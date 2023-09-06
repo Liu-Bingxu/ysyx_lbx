@@ -83,7 +83,7 @@ static int isnum(char argc){
 static long my_atoi(const char *args){
   long res = 0;
   for (int i = 0; i < 18;i++){
-    printf("%-3d: %x\n", i, args[i]);
+    // printf("%-3d: %x\n", i, args[i]);
     if (isnum(args[i]))
     {
       res *= 10;
@@ -116,10 +116,10 @@ static int cmd_x(char *args){
 				return 0;
 			}
 			else{
-        printf("Now n is %ld\n", n);
-        printf("Now addr is %ld\n", addr);
+        // printf("Now n is %ld\n", n);
+        // printf("Now addr is %ld\n", addr);
         for (int y = 0; y < n; y++){
-          printf("addr: %d \n", vaddr_read(addr, 4));
+          printf("addr: %x \n", vaddr_read(addr, 4));
 					addr += 4;
         }
         return 0;
