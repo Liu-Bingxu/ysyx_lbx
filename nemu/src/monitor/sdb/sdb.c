@@ -18,6 +18,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "sdb.h"
+#include <memory/vaddr.h>
 
 static int is_batch_mode = false;
 
@@ -49,7 +50,85 @@ static int cmd_c(char *args) {
 
 
 static int cmd_q(char *args) {
-  return -1;
+  exit(0);
+}
+
+static int cmd_si(char *args){
+  if(args==NULL){
+    cpu_exec(1);
+    return 0;
+  }
+  int n = atoi(args);
+  cpu_exec(n);
+  return 0;
+}
+
+static int cmd_info(char *args){
+
+	if(args==NULL)
+		return 0;
+	else if (*args == 'r')
+		isa_reg_display();
+	else{
+
+	}
+	return 0;
+
+}
+
+static int isnum(char argc){
+  return ((argc >= 0x30) && (argc <= 0x39)) ? 1 : 0;
+}
+
+static long my_atoi(const char *args){
+  long res = 0;
+  for (int i = 0; i < 18;i++){
+    // printf("%-3d: %x\n", i, args[i]);
+    if (isnum(args[i]))
+    {
+      res *= 10;
+      res += (args[i] - 0x30);
+    }
+    else{
+      return res;
+    }
+  }
+  return res;
+}
+
+static int cmd_x(char *args){
+	if(args==NULL){
+		return 0;
+	}
+	else{
+		char *N = strtok(NULL, " ");
+		char *ADDR = strtok(NULL, " ");
+    if (N == NULL || ADDR == NULL)
+    {
+      return 0;
+    }
+    else{
+			long n = my_atoi(N);
+			long addr = my_atoi(ADDR);
+			if (n < 0 || addr <0){
+        printf("%ld\n", n);
+        printf("%ld\n", addr);
+				return 0;
+			}
+			else{
+        // printf("Now n is %ld\n", n);
+        // printf("Now addr is %ld\n", addr);
+        for (int y = 0; y < n; y++){
+          printf("0x%08x ", vaddr_read(addr, 4));
+					addr += 4;
+          if((y+1)%4==0)
+            printf("\n");
+        }
+        if(n%4!=0)printf("\n");
+        return 0;
+      }
+		}
+	}
 }
 
 static int cmd_help(char *args);
@@ -64,7 +143,9 @@ static struct {
   { "q", "Exit NEMU", cmd_q },
 
   /* TODO: Add more commands */
-
+  { "si","Step yoour program n times",cmd_si},
+  {"info","printf register or information of monitor",cmd_info},
+  {"x","printf the memory in your addr, the number is n",cmd_x},
 };
 
 #define NR_CMD ARRLEN(cmd_table)
