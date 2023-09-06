@@ -77,7 +77,7 @@ static int cmd_info(char *args){
 }
 
 static int isnum(char argc){
-  return ((argc >= 0x30) && (argc <= 39)) ? 1 : 0;
+  return ((argc >= 0x30) && (argc <= 0x39)) ? 1 : 0;
 }
 
 static long my_atoi(const char *args){
