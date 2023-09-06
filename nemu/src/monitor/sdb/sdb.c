@@ -83,9 +83,11 @@ static int isnum(char argc){
 static long my_atoi(const char *args){
   long res = 0;
   for (int i = 0; i < 18;i++){
-    if(isnum(args[i])){
+    printf("%-3d: %c", i, args[i]);
+    if (isnum(args[i]))
+    {
       res *= 10;
-      res += (args[i] - 48);
+      res += (args[i] - 0x30);
     }
     else{
       return res;
