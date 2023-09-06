@@ -83,10 +83,13 @@ static int cmd_x(char *args){
 	else{
 		char *N = strtok(NULL, " ");
 		char *ADDR = strtok(NULL, " ");
-		if (N == NULL || ADDR == NULL){
-			return 0;
-		}
-		else{
+    printf("%s\n", N);
+    printf("%s\n", ADDR);
+    if (N == NULL || ADDR == NULL)
+    {
+      return 0;
+    }
+    else{
 			int n = atoi(N);
 			int addr = atoi(ADDR);
 			if (n < 0 || addr <0){
