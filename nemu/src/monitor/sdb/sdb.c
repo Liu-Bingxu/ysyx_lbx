@@ -124,7 +124,7 @@ static int cmd_x(char *args){
           if((y+1)%4==0)
             printf("\n");
         }
-        printf("\n");
+        if(n%4!=0)printf("\n");
         return 0;
       }
 		}
