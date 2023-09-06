@@ -90,10 +90,10 @@ static int cmd_x(char *args){
       return 0;
     }
     else{
-            printf("zhe\n");
 			int n = atoi(N);
 			int addr = atoi(ADDR);
 			if (n < 0 || addr <0){
+            printf("zhe\n");
 				return 0;
 			}
 			else{
