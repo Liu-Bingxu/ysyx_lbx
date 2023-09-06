@@ -87,10 +87,10 @@ static int cmd_x(char *args){
     printf("%s\n", ADDR);
     if (N == NULL || ADDR == NULL)
     {
-      printf("zhe\n");
       return 0;
     }
     else{
+            printf("zhe\n");
 			int n = atoi(N);
 			int addr = atoi(ADDR);
 			if (n < 0 || addr <0){
