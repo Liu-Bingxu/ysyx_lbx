@@ -94,7 +94,7 @@ static int cmd_x(char *args){
 			}
 			else{
 				for (int y = 0; y < n;y++){
-					printf("%x ", vaddr_read(addr, 4));
+					printf("addr: %d ", vaddr_read(addr, 4));
 					addr += 4;
 				}
 				return 0;
