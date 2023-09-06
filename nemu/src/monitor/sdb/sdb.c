@@ -87,6 +87,7 @@ static int cmd_x(char *args){
     printf("%s\n", ADDR);
     if (N == NULL || ADDR == NULL)
     {
+      printf("zhe\n");
       return 0;
     }
     else{
