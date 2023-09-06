@@ -119,7 +119,7 @@ static int cmd_x(char *args){
         // printf("Now n is %ld\n", n);
         // printf("Now addr is %ld\n", addr);
         for (int y = 0; y < n; y++){
-          printf("addr: %x \n", vaddr_read(addr, 4));
+          printf("addr: 0x%08x \n", vaddr_read(addr, 4));
 					addr += 4;
         }
         return 0;
