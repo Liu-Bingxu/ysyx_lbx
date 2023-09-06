@@ -93,11 +93,13 @@ static int cmd_x(char *args){
 				return 0;
 			}
 			else{
-				for (int y = 0; y < n;y++){
-					printf("addr: %d ", vaddr_read(addr, 4));
+        printf("Now n is %d\n", n);
+        printf("Now addr is %d\n", addr);
+        for (int y = 0; y < n; y++){
+          printf("addr: %d \n", vaddr_read(addr, 4));
 					addr += 4;
-				}
-				return 0;
+        }
+        return 0;
 			}
 		}
 	}
