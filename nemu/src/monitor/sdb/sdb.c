@@ -83,8 +83,6 @@ static int cmd_x(char *args){
 	else{
 		char *N = strtok(NULL, " ");
 		char *ADDR = strtok(NULL, " ");
-    printf("%s\n", N);
-    printf("%s\n", ADDR);
     if (N == NULL || ADDR == NULL)
     {
       return 0;
@@ -93,7 +91,8 @@ static int cmd_x(char *args){
 			int n = atoi(N);
 			int addr = atoi(ADDR);
 			if (n < 0 || addr <0){
-            printf("zhe\n");
+        printf("%d\n", n);
+        printf("%d\n", addr);
 				return 0;
 			}
 			else{
