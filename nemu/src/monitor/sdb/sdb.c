@@ -76,6 +76,24 @@ static int cmd_info(char *args){
 
 }
 
+static int isnum(char argc){
+  return ((argc >= 0x30) && (argc <= 39)) ? 1 : 0;
+}
+
+static long my_atoi(const char *args){
+  long res = 0;
+  for (int i = 0; i < 18;i++){
+    if(isnum(args[i])){
+      res *= 10;
+      res += (args[i] - 48);
+    }
+    else{
+      return res;
+    }
+  }
+  return res;
+}
+
 static int cmd_x(char *args){
 	if(args==NULL){
 		return 0;
@@ -88,16 +106,16 @@ static int cmd_x(char *args){
       return 0;
     }
     else{
-			int n = atoi(N);
-			int addr = atoi(ADDR);
+			long n = my_atoi(N);
+			long addr = my_atoi(ADDR);
 			if (n < 0 || addr <0){
-        printf("%d\n", n);
-        printf("%d\n", addr);
+        printf("%ld\n", n);
+        printf("%ld\n", addr);
 				return 0;
 			}
 			else{
-        printf("Now n is %d\n", n);
-        printf("Now addr is %d\n", addr);
+        printf("Now n is %ld\n", n);
+        printf("Now addr is %ld\n", addr);
         for (int y = 0; y < n; y++){
           printf("addr: %d \n", vaddr_read(addr, 4));
 					addr += 4;
