@@ -24,7 +24,7 @@ enum {
   TK_NOTYPE = 256, TK_EQ,
 
   /* TODO: Add more token types */
-
+  TK_NUM,TK_ADD,TK_SUB,TK_MUL,TK_DIV,TK_LP,TK_RP,
 };
 
 static struct rule {
@@ -37,7 +37,13 @@ static struct rule {
    */
 
   {" +", TK_NOTYPE},    // spaces
-  {"\\+", '+'},         // plus
+  {"\\+", TK_ADD},         // plus
+  {"-", TK_SUB},            //sub
+  {"\\*", TK_MUL},          //multiplication
+  {"/", TK_DIV},             //division
+  {"[0-9]+", TK_NUM},        //number
+  {"\\(", TK_LP},          //left (
+  {"\\)", TK_RP},          //right )
   {"==", TK_EQ},        // equal
 };
 
@@ -94,9 +100,9 @@ static bool make_token(char *e) {
          * of tokens, some extra actions should be performed.
          */
 
-        switch (rules[i].token_type) {
-          default: TODO();
-        }
+        // switch (rules[i].token_type) {
+        //   default: TODO();
+        // }
 
         break;
       }
@@ -118,7 +124,11 @@ word_t expr(char *e, bool *success) {
     return 0;
   }
 
-  /* TODO: Insert codes to evaluate the expression. */
+  for (int i = 0; i < 32;i++){
+    printf("%3d: %-20s\n", tokens[i].type, tokens[i].str);
+  }
+
+    /* TODO: Insert codes to evaluate the expression. */
   TODO();
 
   return 0;
