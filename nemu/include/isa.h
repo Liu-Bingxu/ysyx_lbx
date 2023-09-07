@@ -57,5 +57,6 @@ void isa_difftest_attach();
 
 //expr
 word_t expr(char *e, bool *success);
+long my_atoi(const char *args);
 
 #endif

@@ -80,7 +80,7 @@ static int isnum(char argc){
   return ((argc >= 0x30) && (argc <= 0x39)) ? 1 : 0;
 }
 
-static long my_atoi(const char *args){
+long my_atoi(const char *args){
   long res = 0;
   for (int i = 0; i < 18;i++){
     // printf("%-3d: %x\n", i, args[i]);

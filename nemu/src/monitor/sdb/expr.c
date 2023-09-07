@@ -74,7 +74,7 @@ typedef struct token {
   char str[32];
 } Token;
 
-static Token tokens[32] __attribute__((used)) = {};
+static Token tokens[320] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 
 static void strcp(char *target,const char *source,int num){
@@ -118,9 +118,10 @@ static bool make_token(char *e) {
 
         tokens[nr_token].type = rules[i].token_type;
         strcp(tokens[nr_token].str, e+position , substr_len);
-        nr_token++;
+		assert(nr_token < 320);
+		nr_token++;
 
-        position += substr_len;
+		position += substr_len;
 
         // switch (rules[i].token_type) {
         //   default: TODO();
@@ -138,7 +139,95 @@ static bool make_token(char *e) {
 
   return true;
 }
+typedef enum
+{
+	check_expr_true,
+	check_expr_error
+} check_expr_type;
 
+check_expr_type check_parentheses(int p,int q){
+	int count = 1;
+	if ((tokens[p].type != TK_LP) || (tokens[q].type != TK_RP)){
+		return check_expr_error;
+	}
+	else if(q==p+1){
+		assert(0);
+	}
+	else{
+		for (int i = p+1; i < q;i++){
+			if(tokens[i].type==TK_LP){
+				count++;
+			}
+			else if(tokens[i].type==TK_RP){
+				count--;
+			}
+			assert(count >= 0);
+		}
+	}
+	if(count==1)
+		return check_expr_true;
+	else
+		return check_expr_error;
+}
+
+static long eval(int p,int q){
+	int count = 0;
+	int flag = 0;
+	int op = -1;
+	if (p > q){
+		assert(0);
+	}
+	else if(p==q){
+		if(tokens[p].type==TK_NUM){
+			return my_atoi(tokens[p].str);
+		}
+		else{
+			assert(0);
+		}
+	}
+	else if(check_parentheses(p,q) == check_expr_true){
+		eval(p + 1, q - 1);
+	}
+	else{
+		for (int i = p+1; i < q;i++){
+			if(tokens[i].type==TK_LP){
+				count++;
+				flag = 1;
+			}
+			else if(tokens[i].type==TK_RP){
+				count--;
+				if (count == 0)
+					flag = 0;
+			}
+			else if((tokens[i].type!=TK_NUM)&&(flag==0)){
+				if(op>=0){
+					if((tokens[i].type==TK_ADD)||(tokens[i].type==TK_SUB)||(tokens[op].type==TK_DIV)||(tokens[op].type==TK_MUL)){
+						op = i;
+					}
+				}
+				else{
+					op = i;
+				}
+			}
+			assert(count >= 0);
+		}
+		long val1 = eval(p, op - 1);
+		long val2 = eval(op + 1, q);
+		switch (tokens[op].type){
+			case TK_ADD:
+				return val1 + val2;
+			case TK_SUB:
+				return val1 - val2;
+			case TK_MUL:
+				return val1 * val2;
+			case TK_DIV:
+				return val1 / val2;
+			default:
+				assert(0);
+		}
+	}
+	return 0;
+}
 
 word_t expr(char *e, bool *success) {
   while(e!=NULL){
@@ -154,7 +243,8 @@ word_t expr(char *e, bool *success) {
     printf("%3d: %-20s\n", tokens[i].type, tokens[i].str);
   }
 
-    /* TODO: Insert codes to evaluate the expression. */
+  printf("now is %ld\n", eval(0, (nr_token - 1)));
+  /* TODO: Insert codes to evaluate the expression. */
   TODO();
 
   nr_token = 0;
