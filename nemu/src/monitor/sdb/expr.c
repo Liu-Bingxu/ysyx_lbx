@@ -98,7 +98,7 @@ static bool make_token(char *e) {
   int i;
   regmatch_t pmatch;
 
-  nr_token = 0;
+//   nr_token = 0;
 
   while (e[position] != '\0') {
     /* Try all rules one by one. */
@@ -156,6 +156,8 @@ word_t expr(char *e, bool *success) {
 
     /* TODO: Insert codes to evaluate the expression. */
   TODO();
+
+  nr_token = 0;
 
   return 0;
 }
