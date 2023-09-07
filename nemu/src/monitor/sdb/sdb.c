@@ -110,12 +110,14 @@ static int cmd_x(char *args){
     else{
 			long n = my_atoi(N);
 			long addr = my_atoi(ADDR);
-			if (n < 0 || addr <0){
-        printf("%ld\n", n);
-        printf("%ld\n", addr);
+      bool text = true;
+      expr(ADDR,&text);
+      if (n < 0 || addr < 0){
+        // printf("%ld\n", n);
+        // printf("%ld\n", addr);
 				return 0;
-			}
-			else{
+      }
+      else{
         // printf("Now n is %ld\n", n);
         // printf("Now addr is %ld\n", addr);
         for (int y = 0; y < n; y++){
