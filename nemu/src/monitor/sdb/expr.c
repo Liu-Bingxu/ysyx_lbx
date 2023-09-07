@@ -239,6 +239,7 @@ static long eval(int p,int q){
 				break;
 			case TK_DIV:
 				val3 = val1 / val2;
+				printf("Hello\n");
 				break;
 			default:
 				assert(0);
