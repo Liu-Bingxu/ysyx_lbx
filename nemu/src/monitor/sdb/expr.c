@@ -237,7 +237,7 @@ static long eval(int p,int q){
 				assert(0);
 		}
 	}
-	return 0;
+	return -1;
 }
 
 word_t expr(char *e, bool *success) {
