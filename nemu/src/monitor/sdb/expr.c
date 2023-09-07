@@ -117,7 +117,7 @@ static bool make_token(char *e) {
          */
 
         tokens[nr_token].type = rules[i].token_type;
-        strcp(tokens[i].str, e+position , substr_len);
+        strcp(tokens[nr_token].str, e+position , substr_len);
         nr_token++;
 
         position += substr_len;
