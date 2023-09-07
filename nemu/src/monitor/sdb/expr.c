@@ -218,7 +218,7 @@ static long eval(int p,int q){
 					op = i;
 				}
 			}
-			// printf("now i is %d, op is %d, count is %d, flag is %d\n", i, op, count,flag);
+			printf("now i is %d, op is %d, count is %d, flag is %d\n", i, op, count,flag);
 			assert(count >= 0);
 		}
 		long val1 = eval(p, op - 1);
