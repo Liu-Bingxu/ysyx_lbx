@@ -218,9 +218,9 @@ static long eval(int p,int q){
 					op = i;
 				}
 			}
-			printf("now i is %d, op is %d, count is %d, flag is %d\n", i, op, count,flag);
-			if(op>0)
-				printf("the op is %d\n", tokens[op].type);
+			// printf("now i is %d, op is %d, count is %d, flag is %d\n", i, op, count,flag);
+			// if(op>0)
+			// 	printf("the op is %d\n", tokens[op].type);
 			assert(count >= 0);
 		}
 		long val1 = eval(p, op - 1);
@@ -250,15 +250,17 @@ word_t expr(char *e, bool *success) {
     e = strtok(NULL, " ");
   }
 
-  for (int i = 0; i < 32;i++){
-    printf("%3d: %-20s\n", tokens[i].type, tokens[i].str);
-  }
+//   for (int i = 0; i < 32;i++){
+//     printf("%3d: %-20s\n", tokens[i].type, tokens[i].str);
+//   }
 
-  printf("now is %ld\n", eval(0, (nr_token - 1)));
+  word_t val = eval(0, (nr_token - 1));
+
+  //   printf("now is %ld\n", eval(0, (nr_token - 1)));
   /* TODO: Insert codes to evaluate the expression. */
 //   TODO();
 
   nr_token = 0;
 
-  return 0;
+  return val;
 }
