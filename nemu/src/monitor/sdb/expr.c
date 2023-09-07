@@ -84,6 +84,7 @@ static void strcp(char *target,const char *source,int num){
 		for (int i = 0; i < 32;i++){
 			target[i] = '\0';
 		}
+		return;
 	}
 	for (int i = 0; i < num; i++){
 		if(source[i]=='\0'){
