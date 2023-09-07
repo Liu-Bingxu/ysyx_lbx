@@ -80,7 +80,11 @@ static int nr_token __attribute__((used))  = 0;
 static void strcp(char *target,const char *source,int num){
   	assert(num > 0);
 	assert(target != NULL);
-	assert(source != NULL);
+	if(source==NULL){
+		for (int i = 0; i < 32;i++){
+			target[i] = '\0';
+		}
+	}
 	for (int i = 0; i < num; i++){
 		if(source[i]=='\0'){
 			assert(0);
@@ -117,7 +121,8 @@ static bool make_token(char *e) {
          */
 
         tokens[nr_token].type = rules[i].token_type;
-        strcp(tokens[nr_token].str, e+position , substr_len);
+		strcp(tokens[nr_token].str, NULL, substr_len);
+		strcp(tokens[nr_token].str, e + position, substr_len);
 		assert(nr_token < 320);
 		nr_token++;
 
