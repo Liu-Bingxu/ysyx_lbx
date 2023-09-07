@@ -228,12 +228,16 @@ static long eval(int p,int q){
 		switch (tokens[op].type){
 			case TK_ADD:
 				val3 = val1 + val2;
+				break;
 			case TK_SUB:
 				val3 = val1 - val2;
+				break;
 			case TK_MUL:
 				val3 = val1 * val2;
+				break;
 			case TK_DIV:
 				val3 = val1 / val2;
+				break;
 			default:
 				assert(0);
 		}
