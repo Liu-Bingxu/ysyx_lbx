@@ -19,6 +19,7 @@
  * Type 'man regex' for more information about POSIX regex functions.
  */
 #include <regex.h>
+#include "string.h"
 
 enum {
   TK_NOTYPE = 256, TK_EQ,
@@ -100,9 +101,9 @@ static bool make_token(char *e) {
          * of tokens, some extra actions should be performed.
          */
 
-        // switch (rules[i].token_type) {
-        //   default: TODO();
-        // }
+        switch (rules[i].token_type) {
+          default: TODO();
+        }
 
         break;
       }
@@ -119,15 +120,19 @@ static bool make_token(char *e) {
 
 
 word_t expr(char *e, bool *success) {
-  if (!make_token(e)) {
-    *success = false;
-    return 0;
+  while(e!=NULL){
+  
+    if (!make_token(e)) {
+      *success = false;
+      return 0;
+    }
+    e = strtok(NULL, " ");
   }
 
   for (int i = 0; i < 32;i++){
     printf("%3d: %-20s\n", tokens[i].type, tokens[i].str);
   }
-
+  
     /* TODO: Insert codes to evaluate the expression. */
   TODO();
 
