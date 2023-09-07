@@ -182,7 +182,6 @@ static long eval(int p,int q){
 	int count = 0;
 	int flag = 0;
 	int op = -1;
-	long val3 = 0;
 	if (p > q){
 		assert(0);
 	}
@@ -196,7 +195,7 @@ static long eval(int p,int q){
 	}
 	else if(check_parentheses(p,q) == check_expr_true){
 		// printf("()is true\n");
-		eval(p + 1, q - 1);
+		return eval(p + 1, q - 1);
 	}
 	else{
 		for (int i = p; i <= q;i++){
@@ -226,27 +225,19 @@ static long eval(int p,int q){
 		}
 		long val1 = eval(p, op - 1);
 		long val2 = eval(op + 1, q);
-		printf("val1 is %ld, val2 is %ld\n", val1, val2);
 		switch (tokens[op].type){
 			case TK_ADD:
-				val3 = val1 + val2;
-				break;
+				return val1 + val2;
 			case TK_SUB:
-				val3 = val1 - val2;
-				break;
+				return val1 - val2;
 			case TK_MUL:
-				val3 = val1 * val2;
-				break;
+				return val1 * val2;
 			case TK_DIV:
-				val3 = val1 / val2;
-				printf("Hello, val is %ld\n",val3);
-				break;
+				return val1 / val2;
 			default:
 				assert(0);
 		}
-		return val3;
 	}
-	return val3;
 }
 
 word_t expr(char *e, bool *success) {
