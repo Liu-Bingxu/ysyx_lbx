@@ -182,6 +182,7 @@ static long eval(int p,int q){
 	int count = 0;
 	int flag = 0;
 	int op = -1;
+	long val3 = 0;
 	if (p > q){
 		assert(0);
 	}
@@ -226,18 +227,18 @@ static long eval(int p,int q){
 		printf("val1 is %ld, val2 is %ld\n", val1, val2);
 		switch (tokens[op].type){
 			case TK_ADD:
-				return val1 + val2;
+				val3 = val1 + val2;
 			case TK_SUB:
-				return val1 - val2;
+				val3 = val1 - val2;
 			case TK_MUL:
-				return val1 * val2;
+				val3 = val1 * val2;
 			case TK_DIV:
-				return val1 / val2;
+				val3 = val1 / val2;
 			default:
 				assert(0);
 		}
 	}
-	return -1;
+	return val3;
 }
 
 word_t expr(char *e, bool *success) {
