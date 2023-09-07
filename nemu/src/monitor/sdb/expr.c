@@ -161,7 +161,9 @@ check_expr_type check_parentheses(int p,int q){
 			else if(tokens[i].type==TK_RP){
 				count--;
 			}
-			assert(count >= 0);
+			if(count==0)
+				return check_expr_error;
+			assert(count > 0);
 		}
 	}
 	if(count==1)
