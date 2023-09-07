@@ -77,6 +77,22 @@ typedef struct token {
 static Token tokens[32] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 
+static void strcp(char *target,const char *source,int num){
+  	assert(num > 0);
+	assert(target != NULL);
+	assert(source != NULL);
+	for (int i = 0; i < num; i++){
+		if(source[i]=='\0'){
+			assert(0);
+		}
+		else{
+			target[i] = source[i];
+		}
+	}
+	target[num] = '\0';
+	return;
+}
+
 static bool make_token(char *e) {
   int position = 0;
   int i;
@@ -94,16 +110,21 @@ static bool make_token(char *e) {
         Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
             i, rules[i].regex, position, substr_len, substr_len, substr_start);
 
-        position += substr_len;
 
         /* TODO: Now a new token is recognized with rules[i]. Add codes
          * to record the token in the array `tokens'. For certain types
          * of tokens, some extra actions should be performed.
          */
 
-        switch (rules[i].token_type) {
-          default: TODO();
-        }
+        tokens[nr_token].type = rules[i].token_type;
+        strcp(tokens[i].str, e+position , substr_len);
+        nr_token++;
+
+        position += substr_len;
+
+        // switch (rules[i].token_type) {
+        //   default: TODO();
+        // }
 
         break;
       }
@@ -132,7 +153,7 @@ word_t expr(char *e, bool *success) {
   for (int i = 0; i < 32;i++){
     printf("%3d: %-20s\n", tokens[i].type, tokens[i].str);
   }
-  
+
     /* TODO: Insert codes to evaluate the expression. */
   TODO();
 
