@@ -245,7 +245,7 @@ word_t expr(char *e, bool *success) {
 
   printf("now is %ld\n", eval(0, (nr_token - 1)));
   /* TODO: Insert codes to evaluate the expression. */
-  TODO();
+//   TODO();
 
   nr_token = 0;
 

@@ -112,6 +112,7 @@ static int cmd_x(char *args){
 			long addr = my_atoi(ADDR);
       bool text = true;
       expr(ADDR,&text);
+      return 0;
       if (n < 0 || addr < 0){
         // printf("%ld\n", n);
         // printf("%ld\n", addr);
