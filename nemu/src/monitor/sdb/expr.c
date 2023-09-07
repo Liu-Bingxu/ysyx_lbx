@@ -244,6 +244,7 @@ static long eval(int p,int q){
 			default:
 				assert(0);
 		}
+		return val3;
 	}
 	return val3;
 }
