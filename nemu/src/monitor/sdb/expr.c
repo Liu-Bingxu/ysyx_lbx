@@ -223,6 +223,7 @@ static long eval(int p,int q){
 		}
 		long val1 = eval(p, op - 1);
 		long val2 = eval(op + 1, q);
+		printf("val1 is %ld, val2 is %ld\n", val1, val2);
 		switch (tokens[op].type){
 			case TK_ADD:
 				return val1 + val2;
