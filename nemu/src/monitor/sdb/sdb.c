@@ -144,7 +144,7 @@ static int cmd_p(char *args){
         bool text = true;
         value = expr(ex, &text);
         if(text==true){
-            printf("the value of expression is %ld", value);
+            printf("the value of expression is %ld\n", value);
             return 0;
         }
         else{
