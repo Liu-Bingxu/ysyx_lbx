@@ -238,6 +238,12 @@ static long eval(int p,int q){
 			assert(0);
 		}
 	}
+	else if((tokens[p].type==TK_NEG)&&(q == p+1)){
+			return 0 - eval(q, q);
+	}
+	else if((tokens[p].type==TK_NEG)&&(tokens[p+1].type==TK_LP)&&(check_parentheses(p + 1, q) == check_expr_true)){	
+		return 0 - eval(p + 1, q);
+	}
 	else if(check_parentheses(p,q) == check_expr_true){
 		// printf("()is true\n");
 		return eval(p + 1, q - 1);
