@@ -279,7 +279,7 @@ static long eval(int p,int q){
 		}
 	}
 	else if(check_parentheses(p,q) == check_expr_true){
-		printf("()is true\n");
+		// printf("()is true\n");
 		return eval(p + 1, q - 1);
 	}
 	// else if()
@@ -305,9 +305,9 @@ static long eval(int p,int q){
 					op = i;
 				}
 			}
-			printf("now i is %d, op is %d, count is %d, flag is %d\n", i, op, count,flag);
-			if(op>0)
-				printf("the op is %d\n", tokens[op].type);
+			// printf("now i is %d, op is %d, count is %d, flag is %d\n", i, op, count,flag);
+			// if(op>0)
+			// 	printf("the op is %d\n", tokens[op].type);
 			assert(count >= 0);
 		}
 		long val1 = eval(p, op - 1);
