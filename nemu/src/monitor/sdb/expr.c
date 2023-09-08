@@ -279,7 +279,7 @@ static long eval(int p,int q){
 		}
 	}
 	else if(check_parentheses(p,q) == check_expr_true){
-		// printf("()is true\n");
+		printf("()is true\n");
 		return eval(p + 1, q - 1);
 	}
 	// else if()
