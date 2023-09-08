@@ -318,9 +318,9 @@ word_t expr(char *e, bool *success) {
 		}
 	}
 
-  for (int i = 0; i < 32;i++){
-    printf("%3d: %-20s\n", tokens[i].type, tokens[i].str);
-  }
+//   for (int i = 0; i < 32;i++){
+//     printf("%3d: %-20s\n", tokens[i].type, tokens[i].str);
+//   }
 
   word_t val = eval(0, (nr_token - 1));
 
