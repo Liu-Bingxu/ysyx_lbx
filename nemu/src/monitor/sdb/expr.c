@@ -20,6 +20,7 @@
  */
 #include <regex.h>
 #include "string.h"
+#include <memory/vaddr.h>
 
 enum {
   TK_NOTYPE = 256, TK_EQ,
@@ -238,11 +239,43 @@ static long eval(int p,int q){
 			assert(0);
 		}
 	}
-	else if((tokens[p].type==TK_NEG)&&(q == p+1)){
+	else if(q == p+1){
+		if(tokens[p].type==TK_NEG){
 			return 0 - eval(q, q);
+		}
+		else if(tokens[p].type==TK_PIONT){
+			if(tokens[p+1].type==TK_NUM){
+				return vaddr_read(my_atoi(tokens[p+1].str),4);
+			}
+			else if(tokens[p+1].type==TK_HEXNUM){
+				return vaddr_read(my_atoi_hex(tokens[p].str), 4);
+			}
+			else if(tokens[p+1].type==TK_REG){
+				bool point_reg_text = true;
+				word_t point_reg_addr = isa_reg_str2val((tokens[p + 1].str + 1), &point_reg_text);
+				if(point_reg_text==true)
+					return vaddr_read(point_reg_addr, 4);
+				else
+					assert(0);
+			}
+			else{
+				assert(0);
+			}
+		}
+		else{
+			assert(0);
+		}
 	}
-	else if((tokens[p].type==TK_NEG)&&(tokens[p+1].type==TK_LP)&&(check_parentheses(p + 1, q) == check_expr_true)){	
-		return 0 - eval(p + 1, q);
+	else if((tokens[p+1].type==TK_LP)&&(check_parentheses(p + 1, q) == check_expr_true)){	
+		if(tokens[p].type==TK_NEG){
+			return 0 - eval(p + 1, q);
+		}
+		else if(tokens[p].type==TK_PIONT){
+			return vaddr_read(eval(p + 1, q), 4);
+		}
+		else{
+			assert(0);
+		}
 	}
 	else if(check_parentheses(p,q) == check_expr_true){
 		// printf("()is true\n");
