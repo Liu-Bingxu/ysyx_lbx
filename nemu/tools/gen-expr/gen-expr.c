@@ -31,8 +31,95 @@ static char *code_format =
 "  return 0; "
 "}";
 
+int piont = 0;
+
+static void gen_num(){
+  if(piont==65535)
+    return;
+  uint32_t val = rand();
+  int now_piont = piont;
+  int temp_piont;
+  while (val != 0)
+  {
+    char inttochar = (val % 10) + 0x30;
+    buf[now_piont] = inttochar;
+    now_piont++;
+    val /= 10;
+  }
+  temp_piont = now_piont - 1;
+  for (int i = piont; i < temp_piont; i++,temp_piont--)
+  {
+    char temp;
+    temp = buf[i];
+    buf[i] = buf[temp_piont];
+    buf[temp_piont] = temp;
+  }
+  piont = now_piont;
+  // buf[piont] = 'U';
+  // piont++;
+}
+
+static void gen_rand_op(){
+  if(piont==65535)
+    return;
+  switch (rand()%4)
+  {
+  case 0:
+    buf[piont] = '+';
+    piont++;
+    break;
+  case 1:
+    buf[piont] = '-';
+    piont++;
+    break;
+  case 2:
+    buf[piont] = '*';
+    piont++;
+    break;
+  case 3:
+    buf[piont] = '/';
+    piont++;
+    break;
+  default:
+    break;
+  }
+}
+
+static void gen_back(){
+  if(piont==65535)
+    return;
+  int y = rand()%5;
+  for (int i = 0; i < y;i++){
+    buf[piont] = ' ';
+    piont++;
+  }
+}
+
 static void gen_rand_expr() {
-  buf[0] = '\0';
+  if(piont==65535)
+    return;
+  switch (rand() % 3)
+  {
+  case 0:
+    gen_num();
+    break;
+  case 1:
+    buf[piont] = '(';
+    piont++;
+    gen_back();
+    gen_rand_expr();
+    gen_back();
+    buf[piont] = ')';
+    piont++;
+    break;
+  default:
+    gen_rand_expr();
+    gen_back();
+    gen_rand_op();
+    gen_back();
+    gen_rand_expr();
+    break;
+  }
 }
 
 int main(int argc, char *argv[]) {
@@ -44,7 +131,11 @@ int main(int argc, char *argv[]) {
   }
   int i;
   for (i = 0; i < loop; i ++) {
-    gen_rand_expr();
+    do{
+      piont = 0;
+      gen_rand_expr();
+      buf[piont] = '\0';
+    }while(piont==65535);
 
     sprintf(code_buf, code_format, buf);
 

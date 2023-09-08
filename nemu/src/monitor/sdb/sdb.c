@@ -109,11 +109,11 @@ static int cmd_x(char *args){
     }
     else{
 			long n = my_atoi(N);
-			long addr = my_atoi(ADDR);
+			// uint32_t addr = my_atoi(ADDR);
       bool text = true;
-      expr(ADDR,&text);
-      return 0;
-      if (n < 0 || addr < 0){
+      word_t addr = expr(ADDR, &text);
+
+      if (n < 0 || addr < 0||text==false){
         // printf("%ld\n", n);
         // printf("%ld\n", addr);
 				return 0;
@@ -134,6 +134,25 @@ static int cmd_x(char *args){
 	}
 }
 
+static int cmd_p(char *args){
+    char *ex = strtok(NULL, " ");
+    long value = 0;
+    if (ex == NULL){
+        return 0;
+    }
+    else{
+        bool text = true;
+        value = expr(ex, &text);
+        if(text==true){
+            printf("the value of expression is %ld", value);
+            return 0;
+        }
+        else{
+            assert(0);
+        }
+    }
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -149,6 +168,7 @@ static struct {
   { "si","Step yoour program n times",cmd_si},
   {"info","printf register or information of monitor",cmd_info},
   {"x","printf the memory in your addr, the number is n",cmd_x},
+  {"p","to calculate the value of expression",cmd_p},
 };
 
 #define NR_CMD ARRLEN(cmd_table)
