@@ -255,7 +255,7 @@ static long eval(int p,int q){
 					flag = 0;
 			}
 			else if((check_is_OP(i)==1)&&(flag==0)){
-				printf("YES\n");
+				// printf("YES\n");
 				if (op >= 0){
 					if((tokens[i].type==TK_ADD)||(tokens[i].type==TK_SUB)||(tokens[op].type==TK_DIV)||(tokens[op].type==TK_MUL)){
 						op = i;
@@ -265,9 +265,9 @@ static long eval(int p,int q){
 					op = i;
 				}
 			}
-			printf("now i is %d, op is %d, count is %d, flag is %d\n", i, op, count,flag);
-			if(op>0)
-				printf("the op is %d\n", tokens[op].type);
+			// printf("now i is %d, op is %d, count is %d, flag is %d\n", i, op, count,flag);
+			// if(op>0)
+			// 	printf("the op is %d\n", tokens[op].type);
 			assert(count >= 0);
 		}
 		long val1 = eval(p, op - 1);
