@@ -248,7 +248,8 @@ static long eval(int p,int q){
 				return vaddr_read(my_atoi(tokens[p+1].str),4);
 			}
 			else if(tokens[p+1].type==TK_HEXNUM){
-				return vaddr_read(my_atoi_hex(tokens[p].str), 4);
+				printf("%ld\n",my_atoi_hex(tokens[p].str));
+				return vaddr_read(my_atoi_hex(tokens[p + 1].str), 4);
 			}
 			else if(tokens[p+1].type==TK_REG){
 				bool point_reg_text = true;
