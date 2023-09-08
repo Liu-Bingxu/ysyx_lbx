@@ -300,11 +300,12 @@ word_t expr(char *e, bool *success) {
 
   	for(int i=0;i<nr_token;i++){
 		if(tokens[i].type==TK_MUL){
-			if((i==0)||(check_is_OP(i-1)==1)){
-				tokens[i].type=TK_PIONT;
-				if((tokens[i+1].type!=TK_NUM)&&(tokens[i+1].type!=TK_HEXNUM)&&(tokens[i+1].type!=TK_LP)&&(tokens[i+1].type!=TK_REG))
-					assert(0);
+			if((i!=0)&&check_is_OP(i-1)!=1){
+				break;
 			}
+			tokens[i].type=TK_PIONT;
+			if((tokens[i+1].type!=TK_NUM)&&(tokens[i+1].type!=TK_HEXNUM)&&(tokens[i+1].type!=TK_LP)&&(tokens[i+1].type!=TK_REG))
+				assert(0);
 		}
 	}
 
