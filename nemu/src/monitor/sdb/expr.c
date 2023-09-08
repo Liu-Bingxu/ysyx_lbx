@@ -209,6 +209,7 @@ static long eval(int p,int q){
 	int flag = 0;
 	int op = -1;
 	if (p > q){
+		printf("%s and %s", tokens[p].str, tokens[q].str);
 		assert(0);
 	}
 	else if(p==q){
