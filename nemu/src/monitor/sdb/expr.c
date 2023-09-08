@@ -256,7 +256,8 @@ static long eval(int p,int q){
 					flag = 0;
 			}
 			else if((check_is_OP(i)==1)&&(flag==0)){
-				if(op>=0){
+				printf("YES\n");
+				if (op >= 0){
 					if((tokens[i].type==TK_ADD)||(tokens[i].type==TK_SUB)||(tokens[op].type==TK_DIV)||(tokens[op].type==TK_MUL)){
 						op = i;
 					}
