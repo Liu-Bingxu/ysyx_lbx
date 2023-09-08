@@ -205,7 +205,6 @@ static long my_atoi_hex(char *args){
 }
 
 static int check_is_OP(int i){
-	if(i==0)return 1;
 	if((tokens[i].type==TK_ADD)||(tokens[i].type==TK_SUB)||(tokens[i].type==TK_MUL)||(tokens[i].type==TK_DIV)||(tokens[i].type==TK_EQ)||(tokens[i].type==TK_NEQ)||(tokens[i].type==TK_AND))
 		return 1;
 	return 0;
