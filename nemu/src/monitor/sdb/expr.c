@@ -204,6 +204,13 @@ static long my_atoi_hex(char *args){
 	return res;
 }
 
+static int check_is_OP(int i){
+	if(i==0)return 1;
+	if((tokens[i].type==TK_ADD)||(tokens[i].type==TK_SUB)||(tokens[i].type==TK_MUL)||(tokens[i].type==TK_DIV)||(tokens[i].type==TK_EQ)||(tokens[i].type==TK_NEQ)||(tokens[i].type==TK_AND))
+		return 1;
+	return 0;
+}
+
 static long eval(int p,int q){
 	int count = 0;
 	int flag = 0;
@@ -248,7 +255,7 @@ static long eval(int p,int q){
 				if (count == 0)
 					flag = 0;
 			}
-			else if((tokens[i].type!=TK_NUM)&&(flag==0)){
+			else if((check_is_OP(i)==1)&&(flag==0)){
 				if(op>=0){
 					if((tokens[i].type==TK_ADD)||(tokens[i].type==TK_SUB)||(tokens[op].type==TK_DIV)||(tokens[op].type==TK_MUL)){
 						op = i;
@@ -280,12 +287,6 @@ static long eval(int p,int q){
 	}
 }
 
-static int check_is_OP(int i){
-	if(i==0)return 1;
-	if((tokens[i].type==TK_ADD)||(tokens[i].type==TK_SUB)||(tokens[i].type==TK_MUL)||(tokens[i].type==TK_DIV)||(tokens[i].type==TK_EQ)||(tokens[i].type==TK_NEQ)||(tokens[i].type==TK_AND))
-		return 1;
-	return 0;
-}
 
 word_t expr(char *e, bool *success) {
   while(e!=NULL){
