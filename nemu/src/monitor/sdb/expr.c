@@ -212,7 +212,8 @@ static long eval(int p,int q){
 		assert(0);
 	}
 	else if(p==q){
-		if(tokens[p].type==TK_NUM){
+		printf("%s\n", tokens[p].str);
+		if (tokens[p].type == TK_NUM){
 			return my_atoi(tokens[p].str);
 		}
 		else if(tokens[p].type==TK_REG){
