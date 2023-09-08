@@ -25,7 +25,7 @@ enum {
   TK_NOTYPE = 256, TK_EQ,
 
   /* TODO: Add more token types */
-  TK_NUM,TK_ADD,TK_SUB,TK_MUL,TK_DIV,TK_LP,TK_RP,TK_NEQ,TK_AND,TK_HEXNUM,TK_REG
+  TK_NUM,TK_ADD,TK_SUB,TK_MUL,TK_DIV,TK_LP,TK_RP,TK_NEQ,TK_AND,TK_HEXNUM,TK_REG,TK_PIONT,TK_NEG
 };
 
 static struct rule {
@@ -278,6 +278,13 @@ static long eval(int p,int q){
 	}
 }
 
+static int check_is_OP(int i){
+	if(i==0)return 1;
+	if((tokens[i].type==TK_ADD)||(tokens[i].type==TK_SUB)||(tokens[i].type==TK_MUL)||(tokens[i].type==TK_DIV)||(tokens[i].type==TK_EQ)||(tokens[i].type==TK_NEQ)||(tokens[i].type==TK_AND))
+		return 1;
+	return 0;
+}
+
 word_t expr(char *e, bool *success) {
   while(e!=NULL){
   
@@ -287,6 +294,26 @@ word_t expr(char *e, bool *success) {
     }
     e = strtok(NULL, " ");
   }
+
+  	for(int i=0;i<nr_token;i++){
+		if(tokens[i].type==TK_MUL){
+			if((i==0)||(check_is_OP(i-1)==1)){
+				tokens[i].type=TK_PIONT;
+				if((tokens[i+1].type!=TK_NUM)&&(tokens[i+1].type!=TK_HEXNUM)&&(tokens[i+1].type!=TK_LP)&&(tokens[i+1].type!=TK_REG))
+					assert(0);
+			}
+		}
+	}
+
+	for(int i=0;i<nr_token;i++){
+		if(tokens[i].type==TK_SUB){
+			if((i==0)||(check_is_OP(i-1)==1)){
+				tokens[i].type=TK_NEG;
+				if((tokens[i+1].type!=TK_NUM)&&(tokens[i+1].type!=TK_HEXNUM)&&(tokens[i+1].type!=TK_LP)&&(tokens[i+1].type!=TK_REG))
+					assert(0);
+			}
+		}
+	}
 
 //   for (int i = 0; i < 32;i++){
 //     printf("%3d: %-20s\n", tokens[i].type, tokens[i].str);
