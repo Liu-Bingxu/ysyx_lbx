@@ -182,6 +182,28 @@ check_expr_type check_parentheses(int p,int q){
 		return check_expr_error;
 }
 
+static long my_atoi_hex(char *args){
+	long res = 0;
+	for (int i = 2; args[i] != '\0';i++){
+		if((args[i] & 0xF0)==0x30){
+			res *= 16;
+			res += (args[i] - 0x30);
+		}
+		else if((args[i] & 0xF0)==0x40){
+			res *= 16;
+			res += (args[i] - 0x37);
+		}
+		else if((args[i] & 0xF0)==0x60){
+			res *= 16;
+			res += (args[i] - 0x57);
+		}
+		else{
+			assert(0);
+		}
+	}
+	return res;
+}
+
 static long eval(int p,int q){
 	int count = 0;
 	int flag = 0;
@@ -192,6 +214,17 @@ static long eval(int p,int q){
 	else if(p==q){
 		if(tokens[p].type==TK_NUM){
 			return my_atoi(tokens[p].str);
+		}
+		else if(tokens[p].type==TK_REG){
+			bool text = true;
+			word_t reg = isa_reg_str2val((tokens[p].str + 1), &text);
+			if (text == true)
+				return reg;
+			else
+				assert(0);
+		}
+		else if(tokens[p].type==TK_HEXNUM){
+			return my_atoi_hex(tokens[p].str);
 		}
 		else{
 			assert(0);
