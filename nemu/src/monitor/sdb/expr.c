@@ -42,7 +42,7 @@ static struct rule {
 	{"-", TK_SUB},				// sub
 	{"\\*", TK_MUL},			// multiplication
 	{"/", TK_DIV},				// division
-	{"[0-9]+", TK_NUM},			// number
+	{"[0-9]+[^x]", TK_NUM},			// number
 	{"\\(", TK_LP},				// left (
 	{"\\)", TK_RP},				// right )
 	{"==", TK_EQ},				// equal
