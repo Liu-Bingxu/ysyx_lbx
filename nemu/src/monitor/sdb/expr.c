@@ -25,7 +25,7 @@ enum {
   TK_NOTYPE = 256, TK_EQ,
 
   /* TODO: Add more token types */
-  TK_NUM,TK_ADD,TK_SUB,TK_MUL,TK_DIV,TK_LP,TK_RP,
+  TK_NUM,TK_ADD,TK_SUB,TK_MUL,TK_DIV,TK_LP,TK_RP,TK_NEQ,TK_AND,TK_HEXNUM,TK_REG
 };
 
 static struct rule {
@@ -33,19 +33,23 @@ static struct rule {
   int token_type;
 } rules[] = {
 
-  /* TODO: Add more rules.
-   * Pay attention to the precedence level of different rules.
-   */
+	/* TODO: Add more rules.
+	 * Pay attention to the precedence level of different rules.
+	 */
 
-  {" +", TK_NOTYPE},    // spaces
-  {"\\+", TK_ADD},         // plus
-  {"-", TK_SUB},            //sub
-  {"\\*", TK_MUL},          //multiplication
-  {"/", TK_DIV},             //division
-  {"[0-9]+", TK_NUM},        //number
-  {"\\(", TK_LP},          //left (
-  {"\\)", TK_RP},          //right )
-  {"==", TK_EQ},        // equal
+	{" +", TK_NOTYPE},			// spaces
+	{"\\+", TK_ADD},			// plus
+	{"-", TK_SUB},				// sub
+	{"\\*", TK_MUL},			// multiplication
+	{"/", TK_DIV},				// division
+	{"[0-9]+", TK_NUM},			// number
+	{"\\(", TK_LP},				// left (
+	{"\\)", TK_RP},				// right )
+	{"==", TK_EQ},				// equal
+	{"!=", TK_NEQ},				// no equal
+	{"&&", TK_AND},				// logic and
+	{"0x[0-9a-f]+", TK_HEXNUM}, // hex number
+	{"\\$(s11|s10|..)",TK_REG},	//register
 };
 
 #define NR_REGEX ARRLEN(rules)
