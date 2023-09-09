@@ -48,15 +48,19 @@ WP* new_wp(){
             }
             old_WP = old_WP->next;
         }
-        if((watchp->next)&&(watchp->prev)){
+        if((watchp->next!=NULL)&&(watchp->prev!=NULL)){
             watchp->prev->next = watchp->next;
             watchp->next->prev = watchp->prev;
         }
-        else if(watchp->next){
+        else if(watchp->next!=NULL){
+            free_ = watchp->next;
             watchp->next->prev = NULL;
         }
-        else if(watchp->prev){
+        else if(watchp->prev!=NULL){
             watchp->prev->next = NULL;
+        }
+        else{
+            free_ = NULL;
         }
         watchp->prev = NULL;
         watchp->next = NULL;
