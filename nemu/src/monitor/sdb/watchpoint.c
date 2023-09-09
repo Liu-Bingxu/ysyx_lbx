@@ -176,6 +176,7 @@ bool check_watchpoint(){
             printf("New value = %d\n", now_value);
             check_bool = false;
         }
+        now = now->next;
     }
 
     return check_bool;
