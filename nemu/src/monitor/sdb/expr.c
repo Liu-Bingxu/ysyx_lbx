@@ -333,7 +333,7 @@ static long eval(int p,int q){
 static void copy_token(int num,Token *source,Token *target){
 	for (int i = 0; i < num;i++){
 		target[i].type = source[i].type;
-		strcp(target[i].str, source[i].str, 32);
+		strcp(target[i].str, source[i].str, 31);
 	}
 }
 
