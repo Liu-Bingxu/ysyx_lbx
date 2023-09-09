@@ -152,3 +152,10 @@ void watchpoint_display(){
     }
     return;
 }
+
+
+bool check_watchpoint(){
+    bool check_bool = true;
+
+    return check_bool;
+}

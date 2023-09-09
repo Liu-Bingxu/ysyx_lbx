@@ -65,4 +65,6 @@ typedef struct watchpoint {
 
 } WP;
 
+bool check_watchpoint();
+
 #endif
