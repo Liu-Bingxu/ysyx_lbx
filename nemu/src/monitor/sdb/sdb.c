@@ -147,7 +147,7 @@ static int cmd_p(char *args){
         bool text = true;
         value = expr(ex, &text,false,0,NULL);
         if(text==true){
-            printf("the value of expression is %ld or %lx\n", value,value);
+            printf("the value of expression is %ld or %#lx\n", value,value);
             return 0;
         }
         else{
