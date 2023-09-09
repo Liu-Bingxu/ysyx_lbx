@@ -70,8 +70,8 @@ static int cmd_info(char *args){
 	else if (*args == 'r')
 		isa_reg_display();
 	else if(*args=='w'){
-        
-	}
+        watchpoint_display();
+    }
     else{
         assert(0);
     }
@@ -156,6 +156,36 @@ static int cmd_p(char *args){
     }
 }
 
+static int cmd_w(char *args){
+    WP *wp;
+    char *ex = strtok(NULL, " ");
+    if (ex == NULL){
+        return 0;
+    }
+    else{
+        wp = new_wp();
+        assert(wp != NULL);
+        bool text = true;
+        expr(ex, &text,false,&wp->wp_nr_token,wp->wp_tokens);
+        if(text==true){
+            printf("the watchpoint was created\n");
+            return 0;
+        }
+        else{
+            assert(0);
+        }
+    }
+}
+
+static int cmd_d(char *args){
+    if(args==NULL){
+        return 0;
+    }
+    int NO = my_atoi(args);
+    free_wp(NO);
+    return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -169,9 +199,11 @@ static struct {
 
   /* TODO: Add more commands */
   { "si","Step yoour program n times",cmd_si},
-  {"info","printf register or information of monitor",cmd_info},
-  {"x","printf the memory in your addr, the number is n",cmd_x},
-  {"p","to calculate the value of expression",cmd_p},
+  {"info","Printf register or information of monitor",cmd_info},
+  {"x","Printf the memory in your addr, the number is n",cmd_x},
+  {"p","To calculate the value of expression",cmd_p},
+  {"w","To create a watchpoint, system will stop after the vlaue of expr changing",cmd_w},
+  {"d","To detele the watchpoint by NO",cmd_d},
 };
 
 #define NR_CMD ARRLEN(cmd_table)

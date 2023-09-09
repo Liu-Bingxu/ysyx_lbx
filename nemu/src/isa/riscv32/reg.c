@@ -36,6 +36,8 @@ word_t isa_reg_str2val(const char *s, bool *success) {
             return gpr(i);
         }
     }
+    if(strcmp("pc",s)==0)
+        return cpu.pc;
     printf("the register name is error\n");
     assert(0);
 }

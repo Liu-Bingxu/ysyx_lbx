@@ -103,6 +103,7 @@ void free_wp(int NO){
     }
     if(wp==NULL){
         Log("you free a nonexistent watchpoint: %d", NO);
+        return;
     }
     if (wp->next != NULL){
         wp->next->prev = wp->prev;
@@ -122,4 +123,8 @@ void free_wp(int NO){
     }
     free_ = wp;
     return;
+}
+
+void watchpoint_display(){
+    
 }
