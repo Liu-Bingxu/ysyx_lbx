@@ -126,5 +126,9 @@ void free_wp(int NO){
 }
 
 void watchpoint_display(){
-    
+    if(head==NULL){
+        printf("Now don't have watchpoint\n");
+        return;
+    }
+    printf("Num ");
 }

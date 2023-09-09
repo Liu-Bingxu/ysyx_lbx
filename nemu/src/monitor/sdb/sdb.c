@@ -166,8 +166,10 @@ static int cmd_w(char *args){
         wp = new_wp();
         assert(wp != NULL);
         bool text = true;
-        expr(ex, &text,false,&wp->wp_nr_token,wp->wp_tokens);
-        if(text==true){
+        word_t old_value;
+        old_value = expr(ex, &text, false, &wp->wp_nr_token, wp->wp_tokens);
+        if (text == true){
+            wp->old_value = old_value;
             printf("the watchpoint was created\n");
             return 0;
         }
