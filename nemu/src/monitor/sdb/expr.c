@@ -210,6 +210,7 @@ static int check_is_OP(int i){
 }
 
 static long eval(int p,int q){
+	printf("p: %d,q: %d", p, q);
 	int count = 0;
 	int flag = 0;
 	int op = -1;
