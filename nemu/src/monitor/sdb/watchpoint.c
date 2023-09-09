@@ -156,6 +156,27 @@ void watchpoint_display(){
 
 bool check_watchpoint(){
     bool check_bool = true;
+    WP *now = head;
+
+    while(now!=NULL){
+        bool check_succue = true;
+        word_t now_value = expr(NULL, &check_succue, true, &now->wp_nr_token, now->wp_tokens);
+        if(check_succue==false)
+            assert(0);
+        else if (now_value != now->old_value){
+            printf("watchpoint %-3d: ", now->NO);
+            for (int i = 0; i < now->wp_nr_token;i++){
+                printf("%s", now->wp_tokens[i].str);
+            }
+            printf("\n");
+            printf("\n");
+            printf("\n");
+            now->Hitnum++;
+            printf("Old value = %d\n", now->old_value);
+            printf("New value = %d\n", now_value);
+            check_bool = false;
+        }
+    }
 
     return check_bool;
 }
