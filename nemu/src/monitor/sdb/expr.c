@@ -89,12 +89,13 @@ static void strcp(char *target,const char *source,int num){
 		return;
 	}
 	for (int i = 0; i < num; i++){
-		if(source[i]=='\0'){
-			assert(0);
-		}
-		else{
-			target[i] = source[i];
-		}
+		// if(source[i]=='\0'){
+		// 	assert(0);
+		// }
+		// else{
+		// 	target[i] = source[i];
+		// }
+		target[i] = source[i];
 	}
 	target[num] = '\0';
 	return;
