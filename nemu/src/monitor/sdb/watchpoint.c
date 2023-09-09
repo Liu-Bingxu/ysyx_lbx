@@ -140,6 +140,7 @@ void watchpoint_display(){
             printf("%s ", now->wp_tokens[i].str);
         }
         printf("\n");
+        now = now->next;
     }
     return;
 }
