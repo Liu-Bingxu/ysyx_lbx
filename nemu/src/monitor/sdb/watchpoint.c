@@ -24,6 +24,7 @@ void init_wp_pool() {
   int i;
   for (i = 0; i < NR_WP; i ++) {
     wp_pool[i].NO = i;
+    wp_pool[i].Hitnum = 0;
     wp_pool[i].next = (i == NR_WP - 1 ? NULL : &wp_pool[i + 1]);
     wp_pool[i].prev = (i == 0         ? NULL : &wp_pool[i - 1]);
   }
@@ -105,6 +106,7 @@ void free_wp(int NO){
         Log("you free a nonexistent watchpoint: %d", NO);
         return;
     }
+    wp->Hitnum = 0;
     if (wp->next != NULL){
         wp->next->prev = wp->prev;
     }
@@ -130,5 +132,14 @@ void watchpoint_display(){
         printf("Now don't have watchpoint\n");
         return;
     }
-    printf("Num ");
+    printf("No  Hitnum What\n");
+    WP *now = head;
+    while(now!=NULL){
+        printf("%-3d %-6d ", now->NO, now->Hitnum);
+        for (int i = 0; i < now->wp_nr_token;i++){
+            printf("%s ", now->wp_tokens[i].str);
+        }
+        printf("\n");
+    }
+    return;
 }
