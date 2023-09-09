@@ -17,14 +17,6 @@
 
 #define NR_WP 32
 
-typedef struct watchpoint {
-  int NO;
-  struct watchpoint *next;
-
-  /* TODO: Add more members if necessary */
-
-} WP;
-
 static WP wp_pool[NR_WP] = {};
 static WP *head = NULL, *free_ = NULL;
 
@@ -33,6 +25,7 @@ void init_wp_pool() {
   for (i = 0; i < NR_WP; i ++) {
     wp_pool[i].NO = i;
     wp_pool[i].next = (i == NR_WP - 1 ? NULL : &wp_pool[i + 1]);
+    wp_pool[i].prev = (i == 0         ? NULL : &wp_pool[i - 1]);
   }
 
   head = NULL;
@@ -41,3 +34,92 @@ void init_wp_pool() {
 
 /* TODO: Implement the functionality of watchpoint */
 
+WP* new_wp(){
+    WP *watchp = NULL;
+    WP *old_WP = free_;
+    int min = 100;
+    if (free_ != NULL){
+
+        while(old_WP!=NULL){
+            if(old_WP->NO<min){
+                watchp = old_WP;
+                min = old_WP->NO;
+            }
+            old_WP = old_WP->next;
+        }
+        if((watchp->next)&&(watchp->prev)){
+            watchp->prev->next = watchp->next;
+            watchp->next->prev = watchp->prev;
+        }
+        else if(watchp->next){
+            watchp->next->prev = NULL;
+        }
+        else if(watchp->prev){
+            watchp->prev->next = NULL;
+        }
+        watchp->prev = NULL;
+        watchp->next = NULL;
+
+        old_WP = head;
+        if(head==NULL){
+            head = watchp;
+            return watchp;
+        }
+        while(old_WP!=NULL){
+            if(old_WP->NO < watchp->NO){
+                if(old_WP->next==NULL){
+                    old_WP->next = watchp;
+                    watchp->prev = old_WP;
+                    return watchp;
+                }
+                else{
+                    old_WP = old_WP->next;
+                }
+            }
+            else{
+                watchp->prev = old_WP->prev;
+                watchp->next = old_WP;
+                if(old_WP->prev!=NULL){
+                    old_WP->prev->next = watchp;
+                }
+                old_WP->prev = watchp;
+                return watchp;
+            }
+        }
+    }
+    else{
+        assert(0);
+    }
+    return NULL;
+}
+
+void free_wp(int NO){
+    WP *wp=head;
+    while (wp!=NULL){
+        if(wp->NO==NO){
+            break;
+        }
+        wp = wp->next;
+    }
+    if(wp==NULL){
+        Log("you free a nonexistent watchpoint: %d", NO);
+    }
+    if (wp->next != NULL){
+        wp->next->prev = wp->prev;
+    }
+    if(wp->prev!=NULL){
+        wp->prev->next = wp->next;
+    }
+    if(head==wp){
+        if(wp->next!=NULL){
+            head = wp->next;
+        }
+    }
+    wp->prev = NULL;
+    wp->next = free_;
+    if(free_!=NULL){
+        free_->prev = wp;
+    }
+    free_ = wp;
+    return;
+}

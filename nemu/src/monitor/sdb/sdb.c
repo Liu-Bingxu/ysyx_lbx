@@ -69,10 +69,13 @@ static int cmd_info(char *args){
 		return 0;
 	else if (*args == 'r')
 		isa_reg_display();
-	else{
-
+	else if(*args=='w'){
+        
 	}
-	return 0;
+    else{
+        assert(0);
+    }
+    return 0;
 
 }
 
@@ -111,7 +114,7 @@ static int cmd_x(char *args){
             long n = my_atoi(N);
             // uint32_t addr = my_atoi(ADDR);
             bool text = true;
-            word_t addr = expr(ADDR, &text);
+            word_t addr = expr(ADDR, &text,false,0,NULL);
 
             if (n < 0 || addr < 0||text==false){
             // printf("%ld\n", n);
@@ -142,7 +145,7 @@ static int cmd_p(char *args){
     }
     else{
         bool text = true;
-        value = expr(ex, &text);
+        value = expr(ex, &text,false,0,NULL);
         if(text==true){
             printf("the value of expression is %ld\n", value);
             return 0;

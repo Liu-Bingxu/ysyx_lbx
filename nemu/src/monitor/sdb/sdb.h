@@ -18,6 +18,9 @@
 
 #include <common.h>
 
-word_t expr(char *e, bool *success);
+word_t expr(char *e, bool *success,bool mode,int nr_tekones,Token *tekenes);
+
+WP *new_wp();
+void free_wp(int NO);
 
 #endif

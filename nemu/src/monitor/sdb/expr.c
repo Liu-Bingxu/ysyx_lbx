@@ -74,16 +74,13 @@ void init_regex() {
   }
 }
 
-typedef struct token {
-  int type;
-  char str[32];
-} Token;
 
-static Token tokens[320] __attribute__((used)) = {};
+static Token tokens[100] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 
 static void strcp(char *target,const char *source,int num){
   	assert(num > 0);
+	assert(num < 32);
 	assert(target != NULL);
 	if(source==NULL){
 		for (int i = 0; i < 32;i++){
@@ -333,16 +330,45 @@ static long eval(int p,int q){
 	}
 }
 
+static void copy_token(int num,Token *source,Token *target){
+	for (int i = 0; i < num;i++){
+		target[i].type = source[i].type;
+		strcp(target[i].str, source[i].str, 32);
+	}
+}
 
-word_t expr(char *e, bool *success) {
-  while(e!=NULL){
+static void copy_from_tekenes(int *nr_tekones,Token *Tekenes){
+	nr_token = *nr_tekones;
+	copy_token(nr_token, Tekenes, tokens);
+}
+
+static void copy_to_tokenes(int *nr_tekones,Token *tekenes){
+	*nr_tekones = nr_token;
+	copy_token(nr_token, tokens, tekenes);
+}
+
+word_t expr(char *e, bool *success,bool mode,int *nr_tekones,Token *tekenes) {
   
-    if (!make_token(e)) {
-      *success = false;
-      return 0;
-    }
-    e = strtok(NULL, " ");
-  }
+  	while(e!=NULL){
+    	if (!make_token(e)) {
+      		*success = false;
+      		return 0;
+    	}
+   		e = strtok(NULL, " ");
+  	}
+
+  	if(tekenes!=NULL){
+		if(mode==true){
+			copy_from_tekenes(nr_tekones,tekenes);
+		}
+		else if(mode==false){
+			copy_to_tokenes(nr_tekones, tekenes);
+			return 0;
+		}
+		else{
+			assert(0);
+		}
+	}
 
   	for(int i=0;i<nr_token;i++){
 		if(tokens[i].type==TK_MUL){
