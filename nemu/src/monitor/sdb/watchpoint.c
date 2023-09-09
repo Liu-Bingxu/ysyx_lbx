@@ -117,6 +117,9 @@ void free_wp(int NO){
         if(wp->next!=NULL){
             head = wp->next;
         }
+        else{
+            head = NULL;
+        }
     }
     wp->prev = NULL;
     wp->next = free_;
@@ -124,6 +127,7 @@ void free_wp(int NO){
         free_->prev = wp;
     }
     free_ = wp;
+    printf("succue to free the %d watchpoint\n", NO);
     return;
 }
 
