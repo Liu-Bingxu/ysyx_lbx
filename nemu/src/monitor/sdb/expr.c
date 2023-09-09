@@ -210,7 +210,7 @@ static int check_is_OP(int i){
 }
 
 static long eval(int p,int q){
-	printf("p: %d,q: %d", p, q);
+	printf("p: %d,q: %d\n", p, q);
 	int count = 0;
 	int flag = 0;
 	int op = -1;
@@ -365,6 +365,7 @@ word_t expr(char *e, bool *success,bool mode,int *nr_tekones,Token *tekenes) {
 		}
 		else if(mode==false){
 			copy_to_tokenes(nr_tekones, tekenes);
+			nr_token = 0;
 			return 0;
 		}
 		else{
