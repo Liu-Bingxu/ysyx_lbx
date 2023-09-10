@@ -46,4 +46,25 @@ typedef uint16_t ioaddr_t;
 
 #include <debug.h>
 
+typedef struct token {
+  int type;
+  char str[32];
+} Token;
+
+typedef struct watchpoint {
+    int NO;
+    struct watchpoint *next;
+    struct watchpoint *prev;
+
+  /* TODO: Add more members if necessary */
+
+    int Hitnum;
+    word_t old_value;
+    int wp_nr_token;
+    Token wp_tokens[100];
+
+} WP;
+
+bool check_watchpoint();
+
 #endif

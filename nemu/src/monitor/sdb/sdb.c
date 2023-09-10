@@ -69,10 +69,13 @@ static int cmd_info(char *args){
 		return 0;
 	else if (*args == 'r')
 		isa_reg_display();
-	else{
-
-	}
-	return 0;
+	else if(*args=='w'){
+        watchpoint_display();
+    }
+    else{
+        assert(0);
+    }
+    return 0;
 
 }
 
@@ -80,7 +83,7 @@ static int isnum(char argc){
   return ((argc >= 0x30) && (argc <= 0x39)) ? 1 : 0;
 }
 
-static long my_atoi(const char *args){
+long my_atoi(const char *args){
   long res = 0;
   for (int i = 0; i < 18;i++){
     // printf("%-3d: %x\n", i, args[i]);
@@ -103,34 +106,86 @@ static int cmd_x(char *args){
 	else{
 		char *N = strtok(NULL, " ");
 		char *ADDR = strtok(NULL, " ");
-    if (N == NULL || ADDR == NULL)
-    {
-      return 0;
+        if (N == NULL || ADDR == NULL)
+        {
+            return 0;
+        }
+        else{
+            long n = my_atoi(N);
+            // uint32_t addr = my_atoi(ADDR);
+            bool text = true;
+            word_t addr = expr(ADDR, &text,false,0,NULL);
+
+            if (n < 0 || addr < 0||text==false){
+            // printf("%ld\n", n);
+            // printf("%ld\n", addr);
+                return 0;
+            }
+            else{
+                // printf("Now n is %ld\n", n);
+                // printf("Now addr is %ld\n", addr);
+                for (int y = 0; y < n; y++){
+                    printf("0x%08x ", vaddr_read(addr, 4));
+                    addr += 4;
+                    if((y+1)%4==0)
+                        printf("\n");
+                }
+                if(n%4!=0)printf("\n");
+                return 0;
+            }
+        }
+	}
+}
+
+static int cmd_p(char *args){
+    char *ex = strtok(NULL, " ");
+    long value = 0;
+    if (ex == NULL){
+        return 0;
     }
     else{
-			long n = my_atoi(N);
-			long addr = my_atoi(ADDR);
-      bool text = true;
-      expr(ADDR,&text);
-      if (n < 0 || addr < 0){
-        // printf("%ld\n", n);
-        // printf("%ld\n", addr);
-				return 0;
-      }
-      else{
-        // printf("Now n is %ld\n", n);
-        // printf("Now addr is %ld\n", addr);
-        for (int y = 0; y < n; y++){
-          printf("0x%08x ", vaddr_read(addr, 4));
-					addr += 4;
-          if((y+1)%4==0)
-            printf("\n");
+        bool text = true;
+        value = expr(ex, &text,false,0,NULL);
+        if(text==true){
+            printf("the value of expression is %ld or %#lx\n", value,value);
+            return 0;
         }
-        if(n%4!=0)printf("\n");
+        else{
+            assert(0);
+        }
+    }
+}
+
+static int cmd_w(char *args){
+    WP *wp;
+    char *ex = strtok(NULL, " ");
+    if (ex == NULL){
         return 0;
-      }
-		}
-	}
+    }
+    else{
+        wp = new_wp();
+        assert(wp != NULL);
+        bool text = true;
+        word_t old_value;
+        old_value = expr(ex, &text, false, &wp->wp_nr_token, wp->wp_tokens);
+        if (text == true){
+            wp->old_value = old_value;
+            printf("the watchpoint was created\n");
+            return 0;
+        }
+        else{
+            assert(0);
+        }
+    }
+}
+
+static int cmd_d(char *args){
+    if(args==NULL){
+        return 0;
+    }
+    int NO = my_atoi(args);
+    free_wp(NO);
+    return 0;
 }
 
 static int cmd_help(char *args);
@@ -146,8 +201,11 @@ static struct {
 
   /* TODO: Add more commands */
   { "si","Step yoour program n times",cmd_si},
-  {"info","printf register or information of monitor",cmd_info},
-  {"x","printf the memory in your addr, the number is n",cmd_x},
+  {"info","Printf register or information of monitor",cmd_info},
+  {"x","Printf the memory in your addr, the number is n",cmd_x},
+  {"p","To calculate the value of expression",cmd_p},
+  {"w","To create a watchpoint, system will stop after the vlaue of expr changing",cmd_w},
+  {"d","To detele the watchpoint by NO",cmd_d},
 };
 
 #define NR_CMD ARRLEN(cmd_table)
