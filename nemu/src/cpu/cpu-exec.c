@@ -34,7 +34,7 @@ void device_update();
 
 #ifdef CONFIG_WATCHPOINT
 static void cpu_check_watchpoint(){
-    if (check_watchpoint() == false)   
+    if ((check_watchpoint() == false)&&(nemu_state.state!=NEMU_END))   
         nemu_state.state = NEMU_STOP;
 }
 #endif
