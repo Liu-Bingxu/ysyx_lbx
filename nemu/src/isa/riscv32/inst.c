@@ -30,11 +30,11 @@ enum {
   //myself
 };
 
-#define src1R() do { *src1 = R(rs1);  printf("src1:%d\n", *src1); } while (0)
-#define src2R() do { *src2 = R(rs2);  printf("src2:%d\n", *src2); } while (0)
-#define immI() do { *imm = SEXT(BITS(i, 31, 20), 12);;  printf("imm :0x%d\n", *imm); } while(0)
-#define immU() do { *imm = SEXT(BITS(i, 31, 12), 20) << 12; ;  printf("imm :0x%#x\n", *imm);} while(0)
-#define immS() do { *imm = (SEXT(BITS(i, 31, 25), 7) << 5) | BITS(i, 11, 7); ;  printf("imm :0x%#0x\n", *imm);} while(0)
+#define src1R() do { *src1 = R(rs1); /*  printf("src1:%d\n", *src1); */ } while (0)
+#define src2R() do { *src2 = R(rs2); /*  printf("src2:%d\n", *src2); */ } while (0)
+#define immI() do { *imm = SEXT(BITS(i, 31, 20), 12);/* printf("imm :0x%d\n", *imm);  */} while(0)
+#define immU() do { *imm = SEXT(BITS(i, 31, 12), 20) << 12;/*  printf("imm :0x%#x\n", *imm); */} while(0)
+#define immS() do { *imm = (SEXT(BITS(i, 31, 25), 7) << 5) | BITS(i, 11, 7); /*printf("imm :0x%#0x\n", *imm); */} while(0)
 
 //myself
 
@@ -63,13 +63,15 @@ static int decode_exec(Decode *s) {
     __VA_ARGS__ ; \
 }
 
+    printf("inst is 0x%08x\n", s->isa.inst.val);
+
     INSTPAT_START();
-    INSTPAT("??????? ????? ????? ??? ????? 00101 11", auipc, U, printf("true\n");R(rd) = s->pc + imm);
+    INSTPAT("??????? ????? ????? ??? ????? 00101 11", auipc, U,  R(rd) = s->pc + imm);
     INSTPAT("??????? ????? ????? 100 ????? 00000 11", lbu    , I, R(rd) = Mr(src1 + imm, 1));
     INSTPAT("??????? ????? ????? 000 ????? 01000 11", sb     , S, Mw(src1 + imm, 1, src2));
 
     //myself
-    INSTPAT("??????? ????? ????? 000 ????? 00100 11", addi, I, printf("true\n"); R(rd) = R(src1) + imm);
+    INSTPAT("??????? ????? ????? 000 ????? 00100 11", addi, I, R(rd) = R(src1) + imm);
     // myself
 
     INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak, N, NEMUTRAP(s->pc, R(10))); // R(10) is $a0
