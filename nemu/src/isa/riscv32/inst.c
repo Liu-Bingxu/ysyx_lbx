@@ -33,7 +33,7 @@ enum {
 #define src1R() do { *src1 = R(rs1); /*  printf("src1:%d\n", *src1); */ } while (0)
 #define src2R() do { *src2 = R(rs2); /*  printf("src2:%d\n", *src2); */ } while (0)
 #define immI() do { *imm = SEXT(BITS(i, 31, 20), 12);/* printf("imm :0x%d\n", *imm);  */} while(0)
-#define immU() do { *imm = SEXT(BITS(i, 31, 12), 20) << 12;/*  printf("imm :0x%#x\n", *imm); */} while(0)
+#define immU() do { *imm = SEXT(BITS(i, 31, 12), 20) << 12; printf("imm :0x%#x\n", *imm);} while(0)
 #define immS() do { *imm = (SEXT(BITS(i, 31, 25), 7) << 5) | BITS(i, 11, 7); /*printf("imm :0x%#0x\n", *imm); */} while(0)
 
 //myself
