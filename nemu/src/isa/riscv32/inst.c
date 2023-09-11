@@ -32,9 +32,9 @@ enum {
 
 #define src1R() do { *src1 = R(rs1); } while (0)
 #define src2R() do { *src2 = R(rs2); } while (0)
-#define immI() do { *imm = SEXT(BITS(i, 31, 20), 12); } while(0)
-#define immU() do { *imm = SEXT(BITS(i, 31, 12), 20) << 12; } while(0)
-#define immS() do { *imm = (SEXT(BITS(i, 31, 25), 7) << 5) | BITS(i, 11, 7); } while(0)
+#define immI() do { *imm = SEXT(BITS(i, 31, 20), 12);;  printf("imm :%d\n", *imm); } while(0)
+#define immU() do { *imm = SEXT(BITS(i, 31, 12), 20) << 12; ;  printf("imm :%d\n", *imm);} while(0)
+#define immS() do { *imm = (SEXT(BITS(i, 31, 25), 7) << 5) | BITS(i, 11, 7); ;  printf("imm :%d\n", *imm);} while(0)
 
 //myself
 
@@ -64,7 +64,7 @@ static int decode_exec(Decode *s) {
 }
 
     INSTPAT_START();
-    INSTPAT("??????? ????? ????? ??? ????? 00101 11", auipc, U, R(rd) = s->pc + imm;  printf("imm :%d\n", imm););
+    INSTPAT("??????? ????? ????? ??? ????? 00101 11", auipc, U, R(rd) = s->pc + imm);
     INSTPAT("??????? ????? ????? 100 ????? 00000 11", lbu    , I, R(rd) = Mr(src1 + imm, 1));
     INSTPAT("??????? ????? ????? 000 ????? 01000 11", sb     , S, Mw(src1 + imm, 1, src2));
 
