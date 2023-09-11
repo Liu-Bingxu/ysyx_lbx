@@ -22,22 +22,31 @@
 #define Mr vaddr_read
 #define Mw vaddr_write
 
-enum {
-  TYPE_I, TYPE_U, TYPE_S,
-  TYPE_N, // none
-  //myself
-
-  //myself
+enum
+{
+    TYPE_I, TYPE_U, TYPE_S,
+    TYPE_N, // none
+    // myself
+    TYPE_J,
+    // myself
 };
 
-#define src1R() do { *src1 = R(rs1); /*  printf("src1:%d\n", *src1); */ } while (0)
-#define src2R() do { *src2 = R(rs2); /*  printf("src2:%d\n", *src2); */ } while (0)
-#define immI() do { *imm = SEXT(BITS(i, 31, 20), 12);/* printf("imm :0x%d\n", *imm);  */} while(0)
-#define immU() do { *imm = SEXT(BITS(i, 31, 12), 20) << 12;/*  printf("imm :0x%#x\n", *imm); */} while(0)
-#define immS() do { *imm = (SEXT(BITS(i, 31, 25), 7) << 5) | BITS(i, 11, 7); /*printf("imm :0x%#0x\n", *imm); */} while(0)
+#define src1R() do { *src1 = R(rs1); } while (0)
+#define src2R() do { *src2 = R(rs2); } while (0)
+#define immI() do { *imm = SEXT(BITS(i, 31, 20), 12);} while(0)
+#define immU()                                  \
+    do                                          \
+    {                                           \
+        *imm = SEXT(BITS(i, 31, 12), 20) << 12; \
+    } while (0)
+#define immS() do { *imm = (SEXT(BITS(i, 31, 25), 7) << 5) | BITS(i, 11, 7); } while(0)
 
 //myself
-
+#define immJ()                                                                                                                   \
+    do                                                                                                                           \
+    {                                                                                                                            \
+        *imm = (SEXT((BITS(i, 31, 31) << 20) | (BITS(i, 30, 21) << 1) | (BITS(i, 20, 20) << 11) | (BITS(i, 19, 12) << 12), 20)); \
+    } while (0)
 //myself
 
 static void decode_operand(Decode *s, int *rd, word_t *src1, word_t *src2, word_t *imm, int type) {
@@ -49,6 +58,9 @@ static void decode_operand(Decode *s, int *rd, word_t *src1, word_t *src2, word_
         case TYPE_I: src1R();          immI(); break;
         case TYPE_U:                   immU(); break;
         case TYPE_S: src1R(); src2R(); immS(); break;
+        //myself
+        case TYPE_J:                   immJ(); break;
+        //myself
     }
 }
 
@@ -66,16 +78,17 @@ static int decode_exec(Decode *s) {
     printf("inst is 0x%08x\n", s->isa.inst.val>>12);
 
     INSTPAT_START();
-    INSTPAT("??????? ????? ????? ??? ????? 00101 11", auipc, U,  R(rd) = s->pc + imm);
+    INSTPAT("??????? ????? ????? ??? ????? 00101 11", auipc  , U, R(rd) = s->pc + imm);
     INSTPAT("??????? ????? ????? 100 ????? 00000 11", lbu    , I, R(rd) = Mr(src1 + imm, 1));
     INSTPAT("??????? ????? ????? 000 ????? 01000 11", sb     , S, Mw(src1 + imm, 1, src2));
 
     //myself
-    INSTPAT("??????? ????? ????? 000 ????? 00100 11", addi, I, R(rd) = src1 + imm);
+    INSTPAT("??????? ????? ????? 000 ????? 00100 11", addi   , I, R(rd) = src1 + imm);
+    INSTPAT("??????? ????? ????? ??? ????? 11011 11", jal    , J, R(rd) = s->snpc; s->dnpc = s->snpc + imm;);
     // myself
 
-    INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak, N, NEMUTRAP(s->pc, R(10))); // R(10) is $a0
-    INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv, N, INV(s->pc));
+    INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak , N, NEMUTRAP(s->pc, R(10))); // R(10) is $a0
+    INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv    , N, INV(s->pc));
     INSTPAT_END();
 
     R(0) = 0; // reset $zero to 0
