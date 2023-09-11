@@ -75,7 +75,7 @@ static int decode_exec(Decode *s) {
     __VA_ARGS__ ; \
 }
 
-    printf("inst is 0x%08x\n", s->isa.inst.val>>12);
+    // printf("inst is 0x%08x\n", s->isa.inst.val>>12);
 
     INSTPAT_START();
     INSTPAT("??????? ????? ????? ??? ????? 00101 11", auipc  , U, R(rd) = s->pc + imm);
@@ -92,6 +92,8 @@ static int decode_exec(Decode *s) {
     INSTPAT_END();
 
     R(0) = 0; // reset $zero to 0
+
+    printf("now PC is 0x%x\n", s->dnpc);
 
     return 0;
 }
