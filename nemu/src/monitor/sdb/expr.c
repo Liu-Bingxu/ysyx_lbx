@@ -23,10 +23,10 @@
 #include <memory/vaddr.h>
 
 enum {
-  TK_NOTYPE = 256, TK_EQ,
+  TK_NOTYPE = 256, 
 
   /* TODO: Add more token types */
-  TK_NUM,TK_ADD,TK_SUB,TK_MUL,TK_DIV,TK_LP,TK_RP,TK_NEQ,TK_AND,TK_HEXNUM,TK_REG,TK_PIONT,TK_NEG
+  TK_NUM,TK_MUL,TK_DIV,TK_LP,TK_ADD,TK_SUB,TK_RP,TK_NEQ,TK_EQ,TK_HEXNUM,TK_REG,TK_PIONT,TK_AND,TK_NEG
 };
 
 static struct rule {
@@ -296,7 +296,7 @@ static long eval(int p,int q){
 			else if((check_is_OP(i)==1)&&(flag==0)){
 				// printf("YES\n");
 				if (op >= 0){
-					if((tokens[i].type==TK_ADD)||(tokens[i].type==TK_SUB)||(tokens[op].type==TK_DIV)||(tokens[op].type==TK_MUL)){
+					if((tokens[i].type-tokens[op].type)>=(-1)){
 						op = i;
 					}
 				}
