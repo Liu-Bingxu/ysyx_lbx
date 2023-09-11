@@ -63,9 +63,7 @@ static int decode_exec(Decode *s) {
     __VA_ARGS__ ; \
 }
 
-    char *__val = (char *)(&s->isa.inst.val);
-    printf("%x %x %x %x\n", __val[0], __val[1], __val[2], __val[3]);
-    printf("inst is 0x%08x\n", s->isa.inst.val);
+    printf("inst is 0x%08x\n", s->isa.inst.val>>12);
 
     INSTPAT_START();
     INSTPAT("??????? ????? ????? ??? ????? 00101 11", auipc, U,  R(rd) = s->pc + imm);
