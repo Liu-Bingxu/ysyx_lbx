@@ -52,7 +52,7 @@ enum
 #define immB()                                                                                                           \
     do                                                                                                                   \
     {                                                                                                                    \
-        *imm = (SEXT((BITS(i, 31, 31) << 12) | (BITS(i, 30, 25) << 5) | (BITS(i, 11, 8) << 1) | (BITS(i, 7, 7) << 11),12)); \
+        *imm = (SEXT((BITS(i, 31, 31) << 12) | (BITS(i, 30, 25) << 5) | (BITS(i, 11, 8) << 1) | (BITS(i, 7, 7) << 11),13)); \
     } while (0)
 //myself
 
