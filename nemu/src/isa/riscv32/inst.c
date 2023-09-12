@@ -27,7 +27,8 @@ enum
     TYPE_I, TYPE_U, TYPE_S,
     TYPE_N, // none
     // myself
-    TYPE_J
+    TYPE_J,
+    TYPE_R,
     // myself
 };
 
@@ -60,6 +61,7 @@ static void decode_operand(Decode *s, int *rd, word_t *src1, word_t *src2, word_
         case TYPE_S: src1R(); src2R(); immS(); break;
         //myself
         case TYPE_J:                   immJ(); break;
+        case TYPE_R: src1R(); src2R();         break;
         //myself
     }
 }
@@ -88,6 +90,7 @@ static int decode_exec(Decode *s) {
     INSTPAT("??????? ????? ????? 000 ????? 11001 11", jalr   , I, R(rd) = s->snpc; s->dnpc = src1 + imm; s->dnpc &= 0xfffffffe;);
     INSTPAT("??????? ????? ????? 010 ????? 01000 11", sw     , S, Mw(src1 + imm, 4, src2););
     INSTPAT("??????? ????? ????? 010 ????? 00000 11", lw     , I, R(rd) = Mr(src1 + imm, 4););
+    INSTPAT("0000000 ????? ????? 000 ????? 01100 11", add    , R, R(rd) = src1 + src2;);
     // myself
 
     INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak , N, NEMUTRAP(s->pc, R(10))); // R(10) is $a0
