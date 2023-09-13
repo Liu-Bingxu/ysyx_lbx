@@ -9,6 +9,7 @@ module idu#(parameter DATA_LEN=32) (
     output [4 :0]           rd,
     output [DATA_LEN-1:0]   operand1,   
     output [DATA_LEN-1:0]   operand2, 
+    output                  ebreak,
     output                  op  
 );
 
@@ -56,7 +57,7 @@ assign arith_flag = (inst[6:0]==7'b0010011)?1'b1:1'b0;
 
 assign addi     =   (arith_flag&(funct3==3'b000)) ? 1'b1 : 1'b0;
 
-// assign ebreak   =   (inst       ==  32'h00100073) ? 1'b1 : 1'b0;
+assign ebreak   =   (inst       ==  32'h00100073) ? 1'b1 : 1'b0;
 
 assign operand1 = (addi)?src1:32'h0;
 assign operand2 = (addi)?imm_I:32'h0;

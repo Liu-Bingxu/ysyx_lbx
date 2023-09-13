@@ -41,6 +41,8 @@ wire                	Jump_flag;
 wire [DATA_LEN-1:0] 	dest_data;
 wire [DATA_LEN-1:0] 	Jump_PC;
 
+wire ebreak;
+
 assign PC_out = pc_out;
 //
 assign src2_use = src2;
@@ -69,6 +71,7 @@ idu #(DATA_LEN)u_idu(
     .rd       	( rd        ),
     .operand1 	( operand1  ),
     .operand2 	( operand2  ),
+    .ebreak     ( ebreak    ),
     .op       	( op        )
 );
 
@@ -84,12 +87,14 @@ ifu #(DATA_LEN)u_ifu(
 );
 
 exu #(DATA_LEN)u_exu(
+    .clk        ( sys_clk    ),
     .operand1  	( operand1   ),
     .operand2  	( operand2   ),
     .op        	( ~op        ),
     .dest_wen  	( dest_wen   ),
     .Jump_flag 	( Jump_flag  ),
     .dest_data 	( dest_data  ),
+    .ebreak     ( ebreak     ),
     .Jump_PC   	( Jump_PC    )
 );
 

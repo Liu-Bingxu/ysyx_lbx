@@ -2,6 +2,8 @@
 #include "verilated_vcd_c.h"
 #include "Vtop.h"
 #include <iostream>
+#include "svdpi.h"
+#include "Vtop__Dpi.h"
 
 using namespace std;
 
@@ -9,10 +11,11 @@ VerilatedContext* contextp = NULL;
 VerilatedVcdC* tfp = NULL;
 
 uint32_t inst[] = {
-    0x12300093,0x23400113,0x34500193,0x45600213,0x32108093,
+    0x12300093,0x23400113,0x34500193,0x45600213,0x32108093,0x00100073,
 };
 
 static Vtop* top;
+
 
 void step_and_dump_wave(){
     // cout << "Hello Wrold" << top->sys_clk << "ByeBye" << endl;
@@ -32,7 +35,7 @@ void sim_init(int argc, char *argv[]){
     tfp->open("wave.vcd");
 }
 
-void sim_exit(){
+void sim_exit(int code){
     step_and_dump_wave();
     top->final();
     tfp->close();
@@ -43,7 +46,7 @@ void sim_exit(){
     // printf("Hello\n");
     // delete top;
     // printf("Hello\n");
-    exit(0);
+    exit(code);
     // printf("Hello\n");
 }
 
@@ -63,6 +66,10 @@ void sim_rst(){
     step_and_dump_wave();
 }
 
+void halt(int code){
+    sim_exit(code);
+}
+
 int main(int argc, char *argv[]){
 
     sim_init(argc,argv);
@@ -80,8 +87,8 @@ int main(int argc, char *argv[]){
         top->sys_clk = !top->sys_clk;
         step_and_dump_wave();
         count++;
-        if(count==6)break;
+        if(count==1000000)break;
     }
     top->sys_clk = !top->sys_clk;
-    sim_exit();
+    sim_exit(0);
 }

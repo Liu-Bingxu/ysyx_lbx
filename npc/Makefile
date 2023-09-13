@@ -1,5 +1,5 @@
 TOPNAME=top
-MODULE = $(shell find $(abspath ./vsrc) -name "*.v")
+MODULE = $(shell find $(abspath ./vsrc) -name "*.v" -or -name "*.sv")
 
 all:
 	@echo "Write this Makefile by your self."
