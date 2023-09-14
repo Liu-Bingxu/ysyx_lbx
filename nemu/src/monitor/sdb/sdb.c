@@ -137,10 +137,10 @@ static int cmd_x(char *args){
                     for (int y = 0; y < n; y++){
                         printf("%c", vaddr_read(addr, 1));
                         addr += 1;
-                        if((y+1)%8==0)
+                        if((y+1)%100==0)
                             printf("\n");
                     }
-                    if(n%8!=0)printf("\n");
+                    if(n%100!=0)printf("\n");
                 }
                 return 0;
             }
