@@ -7,8 +7,6 @@ html:
 
 ## 1. Basic Setup and Checks
 
-CFLAGS +=-DCONFIG_TARGET_AM
-
 ### Default to create a bare-metal kernel image
 ifeq ($(MAKECMDGOALS),)
   MAKECMDGOALS  = image
