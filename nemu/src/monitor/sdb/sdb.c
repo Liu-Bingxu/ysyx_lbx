@@ -104,10 +104,10 @@ static int cmd_x(char *args){
 		return 0;
 	}
 	else{
-		char *N = strtok(NULL, " ");
-		char *ADDR = strtok(NULL, " ");
-        if (N == NULL || ADDR == NULL)
-        {
+        char *mode = strtok(NULL, " ");
+        char *N = strtok(NULL, " ");
+        char *ADDR = strtok(NULL, " ");
+        if (N == NULL || ADDR == NULL){
             return 0;
         }
         else{
@@ -124,13 +124,24 @@ static int cmd_x(char *args){
             else{
                 // printf("Now n is %ld\n", n);
                 // printf("Now addr is %ld\n", addr);
-                for (int y = 0; y < n; y++){
-                    printf("0x%08x ", vaddr_read(addr, 4));
-                    addr += 4;
-                    if((y+1)%4==0)
-                        printf("\n");
+                if((*mode)=='x'){
+                    for (int y = 0; y < n; y++){
+                        printf("0x%08x ", vaddr_read(addr, 4));
+                        addr += 4;
+                        if((y+1)%4==0)
+                            printf("\n");
+                    }
+                    if(n%4!=0)printf("\n");
                 }
-                if(n%4!=0)printf("\n");
+                else if((*mode)=='s'){
+                    for (int y = 0; y < n; y++){
+                        printf("%c", vaddr_read(addr, 1));
+                        addr += 1;
+                        if((y+1)%100==0)
+                            printf("\n");
+                    }
+                    if(n%100!=0)printf("\n");
+                }
                 return 0;
             }
         }
