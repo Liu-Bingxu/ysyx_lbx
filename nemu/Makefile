@@ -52,6 +52,7 @@ LDFLAGS += $(CFLAGS_BUILD)
 # Include rules for menuconfig
 include $(NEMU_HOME)/scripts/config.mk
 
+a=$(shell echo "Hello World")
 ifdef CONFIG_TARGET_AM
 a=$(shell echo "Hello World")
 include $(AM_HOME)/Makefile
