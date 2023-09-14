@@ -114,7 +114,7 @@ void *memset(void *s, int c, size_t n) {
 // void *memmove(void *dst, const void *src, size_t n) {
 //     void *res = dst;
 //     uint32_t dest = dst;
-//     uint32_t rs = src;
+//     const uint32_t rs = src;
 //     char residue = n % sizeof(uint32_t);
 //     int32_t overlap = src + n - dst;
 //     if (src + n - dst){
