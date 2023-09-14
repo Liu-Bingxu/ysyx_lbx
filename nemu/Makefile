@@ -39,8 +39,8 @@ SRCS-BLACKLIST-y += $(SRCS-BLACKLIST) $(shell find -L $(DIRS-BLACKLIST-y) -name 
 SRCS-y += $(shell find -L $(DIRS-y) -name "*.c")
 SRCS = $(filter-out $(SRCS-BLACKLIST-y),$(SRCS-y))
 
-#My CFLAGS
-# CONFIG_TARGET_AM?=
+# My CFLAGS
+CONFIG_TARGET_AM?=
 
 # Extract compiler and options from menuconfig
 CC = $(call remove_quote,$(CONFIG_CC))
@@ -49,7 +49,7 @@ CFLAGS_BUILD += $(if $(CONFIG_CC_LTO),-flto,)
 CFLAGS_BUILD += $(if $(CONFIG_CC_DEBUG),-Og -ggdb3,)
 CFLAGS_BUILD += $(if $(CONFIG_CC_ASAN),-fsanitize=address,)
 CFLAGS_TRACE += -DITRACE_COND=$(if $(CONFIG_ITRACE_COND),$(call remove_quote,$(CONFIG_ITRACE_COND)),true)
-CFLAGS  += $(CFLAGS_BUILD) $(CFLAGS_TRACE) -D__GUEST_ISA__=$(GUEST_ISA) #$(CONFIG_TARGET_AM)
+CFLAGS  += $(CFLAGS_BUILD) $(CFLAGS_TRACE) -D__GUEST_ISA__=$(GUEST_ISA) $(CONFIG_TARGET_AM)
 LDFLAGS += $(CFLAGS_BUILD)
 
 # Include rules for menuconfig
