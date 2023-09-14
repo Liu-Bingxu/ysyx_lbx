@@ -40,7 +40,7 @@ SRCS-y += $(shell find -L $(DIRS-y) -name "*.c")
 SRCS = $(filter-out $(SRCS-BLACKLIST-y),$(SRCS-y))
 
 # My CFLAGS
-MYCFLAGS?=-DIDN
+MYCFLAGS?=
 
 # Extract compiler and options from menuconfig
 CC = $(call remove_quote,$(CONFIG_CC))
