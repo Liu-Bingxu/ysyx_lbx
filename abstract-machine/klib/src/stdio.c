@@ -15,6 +15,7 @@ static int vsnprintf_num(char *out,int OP_num){
         res++;
         OP_num /= 10;
     } while (OP_num != 0);
+    out--;
     for (int i = 0; i < res / 2; i++){
         char temp = (*dest);
         (*dest) = (*out);
