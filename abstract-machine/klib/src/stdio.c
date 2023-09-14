@@ -31,7 +31,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
     int n = 0;
     for (int i = 0; fmt[i] != '\0'; i++){
         if(fmt[i]!='%'){
-            (*out) = (*fmt);
+            (*out) = fmt[i];
             out++;
             n++;
             continue;
