@@ -19,5 +19,6 @@
 #endif
 
 void init_rand() {
-  srand(MUXDEF(CONFIG_TARGET_AM, 0, time(0)));
+    printf("Hello AM\n");
+    srand(MUXDEF(CONFIG_TARGET_AM, 0, time(0)));
 }
