@@ -110,17 +110,6 @@ void *memset(void *s, int c, size_t n) {
     return s;
     //   panic("Not implemented");
 }
-
-// void *memmove(void *dst, const void *src, size_t n) {
-    // void *res = dst;
-    // word_t dest = dst;
-    // const word_t rs = src;
-    // char residue = n % sizeof(word_t);
-    // if (((src<dst)&&((src+n)>dst))||()){
-        // 
-    // }
-//   panic("Not implemented");
-// }
  
 void *memcpy(void *out, const void *in, size_t n) {
     word_t *dest = out;
@@ -136,6 +125,22 @@ void *memcpy(void *out, const void *in, size_t n) {
         *(((char *)dest) + i) = *(((char *)src) + i);
     }
     return out;
+    //   panic("Not implemented");
+}
+
+void *memmove(void *dst, const void *src, size_t n) {
+    if(dst!=src){
+        if ((src<dst)&&((src+n)>dst)){
+            int first = src + n - dst;
+            int second = n - first;
+            memcpy((dst + first), (src + first), second);
+            memcpy(dst, src, first);
+        }
+        else{
+            memcpy(dst, src, n);
+        }
+    }
+    return dst;
     //   panic("Not implemented");
 }
 
