@@ -133,8 +133,8 @@ void *memmove(void *dst, const void *src, size_t n) {
     word_t second_cnt = n % sizeof(word_t);
     if(dst!=src){
         if ((src<dst)&&((src+n)>dst)){
-            word_t *dest = dst + n - sizeof(word_t) - 1;
-            const word_t *rs = src + n - sizeof(word_t) - 1;
+            word_t *dest = dst + n - sizeof(word_t) ;
+            const word_t *rs = src + n - sizeof(word_t) ;
             for (; main_cnt > 0; main_cnt--){
                 (*dest) = (*rs);
                 dest--;
