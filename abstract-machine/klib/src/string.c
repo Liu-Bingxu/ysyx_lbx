@@ -111,7 +111,7 @@ void *memset(void *s, int c, size_t n) {
     //   panic("Not implemented");
 }
  
-__attribute_noinline__ void *memcpy(void *out, const void *in, size_t n) {
+void *memcpy(void *out, const void *in, size_t n) {
     word_t *dest = out;
     const word_t *src = in;
     word_t main_cnt = n / sizeof(word_t);
@@ -129,15 +129,34 @@ __attribute_noinline__ void *memcpy(void *out, const void *in, size_t n) {
 }
 
 void *memmove(void *dst, const void *src, size_t n) {
+    word_t main_cnt = n / sizeof(word_t);
+    word_t second_cnt = n % sizeof(word_t);
     if(dst!=src){
         if ((src<dst)&&((src+n)>dst)){
-            int first = src + n - dst;
-            int second = n - first;
-            memmove((dst + second), dst, first);
-            memcpy(dst, src, second);
+            word_t *dest = dst + n - sizeof(word_t) - 1;
+            const word_t *rs = src + n - sizeof(word_t) - 1;
+            for (; main_cnt > 0; main_cnt--){
+                (*dest) = (*rs);
+                dest--;
+                rs--;
+            }
+            dest++;
+            rs++;
+            for (int i = 0; i < second_cnt; i++){
+                *(((char *)dest) - i) = *(((char *)rs) - i);
+            }
         }
         else{
-            memcpy(dst, src, n);
+            word_t *dest = dst;
+            const word_t *rs = src;
+            for (; main_cnt > 0;main_cnt--){
+                (*dest) = (*rs);
+                dest++;
+                rs++;
+            }
+            for (int i = 0; i < second_cnt;i++){
+                *(((char *)dest) + i) = *(((char *)rs) + i);
+            }
         }
     }
     return dst;
