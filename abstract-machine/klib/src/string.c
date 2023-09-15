@@ -133,7 +133,7 @@ void *memmove(void *dst, const void *src, size_t n) {
         if ((src<dst)&&((src+n)>dst)){
             int first = src + n - dst;
             int second = n - first;
-            memcpy((dst + second), dst, first);
+            memmove((dst + second), dst, first);
             memcpy(dst, src, second);
         }
         else{
