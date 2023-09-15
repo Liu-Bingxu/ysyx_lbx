@@ -32,3 +32,7 @@ bool log_enable() {
   return MUXDEF(CONFIG_TRACE, (g_nr_guest_inst >= CONFIG_TRACE_START) &&
          (g_nr_guest_inst <= CONFIG_TRACE_END), false);
 }
+
+bool log_mem_enable(word_t addr){
+    return MUXDEF(CONFIG_MTRACE, (addr >= CONFIG_MRACE_START) && (addr <= CONFIG_MRACE_END), false);
+}

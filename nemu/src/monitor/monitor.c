@@ -24,6 +24,8 @@ void init_device();
 void init_sdb();
 void init_disasm(const char *triple);
 
+extern void init_itrace();
+
 static void welcome() {
   Log("Trace: %s", MUXDEF(CONFIG_TRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
   IFDEF(CONFIG_TRACE, Log("If trace is enabled, a log file will be generated "
@@ -98,7 +100,7 @@ static int parse_args(int argc, char *argv[]) {
 
 void init_monitor(int argc, char *argv[]) {
   /* Perform some global initialization. */
-
+  init_itrace();
   /* Parse arguments. */
   parse_args(argc, argv);
 
@@ -150,11 +152,12 @@ static long load_img() {
 }
 
 void am_init_monitor() {
-  init_rand();
-  init_mem();
-  init_isa();
-  load_img();
-  IFDEF(CONFIG_DEVICE, init_device());
-  welcome();
+    init_itrace();
+    init_rand();
+    init_mem();
+    init_isa();
+    load_img();
+    IFDEF(CONFIG_DEVICE, init_device());
+    welcome();
 }
 #endif

@@ -25,6 +25,43 @@
  */
 #define MAX_INST_TO_PRINT 10
 
+//myitrace
+#ifdef CONFIG_ITRACE
+typedef struct{
+    char *myinst[20];
+    int mypoint_to_myinst;
+}irangbuf_struct;
+irangbuf_struct irangbuf;
+char itrace[128 * 20];
+
+void init_itrace(){
+    for (int i = 0; i < 20;i++){
+        irangbuf.myinst[i] = (itrace + (128 * i));
+    }
+    memset(itrace, '\0', (128 * 20));
+    irangbuf.mypoint_to_myinst = 19;
+}
+
+void irangbuf_write(Decode *s){
+    irangbuf.mypoint_to_myinst = ((irangbuf.mypoint_to_myinst + 1) % 20);
+    // memset(irangbuf.myinst[irangbuf.mypoint_to_myinst], '\0', 128);
+    strcpy(irangbuf.myinst[irangbuf.mypoint_to_myinst], s->logbuf);
+}
+
+void irangbuf_printf(){
+    for (int i = 0; i < 20;i++){
+        if(i!=irangbuf.mypoint_to_myinst){
+            printf("    ");
+        }
+        else{
+            printf("--->");
+        }
+        puts(irangbuf.myinst[i]);
+    }
+}
+#endif
+// myitrace
+
 CPU_state cpu = {};
 uint64_t g_nr_guest_inst = 0;
 static uint64_t g_timer = 0; // unit: us
@@ -44,6 +81,7 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
   if (ITRACE_COND) { log_write("%s\n", _this->logbuf); }
 #endif
   if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
+  IFDEF(CONFIG_ITRACE, irangbuf_write(_this));
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
   IFDEF(CONFIG_WATCHPOINT, cpu_check_watchpoint());
 }
@@ -91,7 +129,8 @@ static void execute(uint64_t n) {
 }
 
 static void statistic() {
-  IFNDEF(CONFIG_TARGET_AM, setlocale(LC_NUMERIC, ""));
+    // IFDEF(CONFIG_ITRACE, irangbuf_printf());
+    IFNDEF(CONFIG_TARGET_AM, setlocale(LC_NUMERIC, ""));
 #define NUMBERIC_FMT MUXDEF(CONFIG_TARGET_AM, "%", "%'") PRIu64
   Log("host time spent = " NUMBERIC_FMT " us", g_timer);
   Log("total guest instructions = " NUMBERIC_FMT, g_nr_guest_inst);

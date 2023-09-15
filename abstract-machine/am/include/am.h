@@ -12,6 +12,16 @@
 #define MMAP_READ  0x00000001 // can read
 #define MMAP_WRITE 0x00000002 // can write
 
+#if __WORDSIZE == 64
+    typedef uint64_t word_t;
+    typedef int64_t sword_t;
+#elif __WORDSIZE == 32
+    typedef uint32_t word_t;
+    typedef int32_t sword_t;
+#else
+    #error word size error
+#endif
+
 // Memory area for [@start, @end)
 typedef struct {
   void *start, *end;
