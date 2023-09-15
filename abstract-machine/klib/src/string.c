@@ -92,14 +92,14 @@ int strncmp(const char *s1, const char *s2, size_t n) {
 }
 
 void *memset(void *s, int c, size_t n) {
-    uint32_t *dst = s;
-    uint32_t mychar = 0;
-    for (int i = 0; i < sizeof(uint32_t); i++){
+    word_t *dst = s;
+    word_t mychar = 0;
+    for (int i = 0; i < sizeof(word_t); i++){
         mychar = mychar << 8;
         mychar |= (char)c;
     }
-    size_t main_cnt = n / sizeof(uint32_t);
-    size_t second_cnt = n % sizeof(uint32_t);
+    size_t main_cnt = n / sizeof(word_t);
+    size_t second_cnt = n % sizeof(word_t);
     for (; main_cnt > 0; main_cnt--){
         (*dst) = mychar;
         dst++;
@@ -113,10 +113,10 @@ void *memset(void *s, int c, size_t n) {
 
 // void *memmove(void *dst, const void *src, size_t n) {
 //     void *res = dst;
-//     uint32_t dest = dst;
-//     const uint32_t rs = src;
-//     char residue = n % sizeof(uint32_t);
-//     int32_t overlap = src + n - dst;
+//     word_t dest = dst;
+//     const word_t rs = src;
+//     char residue = n % sizeof(word_t);
+//     sword_t overlap = src + n - dst;
 //     if (src + n - dst){
 
 //     }
@@ -124,10 +124,10 @@ void *memset(void *s, int c, size_t n) {
 // }
 
 void *memcpy(void *out, const void *in, size_t n) {
-    uint32_t *dest = out;
-    const uint32_t *src = in;
-    uint32_t main_cnt = n / sizeof(uint32_t);
-    uint32_t second_cnt = n % sizeof(uint32_t);
+    word_t *dest = out;
+    const word_t *src = in;
+    word_t main_cnt = n / sizeof(word_t);
+    word_t second_cnt = n % sizeof(word_t);
     for (; main_cnt > 0;main_cnt--){
         (*dest) = (*src);
         dest++;
@@ -141,10 +141,10 @@ void *memcpy(void *out, const void *in, size_t n) {
 }
 
 int memcmp(const void *s1, const void *s2, size_t n) {
-    const uint32_t *src1 = s1;
-    const uint32_t *src2 = s2;
-    uint32_t main_cnt = n / sizeof(uint32_t);
-    uint32_t second_cnt = n % sizeof(uint32_t);
+    const word_t *src1 = s1;
+    const word_t *src2 = s2;
+    word_t main_cnt = n / sizeof(word_t);
+    word_t second_cnt = n % sizeof(word_t);
     int res = 0;
     for (; main_cnt > 0; main_cnt--){
         if((*src1)==(*src2)){
@@ -152,7 +152,7 @@ int memcmp(const void *s1, const void *s2, size_t n) {
             src2++;
         }
         else{
-            for (int i = 0; i < sizeof(uint32_t);i++){
+            for (int i = 0; i < sizeof(word_t);i++){
                 res = ((*(((char *)src1) + i)) - (*(((char *)src2) + i)));
                 if(res!=0){
                     return res;
