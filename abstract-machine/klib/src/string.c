@@ -111,7 +111,7 @@ void *memset(void *s, int c, size_t n) {
     //   panic("Not implemented");
 }
  
-void *memcpy(void *out, const void *in, size_t n) {
+__attribute_noinline__ void *memcpy(void *out, const void *in, size_t n) {
     word_t *dest = out;
     const word_t *src = in;
     word_t main_cnt = n / sizeof(word_t);
