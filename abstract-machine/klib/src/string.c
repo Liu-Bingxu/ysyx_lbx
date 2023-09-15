@@ -143,7 +143,7 @@ void *memmove(void *dst, const void *src, size_t n) {
             dest++;
             rs++;
             for (int i = second_cnt; i > 0; i--){
-                *(((char *)dest) - i ) = *(((char *)rs) - i );
+                *(((char *)dest) - i) = *(((char *)rs) - i);
             }
         }
         else{
