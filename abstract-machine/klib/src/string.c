@@ -112,17 +112,16 @@ void *memset(void *s, int c, size_t n) {
 }
 
 // void *memmove(void *dst, const void *src, size_t n) {
-//     void *res = dst;
-//     word_t dest = dst;
-//     const word_t rs = src;
-//     char residue = n % sizeof(word_t);
-//     sword_t overlap = src + n - dst;
-//     if (src + n - dst){
-
-//     }
-// //   panic("Not implemented");
+    // void *res = dst;
+    // word_t dest = dst;
+    // const word_t rs = src;
+    // char residue = n % sizeof(word_t);
+    // if (((src<dst)&&((src+n)>dst))||()){
+        // 
+    // }
+//   panic("Not implemented");
 // }
-
+ 
 void *memcpy(void *out, const void *in, size_t n) {
     word_t *dest = out;
     const word_t *src = in;
