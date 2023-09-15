@@ -78,7 +78,7 @@ uint64_t get_time();
         CONFIG_TARGET_NATIVE_ELF,                    \
         do {                                         \
             extern FILE *log_fp;                     \
-            extern bool log_mem_enable(word_t addr); \
+            extern bool log_mem_enable(paddr_t addr); \
             if (log_mem_enable(addr))                \
             {                                        \
                 fprintf(log_fp, __VA_ARGS__);        \
@@ -86,11 +86,11 @@ uint64_t get_time();
             }                                        \
         } while (0))
 
-#define _Log_mem(addr, ...)             \
-    do                                  \
-    {                                   \
-        printf(__VA_ARGS__);            \
+#define _Log_mem(addr, ...)               \
+    do                                    \
+    {                                     \
+        printf(__VA_ARGS__);              \
         log_mem_write(addr, __VA_ARGS__); \
-    }while(0)
+    } while (0)
 
 #endif
