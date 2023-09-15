@@ -26,11 +26,21 @@
 #define MAX_INST_TO_PRINT 10
 
 //myitrace
+#ifdef CONFIG_ITRACE
 typedef struct{
     char *myinst[20];
     int mypoint_to_myinst;
 }irangbuf_struct;
-//char itrace[(24+)*20];
+irangbuf_struct irangbuf;
+char itrace[61 * 20];
+
+void init_itrace(){
+    for (int i = 0; i < 20;i++){
+        irangbuf.myinst[i] = (itrace + (61 * i));
+    }
+    irangbuf.mypoint_to_myinst = 0;
+}
+#endif
 // myitrace
 
 CPU_state cpu = {};
