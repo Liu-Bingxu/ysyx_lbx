@@ -140,8 +140,8 @@ void *memmove(void *dst, const void *src, size_t n) {
                 dest--;
                 rs--;
             }
-            dest++;
-            rs++;
+            // dest++;
+            // rs++;
             for (int i = second_cnt; i > 0; i--){
                 *(((char *)dest) - i + sizeof(word_t)) = *(((char *)rs) - i + sizeof(word_t));
             }
