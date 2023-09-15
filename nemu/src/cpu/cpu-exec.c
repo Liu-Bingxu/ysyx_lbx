@@ -44,6 +44,7 @@ void init_itrace(){
 
 void irangbuf_write(Decode *s){
     irangbuf.mypoint_to_myinst = ((irangbuf.mypoint_to_myinst + 1) % 20);
+    memset(irangbuf.myinst[irangbuf.mypoint_to_myinst], '\0', 128);
     strcpy(irangbuf.myinst[irangbuf.mypoint_to_myinst], s->logbuf);
 }
 
@@ -128,7 +129,7 @@ static void execute(uint64_t n) {
 }
 
 static void statistic() {
-    IFDEF(CONFIG_ITRACE, irangbuf_printf());
+    // IFDEF(CONFIG_ITRACE, irangbuf_printf());
     IFNDEF(CONFIG_TARGET_AM, setlocale(LC_NUMERIC, ""));
 #define NUMBERIC_FMT MUXDEF(CONFIG_TARGET_AM, "%", "%'") PRIu64
   Log("host time spent = " NUMBERIC_FMT " us", g_timer);
