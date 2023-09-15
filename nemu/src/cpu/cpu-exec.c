@@ -32,13 +32,13 @@ typedef struct{
     int mypoint_to_myinst;
 }irangbuf_struct;
 irangbuf_struct irangbuf;
-char itrace[61 * 20];
+char itrace[128 * 20];
 
 void init_itrace(){
     for (int i = 0; i < 20;i++){
-        irangbuf.myinst[i] = (itrace + (61 * i));
+        irangbuf.myinst[i] = (itrace + (128 * i));
     }
-    memset(itrace, '\0', (61 * 20));
+    memset(itrace, '\0', (128 * 20));
     irangbuf.mypoint_to_myinst = 19;
 }
 
@@ -80,7 +80,7 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
   if (ITRACE_COND) { log_write("%s\n", _this->logbuf); }
 #endif
   if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
-  printf("%ld\n", strlen(_this->logbuf));
+  IFDEF(CONFIG_ITRACE, irangbuf_write(_this));
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
   IFDEF(CONFIG_WATCHPOINT, cpu_check_watchpoint());
 }
@@ -128,7 +128,8 @@ static void execute(uint64_t n) {
 }
 
 static void statistic() {
-  IFNDEF(CONFIG_TARGET_AM, setlocale(LC_NUMERIC, ""));
+    IFDEF(CONFIG_ITRACE, irangbuf_printf());
+    IFNDEF(CONFIG_TARGET_AM, setlocale(LC_NUMERIC, ""));
 #define NUMBERIC_FMT MUXDEF(CONFIG_TARGET_AM, "%", "%'") PRIu64
   Log("host time spent = " NUMBERIC_FMT " us", g_timer);
   Log("total guest instructions = " NUMBERIC_FMT, g_nr_guest_inst);
