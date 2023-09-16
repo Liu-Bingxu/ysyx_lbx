@@ -57,6 +57,7 @@ typedef struct symbol_list{
 
 static symbol_list symbol_tab_list={.end=NULL,.head=NULL,.node_num=0};
 static int func = 0;
+static bool can_func_trace = false;
 
 char *symbol_find_name(paddr_t pc,paddr_t *first_addr){
     symbol_node *now = symbol_tab_list.head;
@@ -77,6 +78,9 @@ char *symbol_find_name(paddr_t pc,paddr_t *first_addr){
 }
 
 void ftrce_text_jump(paddr_t pc){
+    if(!can_func_trace){
+        return;
+    }
     char *name = NULL;
     paddr_t first_addr = 0;
     name = symbol_find_name(pc,&first_addr);
@@ -97,6 +101,9 @@ void ftrce_text_jump(paddr_t pc){
 }
 
 void ftrce_text_retu(paddr_t pc){
+    if(!can_func_trace){
+        return;
+    }
     Log_func(ANSI_FMT("func trace", ANSI_FG_BLUE)" "FMT_PADDR ": \t", pc);
     for (int i = 1; i < func;i++){
         Log_func("\t");
@@ -126,6 +133,7 @@ void symbol_list_push(symbol_list *list,char *name,word_t first_addr,word_t func
     list->head=new;
     list->node_num++;
     if(list->node_num==1)list->end=new;
+    can_func_trace = true;
 }
 void delete_symbol_list(){
     symbol_tab_list.node_num = 0;
@@ -143,7 +151,7 @@ void delete_symbol_list(){
 
 void init_ftrace(const char *ELF_FILE){
     if(ELF_FILE==NULL){
-        Log(ANSI_FMT("No elf file", ANSI_BG_RED));
+        Log(ANSI_FMT("No elf file", ANSI_FG_RED));
         return;
     }
     
@@ -215,7 +223,8 @@ void init_ftrace(const char *ELF_FILE){
         now=now->next;
     }
 
-    Log(ANSI_FMT("ELF file open and symbol tab OK", ANSI_BG_GREEN));
+    if(can_func_trace)Log(ANSI_FMT("ELF file open and symbol tab OK", ANSI_BG_GREEN));
+    else Log(ANSI_FMT("elf read error can't read function", ANSI_FG_RED));
 
     return;
 }
