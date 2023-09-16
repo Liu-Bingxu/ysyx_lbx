@@ -156,6 +156,8 @@ void init_ftrace(const char *ELF_FILE){
     //     now=now->next;
     // }
 
+    Log(ANSI_FMT("ELF file open and symbol tab OK", ANSI_BG_GREEN));
+
     return;
 }
 #endif
