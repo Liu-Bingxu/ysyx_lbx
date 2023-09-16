@@ -56,9 +56,43 @@ typedef struct symbol_list{
 }symbol_list;
 
 static symbol_list symbol_tab_list={.end=NULL,.head=NULL,.node_num=0};
-// static int func = 0;
+static int func = 0;
 
+char *symbol_find_name(paddr_t pc,paddr_t *first_addr){
+    symbol_node *now = NULL;
+    for (int i = 0; i < symbol_tab_list.node_num; i++)
+    {
+        if((pc>=now->first_addr)&&(pc<=now->end_addr)){
+            break;
+        }
+        now = now->next;
+    }
+    if(now!=NULL){
+        (*first_addr) = now->first_addr;
+        return now->name;
+    }
+    else{
+        return NULL;
+    }
+}
 
+void ftrce_text_jump(paddr_t pc){}
+
+void ftrce_text_retu(paddr_t pc){
+    Log_func(ANSI_FMT("func trace ", ANSI_BG_BLUE)FMT_PADDR": ",pc);
+    for (int i = 0; i < func;i++){
+        Log_func("\t");
+    }
+    Log_func("call [");
+    char *name = NULL;
+    paddr_t first_addr=0;
+    name = symbol_find_name(pc,&first_addr);
+    assert(name != NULL);
+    assert(first_addr != 0);
+    Log_func(ANSI_FMT("%s",ANSI_BG_BLUE), name);
+    Log_func("]\n");
+    func--;
+}
 
 void symbol_list_push(symbol_list *list,char *name,word_t first_addr,word_t func_size){
     symbol_node *new=(symbol_node *)malloc(sizeof(symbol_node));
