@@ -48,7 +48,8 @@ static int difftest_port = 1234;
 
 //myftrace
 static char *ELF_FILE = NULL;
-//myftrace
+extern void init_ftrace(const char *ELF_FILE);
+// myftrace
 
 static long load_img() {
   if (img_file == NULL) {
@@ -108,6 +109,7 @@ static int parse_args(int argc, char *argv[]) {
 void init_monitor(int argc, char *argv[]) {
   /* Perform some global initialization. */
   init_itrace();
+  IFDEF(CONFIG_FTRACE, init_ftrace(ELF_FILE));
   /* Parse arguments. */
   parse_args(argc, argv);
 
