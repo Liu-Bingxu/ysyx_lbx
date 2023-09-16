@@ -60,9 +60,9 @@ static int func = 0;
 
 char *symbol_find_name(paddr_t pc,paddr_t *first_addr){
     symbol_node *now = NULL;
-    for (int i = 0; i < symbol_tab_list.node_num; i++)
-    {
-        if((pc>=now->first_addr)&&(pc<=now->end_addr)){
+    for (int i = 0; i < symbol_tab_list.node_num; i++){
+        printf("Hello\n");
+        if ((pc >= now->first_addr) && (pc <= now->end_addr)){
             break;
         }
         now = now->next;
@@ -81,12 +81,9 @@ void ftrce_text_jump(paddr_t pc){}
 void ftrce_text_retu(paddr_t pc){
     Log_func(ANSI_FMT("func trace ", ANSI_BG_BLUE) FMT_PADDR ": ", pc);
     for (int i = 0; i < func;i++){
-        printf("Hello World\n");
         Log_func("\t");
     }
-    printf("Hello World\n");
     Log_func("call [");
-    printf("Hello World\n");
     char *name = NULL;
     paddr_t first_addr=0;
     name = symbol_find_name(pc,&first_addr);
