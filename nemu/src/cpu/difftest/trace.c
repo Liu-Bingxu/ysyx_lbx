@@ -85,7 +85,7 @@ void ftrce_text_jump(paddr_t pc){
     if(pc!=first_addr){
         return;
     }
-    Log_func(ANSI_FMT("func trace", ANSI_FG_BLUE)" "FMT_PADDR ": ", cpu.pc);
+    Log_func(ANSI_FMT("func trace", ANSI_FG_BLUE)" "FMT_PADDR ": \t", cpu.pc);
     for (int i = 0; i < func;i++){
         Log_func("\t");
     }
@@ -97,7 +97,7 @@ void ftrce_text_jump(paddr_t pc){
 }
 
 void ftrce_text_retu(paddr_t pc){
-    Log_func(ANSI_FMT("func trace", ANSI_FG_BLUE)" "FMT_PADDR ": ", pc);
+    Log_func(ANSI_FMT("func trace", ANSI_FG_BLUE)" "FMT_PADDR ": \t", pc);
     for (int i = 1; i < func;i++){
         Log_func("\t");
     }
