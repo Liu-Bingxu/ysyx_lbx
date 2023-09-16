@@ -160,6 +160,11 @@ config MTRACE
   bool "Enable Memory tracer"
   default y
 
+config MTRACE_print
+  depends on MTRACE 
+  bool "Enable Memory tracer to printf"
+  default y
+
 config MRACE_START
   depends on TRACE
   hex "When tracing is enabled (unit: number of memory addr)"

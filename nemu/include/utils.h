@@ -86,10 +86,13 @@ uint64_t get_time();
             }                                        \
         } while (0))
 
+#define MEM_PRINTF_ENABLE MUXDEF(CONFIG_MTRACE_print,true,false)
+
 #define _Log_mem(addr, ...)               \
     do                                    \
     {                                     \
-        printf(__VA_ARGS__);              \
+        if (MEM_PRINTF_ENABLE)          \
+            printf(__VA_ARGS__);          \
         log_mem_write(addr, __VA_ARGS__); \
     } while (0)
 
