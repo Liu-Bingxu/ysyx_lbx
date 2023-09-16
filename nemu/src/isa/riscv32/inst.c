@@ -146,6 +146,7 @@ static int decode_exec(Decode *s) {
 
     // printf("now PC is 0x%x\n", s->dnpc);
     if(INSTPAT_INST(s)==0x00008067){
+        printf("Hello world\n");
         FTRACE_RETU(s->pc);
     }
     return 0;
