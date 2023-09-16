@@ -217,13 +217,13 @@ void init_ftrace(const char *ELF_FILE){
     fclose(elf_file);
 
     // //text list
-    symbol_node *now=symbol_tab_list.head;
-    for(int i=0;i<symbol_tab_list.node_num;i++){
-        printf("FUNC: %s, Addr from "FMT_PADDR" to "FMT_PADDR"\n",now->name,now->first_addr,now->end_addr);
-        now=now->next;
-    }
+    // symbol_node *now=symbol_tab_list.head;
+    // for(int i=0;i<symbol_tab_list.node_num;i++){
+    //     printf("FUNC: %s, Addr from "FMT_PADDR" to "FMT_PADDR"\n",now->name,now->first_addr,now->end_addr);
+    //     now=now->next;
+    // }
 
-    if(can_func_trace)Log(ANSI_FMT("ELF file open and symbol tab OK", ANSI_BG_GREEN));
+    if(can_func_trace)Log(ANSI_FMT("ELF file open and symbol tab OK", ANSI_FG_GREEN));
     else Log(ANSI_FMT("elf read error can't read function", ANSI_FG_RED));
 
     return;
