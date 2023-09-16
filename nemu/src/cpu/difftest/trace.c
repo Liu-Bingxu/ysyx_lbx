@@ -84,7 +84,6 @@ void delete_symbol_list(){
     symbol_tab_list.head = NULL;
 }
 
-
 void init_ftrace(const char *ELF_FILE){
     if(ELF_FILE==NULL){
         Log(ANSI_FMT("No elf file", ANSI_BG_RED));
