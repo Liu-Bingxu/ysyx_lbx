@@ -80,8 +80,8 @@ void ftrce_text_jump(paddr_t pc){}
 
 void ftrce_text_retu(paddr_t pc){
     Log_func(ANSI_FMT("func trace ", ANSI_BG_BLUE) FMT_PADDR ": ", pc);
-    printf("Hello World\n");
     for (int i = 0; i < func;i++){
+        printf("Hello World\n");
         Log_func("\t");
     }
     Log_func("call [");
