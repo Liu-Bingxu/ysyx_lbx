@@ -83,6 +83,7 @@ void delete_symbol_list(){
     symbol_tab_list.end = NULL;
     symbol_tab_list.head = NULL;
 }
+#endif
 
 void init_ftrace(const char *ELF_FILE){
     if(ELF_FILE==NULL){
@@ -90,6 +91,7 @@ void init_ftrace(const char *ELF_FILE){
         return;
     }
     
+    #ifdef CONFIG_FTRACE
     int a;
 
     //open file and get the ELF head
@@ -155,8 +157,9 @@ void init_ftrace(const char *ELF_FILE){
     //     printf("FUNC: %s, Addr from %lx to %lx\n",now->name,now->first_addr,now->end_addr);
     //     now=now->next;
     // }
-
+    #endif
+    
     return;
 }
-#endif
+
 //myftrace
