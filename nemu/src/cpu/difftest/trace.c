@@ -101,7 +101,7 @@ void ftrce_text_retu(paddr_t pc){
     for (int i = 1; i < func;i++){
         Log_func("\t");
     }
-    Log_func(ANSI_FMT("ret",ANSI_FG_GREEN)" [");
+    Log_func(ANSI_FMT("ret",ANSI_FG_GREEN)"  [");
     char *name = NULL;
     paddr_t first_addr=0;
     name = symbol_find_name(pc,&first_addr);
