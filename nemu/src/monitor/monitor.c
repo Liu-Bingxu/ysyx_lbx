@@ -109,10 +109,12 @@ static int parse_args(int argc, char *argv[]) {
 void init_monitor(int argc, char *argv[]) {
   /* Perform some global initialization. */
   init_itrace();
-  IFDEF(CONFIG_FTRACE, init_ftrace(ELF_FILE));
 //   init_ftrace(ELF_FILE);
   /* Parse arguments. */
   parse_args(argc, argv);
+
+    //ftrace init
+    IFDEF(CONFIG_FTRACE, init_ftrace(ELF_FILE));
 
   /* Set random seed. */
   init_rand();
