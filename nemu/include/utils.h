@@ -86,11 +86,29 @@ uint64_t get_time();
             }                                        \
         } while (0))
 
+#define MEM_PRINTF_ENABLE MUXDEF(CONFIG_MTRACE_print,true,false)
+
 #define _Log_mem(addr, ...)               \
     do                                    \
     {                                     \
-        printf(__VA_ARGS__);              \
+        if (MEM_PRINTF_ENABLE)          \
+            printf(__VA_ARGS__);          \
         log_mem_write(addr, __VA_ARGS__); \
+    } while (0)
+
+#define log_FTRACE(...) IFDEF(CONFIG_TARGET_NATIVE_ELF, \
+  do { \
+    extern FILE* log_fp; \
+    fprintf(log_fp, __VA_ARGS__); \
+    fflush(log_fp); \
+  } while (0) \
+)
+
+#define Log_func(...)            \
+    do                           \
+    {                            \
+        printf(__VA_ARGS__);     \
+        log_FTRACE(__VA_ARGS__); \
     } while (0)
 
 #endif

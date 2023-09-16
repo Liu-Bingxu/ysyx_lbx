@@ -25,42 +25,8 @@
  */
 #define MAX_INST_TO_PRINT 10
 
-//myitrace
-#ifdef CONFIG_ITRACE
-typedef struct{
-    char *myinst[20];
-    int mypoint_to_myinst;
-}irangbuf_struct;
-irangbuf_struct irangbuf;
-char itrace[128 * 20];
-
-void init_itrace(){
-    for (int i = 0; i < 20;i++){
-        irangbuf.myinst[i] = (itrace + (128 * i));
-    }
-    memset(itrace, '\0', (128 * 20));
-    irangbuf.mypoint_to_myinst = 19;
-}
-
-void irangbuf_write(Decode *s){
-    irangbuf.mypoint_to_myinst = ((irangbuf.mypoint_to_myinst + 1) % 20);
-    // memset(irangbuf.myinst[irangbuf.mypoint_to_myinst], '\0', 128);
-    strcpy(irangbuf.myinst[irangbuf.mypoint_to_myinst], s->logbuf);
-}
-
-void irangbuf_printf(){
-    for (int i = 0; i < 20;i++){
-        if(i!=irangbuf.mypoint_to_myinst){
-            printf("    ");
-        }
-        else{
-            printf("--->");
-        }
-        puts(irangbuf.myinst[i]);
-    }
-}
-#endif
-// myitrace
+extern void irangbuf_write(Decode *s);
+extern void irangbuf_printf();
 
 CPU_state cpu = {};
 uint64_t g_nr_guest_inst = 0;
@@ -141,6 +107,7 @@ static void statistic() {
 void assert_fail_msg() {
   isa_reg_display();
   statistic();
+  IFDEF(CONFIG_ITRACE, irangbuf_printf());
 }
 
 /* Simulate how the CPU works. */

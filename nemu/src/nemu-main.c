@@ -15,6 +15,8 @@
 
 #include <common.h>
 
+extern void delete_symbol_list();
+
 void init_monitor(int, char *[]);
 void am_init_monitor();
 void engine_start();
@@ -30,6 +32,8 @@ int main(int argc, char *argv[]) {
 
   /* Start engine. */
   engine_start();
+
+  IFDEF(CONFIG_FTRACE,delete_symbol_list());
 
   return is_exit_status_bad();
 }
