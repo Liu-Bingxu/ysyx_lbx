@@ -79,11 +79,11 @@ char *symbol_find_name(paddr_t pc,paddr_t *first_addr){
 void ftrce_text_jump(paddr_t pc){}
 
 void ftrce_text_retu(paddr_t pc){
-    Log_func(ANSI_FMT("func trace ", ANSI_BG_BLUE) FMT_PADDR ": ", pc);
+    Log_func(ANSI_FMT("func trace", ANSI_FG_BLUE)" "FMT_PADDR ": ", pc);
     for (int i = 0; i < func;i++){
         Log_func("\t");
     }
-    Log_func("call [");
+    Log_func(ANSI_FMT("ret",ANSI_FG_GREEN)" [");
     char *name = NULL;
     paddr_t first_addr=0;
     name = symbol_find_name(pc,&first_addr);
