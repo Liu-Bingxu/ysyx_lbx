@@ -38,3 +38,11 @@ void irangbuf_printf(){
 }
 #endif
 // myitrace
+
+//mytrace
+
+void init_ftrace(){
+    
+}
+
+//myftrace
