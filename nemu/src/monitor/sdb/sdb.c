@@ -52,7 +52,7 @@ static int cmd_c(char *args) {
 
 
 static int cmd_q(char *args) {
-    delete_symbol_list();
+    IFDEF(CONFIG_FTRACE,delete_symbol_list());
     exit(0);
 }
 
