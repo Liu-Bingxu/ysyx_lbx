@@ -25,6 +25,8 @@ static int is_batch_mode = false;
 void init_regex();
 void init_wp_pool();
 
+extern void delete_symbol_list();
+
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
   static char *line_read = NULL;
@@ -50,7 +52,8 @@ static int cmd_c(char *args) {
 
 
 static int cmd_q(char *args) {
-  exit(0);
+    delete_symbol_list();
+    exit(0);
 }
 
 static int cmd_si(char *args){
