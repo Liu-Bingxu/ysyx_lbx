@@ -61,7 +61,7 @@ static int func = 0;
 char *symbol_find_name(paddr_t pc,paddr_t *first_addr){
     symbol_node *now = NULL;
     for (int i = 0; i < symbol_tab_list.node_num; i++){
-        printf("Hello\n");
+        printf("Hello,%d\n",symbol_tab_list.node_num);
         if ((pc >= now->first_addr) && (pc <= now->end_addr)){
             break;
         }
