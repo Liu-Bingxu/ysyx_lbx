@@ -86,6 +86,7 @@ void ftrce_text_retu(paddr_t pc){
     }
     printf("Hello World\n");
     Log_func("call [");
+    printf("Hello World\n");
     char *name = NULL;
     paddr_t first_addr=0;
     name = symbol_find_name(pc,&first_addr);
