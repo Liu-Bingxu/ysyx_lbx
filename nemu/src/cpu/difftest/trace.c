@@ -59,9 +59,9 @@ static symbol_list symbol_tab_list={.end=NULL,.head=NULL,.node_num=0};
 static int func = 0;
 
 char *symbol_find_name(paddr_t pc,paddr_t *first_addr){
-    symbol_node *now = NULL;
+    symbol_node *now = symbol_tab_list.head;
     for (int i = 0; i < symbol_tab_list.node_num; i++){
-        printf("Hello,%d\n",symbol_tab_list.node_num);
+        // printf("Hello,%d\n",symbol_tab_list.node_num);
         if ((pc >= now->first_addr) && (pc <= now->end_addr)){
             break;
         }
@@ -89,7 +89,7 @@ void ftrce_text_retu(paddr_t pc){
     name = symbol_find_name(pc,&first_addr);
     assert(name != NULL);
     assert(first_addr != 0);
-    printf("Hello World\n");
+    // printf("Hello World\n");
     Log_func(ANSI_FMT("%s",ANSI_BG_BLUE), name);
     Log_func("]\n");
     func--;
