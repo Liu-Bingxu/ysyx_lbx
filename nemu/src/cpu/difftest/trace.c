@@ -58,6 +58,8 @@ typedef struct symbol_list{
 static symbol_list symbol_tab_list={.end=NULL,.head=NULL,.node_num=0};
 // static int func = 0;
 
+
+
 void symbol_list_push(symbol_list *list,char *name,word_t first_addr,word_t func_size){
     symbol_node *new=(symbol_node *)malloc(sizeof(symbol_node));
     int len=strlen(name);
