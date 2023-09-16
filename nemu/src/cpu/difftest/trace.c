@@ -79,7 +79,7 @@ char *symbol_find_name(paddr_t pc,paddr_t *first_addr){
 void ftrce_text_jump(paddr_t pc){}
 
 void ftrce_text_retu(paddr_t pc){
-    printf("Hello World\n");
+    // printf("Hello World\n");
     Log_func(ANSI_FMT("func trace ", ANSI_BG_BLUE) FMT_PADDR ": ", pc);
     for (int i = 0; i < func;i++){
         Log_func("\t");

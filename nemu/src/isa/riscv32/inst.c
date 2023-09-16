@@ -145,7 +145,7 @@ static int decode_exec(Decode *s) {
     R(0) = 0; // reset $zero to 0
 
     // printf("now PC is 0x%x\n", s->dnpc);
-    if(s->isa.inst.val==0x00080067){
+    if(INSTPAT_INST(s)==0x00008067){
         FTRACE_RETU(s->pc);
     }
     return 0;
