@@ -1,6 +1,6 @@
-#include "common.h"
 #include <cpu/decode.h>
 #include "elf.h"
+#include "utils.h"
 
 // myitrace
 #ifdef CONFIG_ITRACE
@@ -41,8 +41,17 @@ void irangbuf_printf(){
 
 //mytrace
 
-void init_ftrace(){
-    
+void init_ftrace(const char *ELF_FILE){
+    if(ELF_FILE==NULL){
+        IFDEF(CONFIG_FTRACE, Log(ANSI_FMT("No elf file", ANSI_BG_RED)));
+        return;
+    }
+
+    FILE *elf_file = fopen(ELF_FILE,"r");
+    assert(elf_file);
+
+
+
 }
 
 //myftrace

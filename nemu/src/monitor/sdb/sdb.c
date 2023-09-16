@@ -22,6 +22,9 @@
 
 static int is_batch_mode = false;
 
+//my
+static bool BREAK = false;
+//my
 void init_regex();
 void init_wp_pool();
 
@@ -50,7 +53,9 @@ static int cmd_c(char *args) {
 
 
 static int cmd_q(char *args) {
-  exit(0);
+    //   exit(0);
+    BREAK = true;
+    return 0;
 }
 
 static int cmd_si(char *args){
@@ -283,6 +288,7 @@ void sdb_mainloop() {
     }
 
     if (i == NR_CMD) { printf("Unknown command '%s'\n", cmd); }
+    if(BREAK)break;
   }
 }
 
