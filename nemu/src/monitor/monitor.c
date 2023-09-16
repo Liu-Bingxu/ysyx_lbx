@@ -113,9 +113,6 @@ void init_monitor(int argc, char *argv[]) {
   /* Parse arguments. */
   parse_args(argc, argv);
 
-    //ftrace init
-    IFDEF(CONFIG_FTRACE, init_ftrace(ELF_FILE));
-
   /* Set random seed. */
   init_rand();
 
@@ -139,6 +136,10 @@ void init_monitor(int argc, char *argv[]) {
 
   /* Initialize the simple debugger. */
   init_sdb();
+
+
+    //ftrace init
+    IFDEF(CONFIG_FTRACE, init_ftrace(ELF_FILE));
 
 #ifndef CONFIG_ISA_loongarch32r
   IFDEF(CONFIG_ITRACE, init_disasm(
