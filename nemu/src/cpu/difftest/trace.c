@@ -92,6 +92,7 @@ void ftrce_text_retu(paddr_t pc){
     name = symbol_find_name(pc,&first_addr);
     assert(name != NULL);
     assert(first_addr != 0);
+    printf("Hello World\n");
     Log_func(ANSI_FMT("%s",ANSI_BG_BLUE), name);
     Log_func("]\n");
     func--;
