@@ -76,11 +76,29 @@ char *symbol_find_name(paddr_t pc,paddr_t *first_addr){
     }
 }
 
-void ftrce_text_jump(paddr_t pc){}
+void ftrce_text_jump(paddr_t pc){
+    char *name = NULL;
+    paddr_t first_addr = 0;
+    name = symbol_find_name(pc,&first_addr);
+    assert(name != NULL);
+    assert(first_addr != 0);
+    if(pc!=first_addr){
+        return;
+    }
+    Log_func(ANSI_FMT("func trace", ANSI_FG_BLUE)" "FMT_PADDR ": ", cpu.pc);
+    for (int i = 0; i < func;i++){
+        Log_func("\t");
+    }
+    Log_func(ANSI_FMT("call",ANSI_FG_GREEN)" [");
+    Log_func(ANSI_FMT("%s",ANSI_FG_YELLOW), name);
+    Log_func("]\n");
+    func++;
+    return;
+}
 
 void ftrce_text_retu(paddr_t pc){
     Log_func(ANSI_FMT("func trace", ANSI_FG_BLUE)" "FMT_PADDR ": ", pc);
-    for (int i = 0; i < func;i++){
+    for (int i = 1; i < func;i++){
         Log_func("\t");
     }
     Log_func(ANSI_FMT("ret",ANSI_FG_GREEN)" [");
