@@ -54,7 +54,7 @@ assign arith_flag = (inst[6:0]==7'b0010011)?1'b1:1'b0;
 // assign auipc    =   (inst[6:0]  ==  7'b0010111  ) ? 1'b1 : 1'b0;
 // assign jal      =   (inst[6:0]  ==  7'b1101111  ) ? 1'b1 : 1'b0;
 // assign jalr     =   (inst[6:0]  ==  7'b1100111  ) ? 1'b1 : 1'b0;
-
+// assign jalr     =   (inst[6:0]  ==  7'b1100111  ) ? 1'b1 : 1'b0;
 assign addi     =   (arith_flag&(funct3==3'b000)) ? 1'b1 : 1'b0;
 
 assign ebreak   =   (inst       ==  32'h00100073) ? 1'b1 : 1'b0;
