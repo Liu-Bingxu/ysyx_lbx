@@ -21,6 +21,7 @@ void init_itrace(){
 
 void irangbuf_write(Decode *s){
     irangbuf.mypoint_to_myinst = ((irangbuf.mypoint_to_myinst + 1) % 20);
+    printf("Hello\n");
     // memset(irangbuf.myinst[irangbuf.mypoint_to_myinst], '\0', 128);
     strcpy(irangbuf.myinst[irangbuf.mypoint_to_myinst], s->logbuf);
 }
