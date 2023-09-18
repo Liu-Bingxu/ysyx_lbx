@@ -50,6 +50,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
         while((fmt[i]>=0x30)&&(fmt[i]<=0x39)){
             width *= 10;
             width += (fmt[i] - 0x30);
+            i++;
         }
         if(fmt[i]=='s'){
             char *src = va_arg(ap, char *);
