@@ -15,7 +15,9 @@ int months_leap[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 void __am_timer_rtc(AM_TIMER_RTC_T *rtc) {
     outl(RTC_ADDR, 0x0);
-    uint64_t us = (*((uint64_t *)RTC_ADDR));
+    uint64_t us = 0;
+    us = inl(RTC_ADDR);
+    us += ((uint64_t)inl(RTC_ADDR + 4) << 32);
     us /= 1000000;
     rtc->second = us % 60;
     us /= 60;
