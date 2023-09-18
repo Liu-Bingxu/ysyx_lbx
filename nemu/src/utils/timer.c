@@ -43,3 +43,8 @@ uint64_t get_time() {
   uint64_t now = get_time_internal();
   return now - boot_time;
 }
+
+uint64_t get_now_time(){
+    uint64_t now = get_time_internal();
+    return now;
+}

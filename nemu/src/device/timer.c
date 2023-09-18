@@ -28,7 +28,12 @@ static void rtc_io_handler(uint32_t offset, int len, bool is_write) {
             rtc_port_base[1] = us >> 32;
         }
         else if ((*rtc_port_base) == 0x0){
-            
+            uint64_t us = get_now_time();
+            rtc_port_base[0] = (uint32_t)us;
+            rtc_port_base[1] = us >> 32;
+        }
+        else{
+            panic(ANSI_FMT("error key of get time\n",ANSI_FG_RED));
         }
     }
 }
