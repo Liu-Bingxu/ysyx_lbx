@@ -6,8 +6,8 @@
 
 void __am_gpu_init() {
     int i;
-    int w = io_read(AM_GPU_CONFIG).width;
-    int h = io_read(AM_GPU_CONFIG).height;
+    int w = io_read(AM_GPU_CONFIG).width / 32;
+    int h = io_read(AM_GPU_CONFIG).height / 32;
     uint32_t *fb = (uint32_t *)(uintptr_t)FB_ADDR;
     for (i = 0; i < w * h;i++)
         fb[i] = i;
@@ -17,7 +17,7 @@ void __am_gpu_init() {
 void __am_gpu_config(AM_GPU_CONFIG_T *cfg) {
   *cfg = (AM_GPU_CONFIG_T) {
     .present = true, .has_accel = false,
-    .width = ((inl(VGACTL_ADDR)>>16)*32)*(inl(VGACTL_ADDR)&0xff)
+    .width = ((inl(VGACTL_ADDR)>>16)*32)*((inl(VGACTL_ADDR)&0xff)*32)
   };
 }
 
@@ -25,7 +25,7 @@ void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
     // assert((ctl->x + ctl->w) < io_read(AM_GPU_CONFIG).width);
     // assert((ctl->y + ctl->h) < io_read(AM_GPU_CONFIG).height);
     for (int i = 0; i < ctl->h;i++){
-        memcpy(((void *)FB_ADDR + (ctl->y + i) * io_read(AM_GPU_CONFIG).width + ctl->x), ctl->pixels, ctl->w * 4);
+        memcpy(((void *)FB_ADDR + (ctl->y + i) * io_read(AM_GPU_CONFIG).width / 32 + ctl->x), ctl->pixels, ctl->w * 4);
         ctl->pixels += ctl->w * 4;
     }
     if (ctl->sync){
