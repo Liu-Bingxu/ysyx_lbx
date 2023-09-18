@@ -12,7 +12,6 @@ static irangbuf_struct irangbuf;
 static char itrace[128 * 20];
 
 void init_itrace(){
-    printf("Hello\n");
     for (int i = 0; i < 20;i++){
         irangbuf.myinst[i] = (itrace + (128 * i));
     }
@@ -23,7 +22,6 @@ void init_itrace(){
 void irangbuf_write(Decode *s){
     irangbuf.mypoint_to_myinst = ((irangbuf.mypoint_to_myinst + 1) % 20);
     // memset(irangbuf.myinst[irangbuf.mypoint_to_myinst], '\0', 128);
-    printf("Hello %s\n", s->logbuf);
     strcpy(irangbuf.myinst[irangbuf.mypoint_to_myinst], s->logbuf);
 }
 
