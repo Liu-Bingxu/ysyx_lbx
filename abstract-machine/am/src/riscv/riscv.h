@@ -1,4 +1,4 @@
-#ifndef RISCV_H__
+#ifndef RISCV_H_K_
 #define RISCV_H__
 
 #include <stdint.h>
