@@ -61,7 +61,15 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
 }
 
 int printf(const char *fmt, ...) {
-  panic("Not implemented");
+    assert(fmt != NULL);
+    char buf[1024];
+    va_list ap;
+    va_start(ap, fmt);
+    int res = vsprintf(buf, fmt, ap);
+    va_end(ap);
+    putstr(buf);
+    return res;
+    //   panic("Not implemented");
 }
 
 int sprintf(char *out, const char *fmt, ...) {
