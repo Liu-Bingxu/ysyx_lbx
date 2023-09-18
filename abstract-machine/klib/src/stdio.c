@@ -54,6 +54,12 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
             out += res;
             n += res;
         }
+        else if(fmt[i]=='c'){
+            char my_char = va_arg(ap, int);
+            (*out) = my_char;
+            out++;
+            n++;
+        }
     }
     (*out) = '\0';
     return n;
