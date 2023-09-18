@@ -81,7 +81,6 @@ static void exec_once(Decode *s, vaddr_t pc) {
   p[0] = '\0'; // the upstream llvm does not support loongarch32r
 #endif
 #endif
-    printf("Hello\n");
 }
 
 static void execute(uint64_t n) {
@@ -90,6 +89,7 @@ static void execute(uint64_t n) {
 	exec_once(&s, cpu.pc);
 	g_nr_guest_inst ++;
 	trace_and_difftest(&s, cpu.pc);
+    printf("Hello\n");
 	if (nemu_state.state != NEMU_RUNNING) break;
 	IFDEF(CONFIG_DEVICE, device_update());
   }
