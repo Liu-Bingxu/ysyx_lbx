@@ -12,6 +12,10 @@
 #define MMAP_READ  0x00000001 // can read
 #define MMAP_WRITE 0x00000002 // can write
 
+#ifndef __WORDSIZE
+    #define __WORDSIZE 32
+#endif
+
 #if __WORDSIZE == 64
     typedef uint64_t word_t;
     typedef int64_t sword_t;

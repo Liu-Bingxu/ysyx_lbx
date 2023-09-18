@@ -5,7 +5,7 @@
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
-static int vsnprintf_num(char *out,int OP_num){
+static int vsnprintf_num(char *out,int OP_num,int width){
     char *dest = out;
     int res = 0;
     do{
@@ -15,6 +15,11 @@ static int vsnprintf_num(char *out,int OP_num){
         res++;
         OP_num /= 10;
     } while (OP_num != 0);
+    while(width>res){
+        (*out) = ' ';
+        out++;
+        res++;
+    }
     out--;
     for (int i = 0; i < res / 2; i++){
         char temp = (*dest);
@@ -31,7 +36,9 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
     assert(fmt != NULL);
     int n = 0;
     for (int i = 0; fmt[i] != '\0'; i++){
-        if(fmt[i]!='%'){
+        int width = 0;
+        if (fmt[i] != '%')
+        {
             (*out) = fmt[i];
             out++;
             n++;
@@ -40,19 +47,36 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
         else{
             i++;
         }
+        while((fmt[i]>=0x30)&&(fmt[i]<=0x39)){
+            width *= 10;
+            width += (fmt[i] - 0x30);
+            i++;
+        }
         if(fmt[i]=='s'){
             char *src = va_arg(ap, char *);
             assert(src != NULL);
             size_t len = strlen(src);
+            while(width>len){
+                (*out) = ' ';
+                out++;
+                n++;
+                width--;
+            }
             strncpy(out, src, len);
             out += len;
             n += len;
         }
         else if(fmt[i]=='d'){
             int OP_num = va_arg(ap, int);
-            int res = vsnprintf_num(out, OP_num);
+            int res = vsnprintf_num(out, OP_num,width);
             out += res;
             n += res;
+        }
+        else if(fmt[i]=='c'){
+            char my_char = va_arg(ap, int);
+            (*out) = my_char;
+            out++;
+            n++;
         }
     }
     (*out) = '\0';
@@ -61,7 +85,15 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
 }
 
 int printf(const char *fmt, ...) {
-  panic("Not implemented");
+    assert(fmt != NULL);
+    char buf[1024];
+    va_list ap;
+    va_start(ap, fmt);
+    int res = vsprintf(buf, fmt, ap);
+    va_end(ap);
+    putstr(buf);
+    return res;
+    //   panic("Not implemented");
 }
 
 int sprintf(char *out, const char *fmt, ...) {

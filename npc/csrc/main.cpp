@@ -4,18 +4,16 @@
 #include <iostream>
 #include "svdpi.h"
 #include "Vtop__Dpi.h"
+#include "pmem.h"
 
 using namespace std;
 
 VerilatedContext* contextp = NULL;
 VerilatedVcdC* tfp = NULL;
 
-uint32_t inst[] = {
-    0x12300093,0x23400113,0x34500193,0x45600213,0x32108093,0x00100073,
-};
-
 static Vtop* top;
 
+extern void init_monitor(int argc, char *argv[]);
 
 void step_and_dump_wave(){
     // cout << "Hello Wrold" << top->sys_clk << "ByeBye" << endl;
@@ -33,6 +31,8 @@ void sim_init(int argc, char *argv[]){
     contextp->commandArgs(argc, argv);
     top->trace(tfp, 0);
     tfp->open("wave.vcd");
+
+    init_monitor(argc, argv);
 }
 
 void sim_exit(int code){
@@ -75,13 +75,13 @@ int main(int argc, char *argv[]){
     sim_init(argc,argv);
     top->sys_clk = 0;
     top->sys_rst_n = 1;
-    top->inst_in = inst[0];
+    pmem_read(top->PC_out, &top->inst_in);
     // 初始化信号
     sim_rst();
     // sim_exit();
     int count = 0;
     while (!contextp->gotFinish()){
-        top->inst_in = inst[count];
+        pmem_read(top->PC_out,&top->inst_in);
         top->sys_clk = !top->sys_clk;
         step_and_dump_wave();
         top->sys_clk = !top->sys_clk;

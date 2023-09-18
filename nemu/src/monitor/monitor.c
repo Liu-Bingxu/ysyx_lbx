@@ -108,7 +108,7 @@ static int parse_args(int argc, char *argv[]) {
 
 void init_monitor(int argc, char *argv[]) {
   /* Perform some global initialization. */
-  init_itrace();
+  IFDEF(CONFIG_ITRACE,init_itrace());
 //   init_ftrace(ELF_FILE);
   /* Parse arguments. */
   parse_args(argc, argv);
@@ -165,7 +165,7 @@ static long load_img() {
 }
 
 void am_init_monitor() {
-    init_itrace();
+  IFDEF(CONFIG_ITRACE,init_itrace());
     init_rand();
     init_mem();
     init_isa();

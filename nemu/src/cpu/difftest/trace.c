@@ -12,6 +12,7 @@ static irangbuf_struct irangbuf;
 static char itrace[128 * 20];
 
 void init_itrace(){
+    printf("Hello\n");
     for (int i = 0; i < 20;i++){
         irangbuf.myinst[i] = (itrace + (128 * i));
     }

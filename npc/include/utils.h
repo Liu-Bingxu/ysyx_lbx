@@ -33,7 +33,6 @@ extern NEMUState nemu_state;
 // ----------- timer -----------
 
 uint64_t get_time();
-uint64_t get_now_time();
 
 // ----------- log -----------
 
@@ -57,59 +56,23 @@ uint64_t get_now_time();
 
 #define ANSI_FMT(str, fmt) fmt str ANSI_NONE
 
-#define log_write(...) IFDEF(CONFIG_TARGET_NATIVE_ELF, \
-  do { \
-    extern FILE* log_fp; \
-    extern bool log_enable(); \
-    if (log_enable()) { \
-      fprintf(log_fp, __VA_ARGS__); \
-      fflush(log_fp); \
-    } \
-  } while (0) \
-)
-
-#define _Log(...) \
-  do { \
-    printf(__VA_ARGS__); \
-    log_write(__VA_ARGS__); \
-  } while (0)
-
-#define log_mem_write(addr, ...)                     \
-    IFDEF(                                           \
-        CONFIG_TARGET_NATIVE_ELF,                    \
-        do {                                         \
-            extern FILE *log_fp;                     \
-            extern bool log_mem_enable(paddr_t addr); \
-            if (log_mem_enable(addr))                \
-            {                                        \
-                fprintf(log_fp, __VA_ARGS__);        \
-                fflush(log_fp);                      \
-            }                                        \
-        } while (0))
-
-#define MEM_PRINTF_ENABLE MUXDEF(CONFIG_MTRACE_print,true,false)
-
-#define _Log_mem(addr, ...)               \
+#define log_write(...)                    \
     do                                    \
     {                                     \
-        if (MEM_PRINTF_ENABLE)          \
-            printf(__VA_ARGS__);          \
-        log_mem_write(addr, __VA_ARGS__); \
+        extern FILE *log_fp;              \
+        extern bool log_enable();         \
+        if (log_enable())                 \
+        {                                 \
+            fprintf(log_fp, __VA_ARGS__); \
+            fflush(log_fp);               \
+        }                                 \
     } while (0)
 
-#define log_FTRACE(...) IFDEF(CONFIG_TARGET_NATIVE_ELF, \
-  do { \
-    extern FILE* log_fp; \
-    fprintf(log_fp, __VA_ARGS__); \
-    fflush(log_fp); \
-  } while (0) \
-)
-
-#define Log_func(...)            \
-    do                           \
-    {                            \
-        printf(__VA_ARGS__);     \
-        log_FTRACE(__VA_ARGS__); \
+#define Log(...)               \
+    do                          \
+    {                           \
+        printf(__VA_ARGS__);    \
+        log_write(__VA_ARGS__); \
     } while (0)
 
 #endif
