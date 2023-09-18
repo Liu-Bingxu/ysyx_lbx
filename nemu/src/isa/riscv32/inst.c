@@ -152,11 +152,11 @@ static int decode_exec(Decode *s) {
         // printf("Hello world\n");
         FTRACE_RETU(s->pc);
     }
+    printf("Hello\n");
     return 0;
 }
 
 int isa_exec_once(Decode *s) {
     s->isa.inst.val = inst_fetch(&s->snpc, 4);
-    printf("Hello\n");
     return decode_exec(s);
 }
