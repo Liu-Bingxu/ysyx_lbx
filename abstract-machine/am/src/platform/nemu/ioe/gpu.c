@@ -20,7 +20,7 @@ void __am_gpu_config(AM_GPU_CONFIG_T *cfg) {
     cfg->has_accel = false;
     cfg->width = (inl(VGACTL_ADDR) >> 16);
     cfg->height = (inl(VGACTL_ADDR) & 0xffff);
-    cfg->vmemsz = cfg->width * cfg->height;
+    cfg->vmemsz = cfg->width * cfg->height * 32;
 }
 
 void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
