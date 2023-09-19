@@ -26,9 +26,11 @@ void __am_gpu_config(AM_GPU_CONFIG_T *cfg) {
 void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
     // assert((ctl->x + ctl->w) < io_read(AM_GPU_CONFIG).width);
     // assert((ctl->y + ctl->h) < io_read(AM_GPU_CONFIG).height);
-    for (int i = 0; i < ctl->h;i++){
-        memcpy(((void *)FB_ADDR + (ctl->y + i) * io_read(AM_GPU_CONFIG).width + ctl->x), ctl->pixels, ctl->w * 4);
-        ctl->pixels += ctl->w * 4;
+    if(ctl->pixels!=NULL){
+        for (int i = 0; i < ctl->h; i++){
+            memcpy(((void *)FB_ADDR + (ctl->y + i) * io_read(AM_GPU_CONFIG).width + ctl->x), ctl->pixels, ctl->w * 4);
+            ctl->pixels += ctl->w * 4;
+        }
     }
     if (ctl->sync){
         outl(SYNC_ADDR, 1);
