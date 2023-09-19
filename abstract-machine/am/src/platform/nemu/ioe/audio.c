@@ -53,7 +53,6 @@ void __am_audio_play(AM_AUDIO_PLAY_T *ctl) {
         printf("I am %lu, target is %d\n",len,count);
         count = inl(AUDIO_COUNT_ADDR);
     }
-    printf("Now last_len is %d\n", last_len);
     if (last_len < len){
         memcpy((void *)AUDIO_SBUF_ADDR+sb_size-last_len, start, last_len);
         last_len = sb_size;
@@ -61,6 +60,7 @@ void __am_audio_play(AM_AUDIO_PLAY_T *ctl) {
         len -= last_len;
         printf("Hello\n");
     }
+    printf("Now last_len is %d\n", last_len);
     memcpy((void *)AUDIO_SBUF_ADDR+sb_size-last_len, start, len);
     printf("Hello\n");
     last_len = (last_len == len) ? sb_size : last_len - len;
