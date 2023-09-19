@@ -48,7 +48,7 @@ void audio_play(void *userdata, Uint8 *stream, int len){
     if((sb_start-sbuf)>CONFIG_SB_SIZE)
         sb_start -= CONFIG_SB_SIZE;
     // sb_start = sbuf + (((sb_start - sbuf) + len) % CONFIG_SB_SIZE);
-    audio_base[5] = (sb_end >= sb_start) ? (sb_end - sb_start - 1) : (CONFIG_SB_SIZE + sb_end - sb_start - 1);
+    audio_base[5] = (sb_end >= sb_start) ? (sb_end - sb_start ) : (CONFIG_SB_SIZE + sb_end - sb_start );
 }
 
 static void audio_io_handler(uint32_t offset, int len, bool is_write) {
@@ -63,7 +63,7 @@ static void audio_io_handler(uint32_t offset, int len, bool is_write) {
 
 static void call_of_sbuf(uint32_t offset, int len, bool is_write){
     sb_end = (sbuf + ((offset + len) % CONFIG_SB_SIZE));
-    audio_base[5] = (sb_end >= sb_start) ? (sb_end - sb_start - 1) : (CONFIG_SB_SIZE + sb_end - sb_start - 1);
+    audio_base[5] = (sb_end >= sb_start) ? (sb_end - sb_start ) : (CONFIG_SB_SIZE + sb_end - sb_start );
 }
 
 void init_audio() {
