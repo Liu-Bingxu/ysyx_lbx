@@ -44,10 +44,10 @@ void audio_play(void *userdata, Uint8 *stream, int len){
     }
     len = (len < my_fifo_len) ? len : my_fifo_len;
     SDL_MixAudio(stream, sb_start, len, SDL_MIX_MAXVOLUME / 8);
-    // sb_start += len;
-    // if((sb_start-sbuf)>CONFIG_SB_SIZE)
-    //     sb_start -= CONFIG_SB_SIZE;
-    sb_start = sbuf + (((sb_start - sbuf) + len) % CONFIG_SB_SIZE);
+    sb_start += len;
+    if((sb_start-sbuf)>CONFIG_SB_SIZE)
+        sb_start -= CONFIG_SB_SIZE;
+    // sb_start = sbuf + (((sb_start - sbuf) + len) % CONFIG_SB_SIZE);
     audio_base[5] = (sb_end >= sb_start) ? (sb_end - sb_start) : (CONFIG_SB_SIZE + sb_end - sb_start);
 }
 
