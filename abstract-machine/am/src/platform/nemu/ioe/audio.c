@@ -37,7 +37,7 @@ void __am_audio_play(AM_AUDIO_PLAY_T *ctl) {
         last_len = inl(AUDIO_SBUF_SIZE_ADDR);
         sb_size = inl(AUDIO_SBUF_SIZE_ADDR);
     }
-    volatile uint32_t count = inl(AUDIO_COUNT_ADDR);
+    volatile int count = inl(AUDIO_COUNT_ADDR);
     if(ctl->buf.end < ctl->buf.start){
         return;
     }
