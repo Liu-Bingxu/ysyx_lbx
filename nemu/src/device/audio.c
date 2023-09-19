@@ -80,7 +80,7 @@ void init_audio() {
 
     audio_base[3] = CONFIG_SB_SIZE;
     audio_base[4] = 0;
-    audio_base[5] = CONFIG_SB_SIZE - 1;
+    audio_base[5] = 0;
 
     s.format = AUDIO_S16SYS;
     s.userdata = NULL;
