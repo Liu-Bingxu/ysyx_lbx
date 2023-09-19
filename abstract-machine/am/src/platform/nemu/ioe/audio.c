@@ -38,9 +38,9 @@ void __am_audio_play(AM_AUDIO_PLAY_T *ctl) {
         sb_size = inl(AUDIO_SBUF_SIZE_ADDR);
     }
     volatile int count = inl(AUDIO_COUNT_ADDR);
-    if(ctl->buf.end < ctl->buf.start){
-        return;
-    }
+    // if(ctl->buf.end < ctl->buf.start){
+        // return;
+    // }
     assert(ctl->buf.end >= ctl->buf.start);
     long len = ctl->buf.end - ctl->buf.start;
     void *start = ctl->buf.start;
