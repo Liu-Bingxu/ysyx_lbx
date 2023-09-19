@@ -85,7 +85,7 @@ void ftrce_text_jump(paddr_t pc){
     char *name = NULL;
     paddr_t first_addr = 0;
     name = symbol_find_name(pc,&first_addr);
-    printf("PC is %d\n", cpu.pc);
+    printf("PC is %u\n", cpu.pc);
     assert(name != NULL);
     assert(first_addr != 0);
     if(pc!=first_addr){
