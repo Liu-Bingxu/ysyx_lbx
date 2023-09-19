@@ -124,7 +124,8 @@ void ftrce_text_retu(paddr_t pc){
 }
 
 void symbol_list_push(symbol_list *list,char *name,word_t first_addr,word_t func_size){
-    symbol_node *new=(symbol_node *)malloc(sizeof(symbol_node));
+    printf("name is %s\n", name);
+    symbol_node *new = (symbol_node *)malloc(sizeof(symbol_node));
     int len=strlen(name);
     new->name=(char *)malloc(len+1);
     strcpy(new->name,name);
