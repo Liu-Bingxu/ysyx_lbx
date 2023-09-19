@@ -5,10 +5,45 @@
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
-static int vsnprintf_long_num(char *out, long OP_num, int width)
+static int vsnprintf_unsigned_long_long_num(char *out, unsigned long long OP_num, int width)
 {
     char *dest = out;
     int res = 0;
+    do
+    {
+        int w = OP_num % 10;
+        (*out) = (w + 0x30);
+        out++;
+        res++;
+        OP_num /= 10;
+    } while (OP_num != 0);
+    while (width > res)
+    {
+        (*out) = ' ';
+        out++;
+        res++;
+    }
+    out--;
+    for (int i = 0; i < res / 2; i++)
+    {
+        char temp = (*dest);
+        (*dest) = (*out);
+        (*out) = temp;
+        dest++;
+        out--;
+    }
+    return res;
+}
+
+static int vsnprintf_signed_long_long_num(char *out, long long OP_num, int width){
+    char *dest = out;
+    int res = 0;
+    if(OP_num<0){
+        (*out) = '-';
+        out++;
+        res++;
+        OP_num = (-OP_num);
+    }
     do
     {
         int w = OP_num % 10;
@@ -76,20 +111,45 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
             out += len;
             n += len;
         }
-        else if(fmt[i]=='d'){
-            int OP_num=0;
-            switch (len_flag)
-            {
-            case 0:
-                OP_num = va_arg(ap, int);
-                break;
-            case 1:
-                OP_num = va_arg(ap, long);
-                break;
-            default:
-                break;
+        else if (fmt[i] == 'u'){
+            unsigned long long OP_num = 0;
+            switch (len_flag){
+                case 1:
+                    OP_num = va_arg(ap, unsigned long);
+                    break;
+                case 2:
+                    OP_num = va_arg(ap, unsigned long long);
+                    break;
+                case -2:
+                case -1:
+                case 0:
+                    OP_num = va_arg(ap, unsigned int);
+                    break;
+                default:
+                    break;
             }
-            int res = vsnprintf_long_num(out, OP_num, width);
+            int res = vsnprintf_unsigned_long_long_num(out, OP_num, width);
+            out += res;
+            n += res;
+        }
+        else if(fmt[i]=='d'){
+            long long OP_num=0;
+            switch (len_flag){
+                case 1:
+                    OP_num = va_arg(ap, long);
+                    break;
+                case 2:
+                    OP_num = va_arg(ap, long long);
+                    break;
+                case -2:
+                case -1:
+                case 0:
+                    OP_num = va_arg(ap, int);
+                    break;
+                default:
+                    break;
+            }
+            int res = vsnprintf_signed_long_long_num(out, OP_num, width);
             out += res;
             n += res;
         }

@@ -20,7 +20,7 @@ void __am_timer_rtc(AM_TIMER_RTC_T *rtc) {
     us = inl(RTC_ADDR);
     us += ((uint64_t)inl(RTC_ADDR + 4) << 32);
     // printf("long %d,long long: %d\n", sizeof(long), sizeof(long long));
-    printf("%ld\n", (long)us);
+    printf("%llu\n", (long)us);
     us /= 1000000;
     rtc->second = us % 60;
     us /= 60;
