@@ -44,15 +44,19 @@ void __am_audio_play(AM_AUDIO_PLAY_T *ctl) {
     assert(ctl->buf.end >= ctl->buf.start);
     long len = ctl->buf.end - ctl->buf.start;
     void *start = ctl->buf.start;
-    while (count < len){
+    while ((count < len)&&(count<last_len)){
         printf("I am %lu, target is %d\n",len,count);
         count = inl(AUDIO_COUNT_ADDR);
     }
-    if(last_len<len){
+    while(last_len<len){
         memcpy((void *)AUDIO_SBUF_ADDR+sb_size-last_len, start, last_len);
         last_len = sb_size;
         start += last_len;
         len -= last_len;
+        do{
+            printf("I am %lu, target is %d\n", len, count);
+            count = inl(AUDIO_COUNT_ADDR);
+        } while ((count < len) && (count < last_len));
     }
     memcpy((void *)AUDIO_SBUF_ADDR+sb_size-last_len, start, len);
     last_len = (last_len == len) ? sb_size : last_len - len;
