@@ -38,10 +38,11 @@ void __am_audio_play(AM_AUDIO_PLAY_T *ctl) {
         sb_size = inl(AUDIO_SBUF_SIZE_ADDR);
     }
     volatile uint32_t count = inl(AUDIO_COUNT_ADDR);
+    assert(ctl->buf.end >= ctl->buf.start);
     long len = ctl->buf.end - ctl->buf.start;
     void *start = ctl->buf.start;
     while (count < len){
-        printf("I am %ld, target is %d\n",len,count);
+        printf("I am %lu, target is %d\n",len,count);
         count = inl(AUDIO_COUNT_ADDR);
     }
     if(last_len<len){
