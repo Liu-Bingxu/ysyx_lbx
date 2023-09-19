@@ -38,12 +38,18 @@ static uint32_t sb_count = 0;
 
 void audio_play(void *userdata, Uint8 *stream, int len){
     memset(stream, 0, len);
-    int my_fifo_len = CONFIG_SB_SIZE - audio_base[5];
+    int my_fifo_len = audio_base[5];
     if (my_fifo_len==0){
         return;
     }
     len = (len < my_fifo_len) ? len : my_fifo_len;
-    SDL_MixAudio(stream, sb_start, len, SDL_MIX_MAXVOLUME );
+    uint8_t *new_sb_buf = malloc(len);
+    if((sb_start+len-sbuf)>=CONFIG_SB_SIZE){
+        int temp_len = CONFIG_SB_SIZE - (uint32_t)(new_sb_buf - sbuf);
+        memcpy(new_sb_buf, sb_start, temp_len);
+        memcpy(new_sb_buf + temp_len, sbuf, len - temp_len);
+    }
+    SDL_MixAudio(stream, new_sb_buf, len, SDL_MIX_MAXVOLUME);
     sb_start += len;
     if((sb_start-sbuf)>CONFIG_SB_SIZE)
         sb_start -= CONFIG_SB_SIZE;
