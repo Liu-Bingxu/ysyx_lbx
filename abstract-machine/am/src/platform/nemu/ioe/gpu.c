@@ -16,11 +16,11 @@ void __am_gpu_init() {
 }
 
 void __am_gpu_config(AM_GPU_CONFIG_T *cfg) {
-  *cfg = (AM_GPU_CONFIG_T) {
-    .present = true, .has_accel = false,
-    .width = (inl(VGACTL_ADDR)>>16), .height = ((inl(VGACTL_ADDR)&0xffff)<<5),
-    .vmemsz = (inl(VGACTL_ADDR)>>16)*(inl(VGACTL_ADDR)&0xff)
-  };
+    cfg->present = true;
+    cfg->has_accel = false;
+    cfg->width = (inl(VGACTL_ADDR) >> 16);
+    cfg->height = (inl(VGACTL_ADDR) & 0xffff);
+    cfg->vmemsz = cfg->width * cfg->height;
 }
 
 void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
