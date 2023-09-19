@@ -209,7 +209,7 @@ void init_ftrace(const char *ELF_FILE){
         fseek(elf_file,symbol_tab.sh_offset+sizeof(Elf32_Sym)*i,SEEK_SET);
         a=fread(&symbol,sizeof(Elf32_Sym),1,elf_file);
         assert(a == 1);
-        if (symbol.st_info == 18){
+        if ((symbol.st_info&0xf) == 2){
             symbol_list_push(&symbol_tab_list,symbol_name+symbol.st_name,symbol.st_value,symbol.st_size);
         }
     }
