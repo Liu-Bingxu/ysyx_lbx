@@ -1,5 +1,6 @@
 #include <am.h>
 #include <nemu.h>
+#include<klib.h>
 
 void __am_timer_init() {
 }
@@ -18,6 +19,7 @@ void __am_timer_rtc(AM_TIMER_RTC_T *rtc) {
     uint64_t us = 0;
     us = inl(RTC_ADDR);
     us += ((uint64_t)inl(RTC_ADDR + 4) << 32);
+    printf("%ld\n", us);
     us /= 1000000;
     rtc->second = us % 60;
     us /= 60;
