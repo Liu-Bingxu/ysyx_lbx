@@ -5,7 +5,7 @@
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
-static int vsnprintf_long_num(char *out, long OP_num, int width)
+static int vsnprintf_long_num(char *out, long long OP_num, int width)
 {
     char *dest = out;
     int res = 0;
@@ -84,7 +84,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
                 OP_num = va_arg(ap, int);
                 break;
             case 1:
-                OP_num = va_arg(ap, long);
+                OP_num = va_arg(ap, uint64_t);
                 break;
             default:
                 break;
