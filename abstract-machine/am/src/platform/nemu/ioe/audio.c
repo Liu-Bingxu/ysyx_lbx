@@ -63,8 +63,9 @@ void __am_audio_play(AM_AUDIO_PLAY_T *ctl) {
         start = ctl->buf.start;
     }
     while (count < len){
-        printf("I am %lu, target is %d\n",len,count);
+        uint32_t text = count;
         count = inl(AUDIO_COUNT_ADDR);
+        if(text!=count)printf("I am %lu, target is %d\n", len, count);   
     }
     // if (last_len < len){
     //     playcpy((void *)AUDIO_SBUF_ADDR+sb_size-last_len, start, last_len);
