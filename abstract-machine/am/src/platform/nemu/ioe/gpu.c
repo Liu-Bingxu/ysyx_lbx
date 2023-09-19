@@ -4,6 +4,10 @@
 
 #define SYNC_ADDR (VGACTL_ADDR + 4)
 
+static int width = 0;
+static int height = 0;
+static int vmemsz = 0;
+
 void __am_gpu_init() {
     int i;
     int w = io_read(AM_GPU_CONFIG).width;
@@ -18,9 +22,19 @@ void __am_gpu_init() {
 void __am_gpu_config(AM_GPU_CONFIG_T *cfg) {
     cfg->present = true;
     cfg->has_accel = false;
-    cfg->width = (inl(VGACTL_ADDR) >> 16);
-    cfg->height = (inl(VGACTL_ADDR) & 0xffff);
-    cfg->vmemsz = cfg->width * cfg->height;
+    if(width==0){
+        cfg->width = (inl(VGACTL_ADDR) >> 16);
+        cfg->height = (inl(VGACTL_ADDR) & 0xffff);
+        cfg->vmemsz = cfg->width * cfg->height;
+        width = cfg->width;
+        height = cfg->height;
+        vmemsz = cfg->vmemsz;
+    }
+    else{
+        cfg->width = width;
+        cfg->height = height;
+        cfg->vmemsz = vmemsz;
+    }
 }
 
 void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
@@ -28,7 +42,7 @@ void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
     // assert((ctl->y + ctl->h) < io_read(AM_GPU_CONFIG).height);
     if(ctl->pixels!=NULL){
         for (int i = 0; i < ctl->h; i++){
-            memcpy(((void *)FB_ADDR + (ctl->y + i) * io_read(AM_GPU_CONFIG).width * 4 + ctl->x ), ctl->pixels, ctl->w * 4);
+            memcpy(((void *)FB_ADDR + (ctl->y + i) * io_read(AM_GPU_CONFIG).width * 4 + ctl->x * 4), ctl->pixels, ctl->w * 4);
             ctl->pixels += ctl->w * 4;
         }
     }
