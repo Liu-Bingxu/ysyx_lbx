@@ -39,9 +39,16 @@ void __am_audio_play(AM_AUDIO_PLAY_T *ctl) {
     }
     volatile uint32_t count = inl(AUDIO_COUNT_ADDR);
     printf("the start addr is 0x%x, end addr is 0x%x\n", ctl->buf.start, ctl->buf.end);
-    assert(ctl->buf.end >= ctl->buf.start);
-    long len = ctl->buf.end - ctl->buf.start;
-    void *start = ctl->buf.start;
+    long len;
+    void *start;
+    if (ctl->buf.end < ctl->buf.start){
+        start = ctl->buf.end;
+        len = ctl->buf.start - ctl->buf.end;
+    }
+    else{
+        len = ctl->buf.end - ctl->buf.start;
+        start = ctl->buf.start;
+    }
     while (count < len){
         printf("I am %lu, target is %d\n",len,count);
         count = inl(AUDIO_COUNT_ADDR);
