@@ -32,13 +32,13 @@ void __am_timer_rtc(AM_TIMER_RTC_T *rtc) {
     int year_day = 365;
     while(us>=year_day){
         rtc->year++;
+        us -= year_day;
         if((((rtc->year%4)==0)&&((rtc->year%100)!=0))||(rtc->year%400==0)){
             year_day = 366;
         }
         else{
             year_day = 365;
         }
-        us -= year_day;
     }
     rtc->month = 0;
     if (year_day == 365){
@@ -51,9 +51,9 @@ void __am_timer_rtc(AM_TIMER_RTC_T *rtc) {
     }
     else{
         int month = 0;
-        while (us >= months_common[month])
+        while (us >= months_leap[month])
         {
-            us -= months_common[month];
+            us -= months_leap[month];
             rtc->month++;
             month++;
         }
