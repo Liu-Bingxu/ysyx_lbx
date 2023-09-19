@@ -47,7 +47,7 @@ void *malloc(size_t size) {
         next_addr -= ((uint32_t)next_addr & 0x7);
         next_addr += 0x8;
     }
-    printf("addr is %d\n", return_addr);
+    printf("addr is %u\n", return_addr);
     return return_addr;
 //   panic("Not implemented");
 #endif
