@@ -92,22 +92,28 @@ int strncmp(const char *s1, const char *s2, size_t n) {
 }
 
 void *memset(void *s, int c, size_t n) {
-    word_t *dst = s;
-    word_t mychar = 0;
-    for (int i = 0; i < sizeof(word_t); i++){
-        mychar = mychar << 8;
-        mychar |= (char)c;
-    }
-    size_t main_cnt = n / sizeof(word_t);
-    size_t second_cnt = n % sizeof(word_t);
-    for (; main_cnt > 0; main_cnt--){
-        (*dst) = mychar;
-        dst++;
-    }
-    for (int i = 0; i < second_cnt; i++){
-        *(((char *)dst) + i) = (char)c;
+    char *dst = s;
+    char mychar = (char)c;
+    for (int i = 0; i < n; i++){
+        (*(dst + i)) = mychar;
     }
     return s;
+    // word_t *dst = s;
+    // word_t mychar = 0;
+    // for (int i = 0; i < sizeof(word_t); i++){
+    //     mychar = mychar << 8;
+    //     mychar |= (char)c;
+    // }
+    // size_t main_cnt = n / sizeof(word_t);
+    // size_t second_cnt = n % sizeof(word_t);
+    // for (; main_cnt > 0; main_cnt--){
+    //     (*dst) = mychar;
+    //     dst++;
+    // }
+    // for (int i = 0; i < second_cnt; i++){
+    //     *(((char *)dst) + i) = (char)c;
+    // }
+    // return s;
     //   panic("Not implemented");
 }
  
