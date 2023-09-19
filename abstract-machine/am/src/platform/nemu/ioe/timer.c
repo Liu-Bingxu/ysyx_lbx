@@ -58,5 +58,5 @@ void __am_timer_rtc(AM_TIMER_RTC_T *rtc) {
             month++;
         }
     }
-    rtc->day = (us == 0) ? 1 : us;
+    rtc->day = 1 + us;
 }
