@@ -119,27 +119,27 @@ void *memset(void *s, int c, size_t n) {
 }
  
 void *memcpy(void *out, const void *in, size_t n) {
-    char *dest = out;
-    const char *src = in;
-    for (int i=0; i < n; i++){
-        (*dest) = (*src);
-        dest++;
-        src++;
-    }
-    return out;
-    // word_t *dest = out;
-    // const word_t *src = in;
-    // word_t main_cnt = n / sizeof(word_t);
-    // word_t second_cnt = n % sizeof(word_t);
-    // for (; main_cnt > 0;main_cnt--){
+    // char *dest = out;
+    // const char *src = in;
+    // for (int i=0; i < n; i++){
     //     (*dest) = (*src);
     //     dest++;
     //     src++;
     // }
-    // for (int i = 0; i < second_cnt;i++){
-    //     *(((char *)dest) + i) = *(((char *)src) + i);
-    // }
     // return out;
+    word_t *dest = out;
+    const word_t *src = in;
+    word_t main_cnt = n / sizeof(word_t);
+    word_t second_cnt = n % sizeof(word_t);
+    for (; main_cnt > 0;main_cnt--){
+        (*dest) = (*src);
+        dest++;
+        src++;
+    }
+    for (int i = 0; i < second_cnt;i++){
+        *(((char *)dest) + i) = *(((char *)src) + i);
+    }
+    return out;
     //   panic("Not implemented");
 }
 
