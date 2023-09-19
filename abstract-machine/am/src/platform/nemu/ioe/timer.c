@@ -40,7 +40,7 @@ void __am_timer_rtc(AM_TIMER_RTC_T *rtc) {
             year_day = 365;
         }
     }
-    rtc->month = 0;
+    rtc->month = 1;
     if (year_day == 365){
         int month = 0;
         while (us>=months_common[month]){
