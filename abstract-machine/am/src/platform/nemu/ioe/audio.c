@@ -35,7 +35,7 @@ void __am_audio_play(AM_AUDIO_PLAY_T *ctl) {
     if (first_flag == 0){
         first_flag = 1;
         last_len = inl(AUDIO_SBUF_SIZE_ADDR);
-        sb_size = inl(AUDIO_SBUF_SIZE_ADDR)-1;
+        sb_size = inl(AUDIO_SBUF_SIZE_ADDR);
     }
     volatile uint32_t count = inl(AUDIO_COUNT_ADDR);
     printf("the start addr is 0x%x, end addr is 0x%x\n", ctl->buf.start, ctl->buf.end);
