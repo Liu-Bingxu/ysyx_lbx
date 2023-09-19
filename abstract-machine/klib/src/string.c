@@ -164,43 +164,43 @@ void *memmove(void *dst, const void *src, size_t n) {
 }
 
 int memcmp(const void *s1, const void *s2, size_t n) {
-    const char *src1=s1;
-    const char *src2=s2;
-    for (int i = 0; i < n;i++){
+    // const char *src1=s1;
+    // const char *src2=s2;
+    // for (int i = 0; i < n;i++){
+        // if((*src1)==(*src2)){
+            // continue;
+        // }
+        // else{
+            // return ((*src1) - (*src2));
+        // }
+    // }
+    // return 0;
+    const word_t *src1 = s1;
+    const word_t *src2 = s2;
+    word_t main_cnt = n / sizeof(word_t);
+    word_t second_cnt = n % sizeof(word_t);
+    int res = 0;
+    for (; main_cnt > 0; main_cnt--){
         if((*src1)==(*src2)){
-            continue;
+            src1++;
+            src2++;
         }
         else{
-            return ((*src1) - (*src2));
+            for (int i = 0; i < sizeof(word_t);i++){
+                res = ((*(((char *)src1) + i)) - (*(((char *)src2) + i)));
+                if(res!=0){
+                    return res;
+                }
+            }
+        }
+    }
+    for (int i = 0; i < second_cnt;i++){
+        res = ((*(((char *)src1) + i)) - (*(((char *)src2) + i)));
+        if(res!=0){
+            return res;
         }
     }
     return 0;
-    // const word_t *src1 = s1;
-    // const word_t *src2 = s2;
-    // word_t main_cnt = n / sizeof(word_t);
-    // word_t second_cnt = n % sizeof(word_t);
-    // int res = 0;
-    // for (; main_cnt > 0; main_cnt--){
-        // if((*src1)==(*src2)){
-            // src1++;
-            // src2++;
-        // }
-        // else{
-            // for (int i = 0; i < sizeof(word_t);i++){
-                // res = ((*(((char *)src1) + i)) - (*(((char *)src2) + i)));
-                // if(res!=0){
-                    // return res;
-                // }
-            // }
-        // }
-    // }
-    // for (int i = 0; i < second_cnt;i++){
-        // res = ((*(((char *)src1) + i)) - (*(((char *)src2) + i)));
-        // if(res!=0){
-            // return res;
-        // }
-    // }
-    // return res;
     //   panic("Not implemented");
 }
 
