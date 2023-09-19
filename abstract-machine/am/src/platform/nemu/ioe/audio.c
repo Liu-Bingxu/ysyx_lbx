@@ -9,18 +9,18 @@
 #define AUDIO_INIT_ADDR      (AUDIO_ADDR + 0x10)
 #define AUDIO_COUNT_ADDR     (AUDIO_ADDR + 0x14)
 
-char *play_buf = (char *)AUDIO_SBUF_ADDR;
+// char *play_buf = (char *)AUDIO_SBUF_ADDR;
 
-static uint32_t playcpy(uint32_t dst, char *src, uint32_t n){
-    dst %= 0x10000;
-    for (int i = 0; i < n; i++){
-        play_buf[dst] = (*src);
-        src++;
-        dst++;
-        dst %= 0x10000;
-    }
-    return dst;
-}
+// static uint32_t playcpy(uint32_t dst, char *src, uint32_t n){
+//     dst %= 0x10000;
+//     for (int i = 0; i < n; i++){
+//         play_buf[dst] = (*src);
+//         src++;
+//         dst++;
+//         dst %= 0x10000;
+//     }
+//     return dst;
+// }
 
 void __am_audio_init() {
 }
@@ -43,13 +43,13 @@ void __am_audio_status(AM_AUDIO_STATUS_T *stat) {
 
 void __am_audio_play(AM_AUDIO_PLAY_T *ctl) {
     static int last_len=0;
-    // static int first_flag=0;
-    // static uint32_t sb_size;
-    // if (first_flag == 0){
-    //     first_flag = 1;
-    //     last_len = inl(AUDIO_SBUF_SIZE_ADDR);
-    //     sb_size = inl(AUDIO_SBUF_SIZE_ADDR);
-    // }
+    static int first_flag=0;
+    static uint32_t sb_size;
+    if (first_flag == 0){
+        first_flag = 1;
+        last_len = inl(AUDIO_SBUF_SIZE_ADDR);
+        sb_size = inl(AUDIO_SBUF_SIZE_ADDR);
+    }
     volatile uint32_t count = inl(AUDIO_COUNT_ADDR);
     printf("the start addr is 0x%x, end addr is 0x%x\n", ctl->buf.start, ctl->buf.end);
     long len;
@@ -67,16 +67,16 @@ void __am_audio_play(AM_AUDIO_PLAY_T *ctl) {
         count = inl(AUDIO_COUNT_ADDR);
         if(text!=count)printf("I am %lu, target is %d\n", len, count);   
     }
-    // if (last_len < len){
-    //     playcpy((void *)AUDIO_SBUF_ADDR+sb_size-last_len, start, last_len);
-    //     last_len = sb_size;
-    //     start += last_len;
-    //     len -= last_len;
-    //     printf("Hello\n");
-    // }
-    // printf("Now last_len is %d\n", last_len);
-    // playcpy((void *)AUDIO_SBUF_ADDR+sb_size-last_len, start, len);
+    if (last_len < len){
+        memcpy((void *)AUDIO_SBUF_ADDR+sb_size-last_len, start, last_len);
+        last_len = sb_size;
+        start += last_len;
+        len -= last_len;
+        printf("Hello\n");
+    }
+    printf("Now last_len is %d\n", last_len);
+    memcpy((void *)AUDIO_SBUF_ADDR+sb_size-last_len, start, len);
     printf("Hello\n");
-    // last_len = (last_len == len) ? sb_size : last_len - len;
-    last_len = playcpy(last_len, start, len);
+    last_len = (last_len == len) ? sb_size : last_len - len;
+    // last_len = playcpy(last_len, start, len);
 }
