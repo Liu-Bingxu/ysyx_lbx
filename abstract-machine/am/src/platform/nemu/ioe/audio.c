@@ -41,6 +41,7 @@ void __am_audio_play(AM_AUDIO_PLAY_T *ctl) {
     int len = ctl->buf.end - ctl->buf.start;
     void *start = ctl->buf.start;
     while (count < len){
+        printf("Hello\n");
         count = inl(AUDIO_COUNT_ADDR);
     }
     if(last_len<len){
