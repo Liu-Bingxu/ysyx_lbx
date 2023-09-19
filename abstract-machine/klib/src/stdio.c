@@ -5,17 +5,17 @@
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
-static int vsnprintf_unsigned_long_long_num(char *out, unsigned long long OP_num, int width)
+static int vsnprintf_unsigned_long_long_num(char *out, unsigned long long OP_num, int width,int div)
 {
     char *dest = out;
     int res = 0;
     do
     {
-        int w = OP_num % 10;
+        int w = OP_num % div;
         (*out) = (w + 0x30);
         out++;
         res++;
-        OP_num /= 10;
+        OP_num /= div;
     } while (OP_num != 0);
     while (width > res)
     {
@@ -129,7 +129,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
                 default:
                     break;
             }
-            int res = vsnprintf_unsigned_long_long_num(out, OP_num, width);
+            int res = vsnprintf_unsigned_long_long_num(out, OP_num, width,10);
             out += res;
             n += res;
         }
@@ -151,6 +151,27 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
                     break;
             }
             int res = vsnprintf_signed_long_long_num(out, OP_num, width);
+            out += res;
+            n += res;
+        }
+        else if(fmt[i]=='x'){
+            unsigned long long OP_num = 0;
+            switch (len_flag){
+                case 1:
+                    OP_num = va_arg(ap, unsigned long);
+                    break;
+                case 2:
+                    OP_num = va_arg(ap, unsigned long long);
+                    break;
+                case -2:
+                case -1:
+                case 0:
+                    OP_num = va_arg(ap, unsigned int);
+                    break;
+                default:
+                    break;
+            }
+            int res = vsnprintf_unsigned_long_long_num(out, OP_num, width,16);
             out += res;
             n += res;
         }
