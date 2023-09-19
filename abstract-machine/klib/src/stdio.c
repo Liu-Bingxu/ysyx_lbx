@@ -43,6 +43,7 @@ static int vsnprintf_signed_long_long_num(char *out, long long OP_num, int width
         out++;
         res++;
         OP_num = (-OP_num);
+        dest++;
     }
     do
     {
