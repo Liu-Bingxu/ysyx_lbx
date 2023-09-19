@@ -25,7 +25,7 @@ void __am_timer_rtc(AM_TIMER_RTC_T *rtc) {
     us /= 60;
     rtc->hour = us % 24;
     us /= 24;
-    rtc->year = 1900;
+    rtc->year = 1970;
     int year_day = 365;
     while(us>=year_day){
         rtc->year++;
