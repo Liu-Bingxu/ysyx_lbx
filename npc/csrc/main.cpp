@@ -5,6 +5,8 @@
 #include "svdpi.h"
 #include "Vtop__Dpi.h"
 #include "pmem.h"
+#include "common.h"
+#include "utils.h"
 
 using namespace std;
 
@@ -66,7 +68,8 @@ void sim_rst(){
     step_and_dump_wave();
 }
 
-void halt(int code){
+void halt(int code,int pc){
+	Log("npc: %s at pc = " FMT_WORD,((code==0)?ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED)),pc); 
     sim_exit(code);
 }
 
