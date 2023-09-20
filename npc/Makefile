@@ -15,7 +15,7 @@ BUILD_DIR?=.
 include $(NPC_HOME)/csrc/utils/filelist.mk
 
 MY_CXXFLAGS=$(call CFLAGS_add,$(CXXFLAGS))
-MY_LDFLAGS=$(call LD_add,$(LIB))
+MY_LDFLAGS=$(call LD_add,$(LIBS))
 
 all:
 	@echo "Write this Makefile by your self."
