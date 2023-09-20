@@ -31,9 +31,16 @@ wire [4:0]  	        rs2;
 wire [4:0]  	        rd;
 wire [DATA_LEN-1:0] 	operand1;
 wire [DATA_LEN-1:0] 	operand2;
-wire        	        op;
+wire [DATA_LEN-1:0] 	operand3;
+wire [DATA_LEN-1:0] 	operand4;
+wire                	inst_jump_flag;
+wire                	ebreak;
+wire                	op1;
+wire                	op2;
 
-wire [DATA_LEN-1:0] 	pc_out;
+wire [DATA_LEN-1:0] 	PC_S;
+wire [DATA_LEN-1:0] 	PC_D;
+wire [DATA_LEN-1:0] 	PC_now;
 wire [DATA_LEN-1:0] 	inst_fetch;
 
 wire                	dest_wen;
@@ -41,9 +48,7 @@ wire                	Jump_flag;
 wire [DATA_LEN-1:0] 	dest_data;
 wire [DATA_LEN-1:0] 	Jump_PC;
 
-wire ebreak;
-
-assign PC_out = pc_out;
+assign PC_out = PC_D;
 //
 assign src2_use = src2;
 //
@@ -59,22 +64,26 @@ regs #(DATA_LEN)u_regs(
     .src2      	( src2       )
 );
 
-
 idu #(DATA_LEN)u_idu(
-    // .clk      	( sys_clk   ),
-    // .rst_n    	( rst_n     ),
-    .inst     	( inst_fetch),
-    .src1     	( src1      ),
-    // .src2     	( src2      ),
-    .rs1      	( rs1       ),
-    .rs2      	( rs2       ),
-    .rd       	( rd        ),
-    .operand1 	( operand1  ),
-    .operand2 	( operand2  ),
-    .ebreak     ( ebreak    ),
-    .op       	( op        )
+    // .clk      	( sys_clk           ),
+    // .rst_n    	( rst_n             ),
+    .inst     	    ( inst_fetch        ),
+    .src1     	    ( src1              ),
+    // .src2     	( src2              ),
+    .PC_S           ( PC_S              ),
+    .PC             ( PC_now            ),
+    .rs1      	    ( rs1               ),
+    .rs2      	    ( rs2               ),
+    .rd       	    ( rd                ),
+    .operand1 	    ( operand1          ),
+    .operand2 	    ( operand2          ),
+    .operand3       ( operand3          ),
+    .operand4       ( operand4          ),
+    .inst_jump_flag ( inst_jump_flag    ),
+    .ebreak         ( ebreak            ),
+    .op1            ( op1               ),
+    .op2            ( op2               )
 );
-
 
 ifu #(DATA_LEN)u_ifu(
     .clk        	( sys_clk     ),
@@ -82,20 +91,27 @@ ifu #(DATA_LEN)u_ifu(
     .Jump_flag  	( Jump_flag   ),
     .Jump_PC    	( Jump_PC     ),
     .inst_in    	( inst_in     ),
-    .pc_out     	( pc_out      ),
+    .PC_S       	( PC_S        ),
+    .PC_D       	( PC_D        ),
+    .PC_now     	( PC_now      ),
     .inst_fetch 	( inst_fetch  )
 );
 
+
 exu #(DATA_LEN)u_exu(
-    .clk        ( sys_clk    ),
-    .operand1  	( operand1   ),
-    .operand2  	( operand2   ),
-    .op        	( ~op        ),
-    .dest_wen  	( dest_wen   ),
-    .Jump_flag 	( Jump_flag  ),
-    .dest_data 	( dest_data  ),
-    .ebreak     ( ebreak     ),
-    .Jump_PC   	( Jump_PC    )
+    .clk                ( sys_clk           ),
+    .operand1  	        ( operand1          ),
+    .operand2  	        ( operand2          ),
+    .operand3       	( operand3          ),
+    .operand4       	( operand4          ),
+    .op1            	( op1               ),
+    .op2            	( op2               ),
+    .inst_jump_flag 	( inst_jump_flag    ),
+    .dest_wen  	        ( dest_wen          ),
+    .Jump_flag 	        ( Jump_flag         ),
+    .dest_data 	        ( dest_data         ),
+    .ebreak             ( ebreak            ),
+    .Jump_PC   	        ( Jump_PC           )
 );
 
 

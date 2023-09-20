@@ -4,49 +4,45 @@ CSRC = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cpp" -or -name "c
 INC_file=$(shell find $(abspath ./) -name "*.h")
 INC=$(addprefix -CFLAGS -I,$(sort $(dir $(INC_file))))
 
-BUILD_DIR=$(addsuffix /build,$(shell pwd))
-
 override ARGS ?= --log=$(BUILD_DIR)/npc-log.txt
 override ARGS+=
+
+BUILD_DIR?=.
 
 all:
 	@echo "Write this Makefile by your self."
 
-sim:waveform.vcd
+sim:$(BUILD_DIR)/wave.vcd
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
 	@echo "Write this Makefile by your self."
 
 .PHONY:verilate
-verilate: .stamp.verilate
-
-.PHONY:build
-build: build/Valu
+verilate: $(BUILD_DIR)/.stamp.verilate
 
 .PHONY:run
-run:waves
+run:sim waves
 
 .PHONY:waves
-waves: wave.vcd
+waves: $(BUILD_DIR)/wave.vcd
 	@echo
 	@echo "### WAVES ###"
-	gtkwave wave.vcd
+	gtkwave $(BUILD_DIR)/wave.vcd
 
-wave.vcd: ./build/V$(TOPNAME)
+$(BUILD_DIR)/wave.vcd: $(BUILD_DIR)/build/V$(TOPNAME) $(IMG)
 	@echo
 	@echo "### SIMULATING ###"
-	@./build/V$(TOPNAME) $(ARGS) $(IMG) +verilator+rand+reset+2
+	@$(BUILD_DIR)/build/V$(TOPNAME) $(ARGS) $(IMG) +verilator+rand+reset+2
 
-./build/V$(TOPNAME): .stamp.verilate
+$(BUILD_DIR)/build/V$(TOPNAME): $(BUILD_DIR)/.stamp.verilate
 	@echo
 	@echo "### BUILDING SIM ###"
-	make -C build -f V$(TOPNAME).mk V$(TOPNAME) 
+	make -C $(BUILD_DIR)/build -f V$(TOPNAME).mk V$(TOPNAME) 
 
-.stamp.verilate: $(MODULE) $(CSRC)
-	@echo $(INC)
+$(BUILD_DIR)/.stamp.verilate: $(MODULE) $(CSRC)
 	@echo
 	@echo "### VERILATING ###"
-	verilator --Mdir ./build -Wall --trace --x-assign unique --x-initial unique --top-module $(TOPNAME)  -cc $(MODULE) --exe $(CSRC) $(INC)
-	@touch .stamp.verilate
+	verilator --Mdir $(BUILD_DIR)/build -Wall --trace --x-assign unique --x-initial unique --top-module $(TOPNAME)  -cc $(MODULE) --exe $(CSRC) $(INC) -CFLAGS -D__GUEST_ISA__=$(ISA) -Ivsrc
+	@touch $(BUILD_DIR)/.stamp.verilate
 
 .PHONY:lint
 lint: $(MODULE).v
@@ -57,5 +53,6 @@ clean:
 	rm -rf .stamp.*;
 	rm -rf ./build
 	rm -rf wave.vcd
+	rm -rf *.txt
 
 include ../Makefile

@@ -40,8 +40,14 @@ void *malloc(size_t size) {
         next_addr=heap.start;
         start_flag = 1;
     }
+    if(size==0)return NULL;
     void *return_addr = next_addr;
     next_addr += size;
+    if((uint32_t)next_addr%0x7!=0){
+        next_addr -= ((uint32_t)next_addr & 0x7);
+        next_addr += 0x8;
+    }
+    printf("addr is %x\n", return_addr);
     return return_addr;
 //   panic("Not implemented");
 #endif

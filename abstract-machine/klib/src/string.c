@@ -92,26 +92,41 @@ int strncmp(const char *s1, const char *s2, size_t n) {
 }
 
 void *memset(void *s, int c, size_t n) {
-    word_t *dst = s;
-    word_t mychar = 0;
-    for (int i = 0; i < sizeof(word_t); i++){
-        mychar = mychar << 8;
-        mychar |= (char)c;
-    }
-    size_t main_cnt = n / sizeof(word_t);
-    size_t second_cnt = n % sizeof(word_t);
-    for (; main_cnt > 0; main_cnt--){
+    char *dst = s;
+    char mychar = (char)c;
+    for (int i = 0; i < n; i++){
         (*dst) = mychar;
         dst++;
     }
-    for (int i = 0; i < second_cnt; i++){
-        *(((char *)dst) + i) = (char)c;
-    }
     return s;
+    // word_t *dst = s;
+    // word_t mychar = 0;
+    // for (int i = 0; i < sizeof(word_t); i++){
+    //     mychar = mychar << 8;
+    //     mychar |= (char)c;
+    // }
+    // size_t main_cnt = n / sizeof(word_t);
+    // size_t second_cnt = n % sizeof(word_t);
+    // for (; main_cnt > 0; main_cnt--){
+    //     (*dst) = mychar;
+    //     dst++;
+    // }
+    // for (int i = 0; i < second_cnt; i++){
+    //     *(((char *)dst) + i) = (char)c;
+    // }
+    // return s;
     //   panic("Not implemented");
 }
  
 void *memcpy(void *out, const void *in, size_t n) {
+    // char *dest = out;
+    // const char *src = in;
+    // for (int i=0; i < n; i++){
+    //     (*dest) = (*src);
+    //     dest++;
+    //     src++;
+    // }
+    // return out;
     word_t *dest = out;
     const word_t *src = in;
     word_t main_cnt = n / sizeof(word_t);
@@ -147,16 +162,7 @@ void *memmove(void *dst, const void *src, size_t n) {
             }
         }
         else{
-            word_t *dest = dst;
-            const word_t *rs = src;
-            for (; main_cnt > 0;main_cnt--){
-                (*dest) = (*rs);
-                dest++;
-                rs++;
-            }
-            for (int i = 0; i < second_cnt;i++){
-                *(((char *)dest) + i) = *(((char *)rs) + i);
-            }
+            memcpy(dst, src, n);
         }
     }
     return dst;
@@ -164,32 +170,45 @@ void *memmove(void *dst, const void *src, size_t n) {
 }
 
 int memcmp(const void *s1, const void *s2, size_t n) {
-    const word_t *src1 = s1;
-    const word_t *src2 = s2;
-    word_t main_cnt = n / sizeof(word_t);
-    word_t second_cnt = n % sizeof(word_t);
-    int res = 0;
-    for (; main_cnt > 0; main_cnt--){
+    const char *src1=s1;
+    const char *src2=s2;
+    for (int i = 0; i < n;i++){
         if((*src1)==(*src2)){
             src1++;
             src2++;
+            continue;
         }
         else{
-            for (int i = 0; i < sizeof(word_t);i++){
-                res = ((*(((char *)src1) + i)) - (*(((char *)src2) + i)));
-                if(res!=0){
-                    return res;
-                }
-            }
+            return ((*src1) - (*src2));
         }
     }
-    for (int i = 0; i < second_cnt;i++){
-        res = ((*(((char *)src1) + i)) - (*(((char *)src2) + i)));
-        if(res!=0){
-            return res;
-        }
-    }
-    return res;
+    return 0;
+    // const word_t *src1 = s1;
+    // const word_t *src2 = s2;
+    // word_t main_cnt = n / sizeof(word_t);
+    // word_t second_cnt = n % sizeof(word_t);
+    // int res = 0;
+    // for (; main_cnt > 0; main_cnt--){
+    //     if((*src1)==(*src2)){
+    //         src1++;
+    //         src2++;
+    //     }
+    //     else{
+    //         for (int i = 0; i < sizeof(word_t);i++){
+    //             res = ((*(((char *)src1) + i)) - (*(((char *)src2) + i)));
+    //             if(res!=0){
+    //                 return res;
+    //             }
+    //         }
+    //     }
+    // }
+    // for (int i = 0; i < second_cnt;i++){
+    //     res = ((*(((char *)src1) + i)) - (*(((char *)src2) + i)));
+    //     if(res!=0){
+    //         return res;
+    //     }
+    // }
+    // return 0;
     //   panic("Not implemented");
 }
 

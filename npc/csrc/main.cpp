@@ -5,6 +5,9 @@
 #include "svdpi.h"
 #include "Vtop__Dpi.h"
 #include "pmem.h"
+#include "common.h"
+#include "utils.h"
+#include "debug.h"
 
 using namespace std;
 
@@ -13,7 +16,7 @@ VerilatedVcdC* tfp = NULL;
 
 static Vtop* top;
 
-extern void init_monitor(int argc, char *argv[]);
+extern char *init_monitor(int argc, char *argv[]);
 
 void step_and_dump_wave(){
     // cout << "Hello Wrold" << top->sys_clk << "ByeBye" << endl;
@@ -30,9 +33,9 @@ void sim_init(int argc, char *argv[]){
     contextp->traceEverOn(true);
     contextp->commandArgs(argc, argv);
     top->trace(tfp, 0);
-    tfp->open("wave.vcd");
 
-    init_monitor(argc, argv);
+    char *wave_file=init_monitor(argc, argv);
+    tfp->open(wave_file);
 }
 
 void sim_exit(int code){
@@ -66,7 +69,8 @@ void sim_rst(){
     step_and_dump_wave();
 }
 
-void halt(int code){
+void halt(int code,int pc){
+	Log("npc: %s at pc = " FMT_WORD,((code==0)?ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED)),pc); 
     sim_exit(code);
 }
 

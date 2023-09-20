@@ -1,5 +1,6 @@
 #include <am.h>
 #include <nemu.h>
+#include<klib.h>
 
 void __am_timer_init() {
 }
@@ -18,6 +19,8 @@ void __am_timer_rtc(AM_TIMER_RTC_T *rtc) {
     uint64_t us = 0;
     us = inl(RTC_ADDR);
     us += ((uint64_t)inl(RTC_ADDR + 4) << 32);
+    // printf("long %d,long long: %d\n", sizeof(long), sizeof(long long));
+    // printf("%llu\n", (us/1000000));
     us /= 1000000;
     rtc->second = us % 60;
     us /= 60;
@@ -25,19 +28,19 @@ void __am_timer_rtc(AM_TIMER_RTC_T *rtc) {
     us /= 60;
     rtc->hour = us % 24;
     us /= 24;
-    rtc->year = 1900;
+    rtc->year = 1970;
     int year_day = 365;
     while(us>=year_day){
         rtc->year++;
+        us -= year_day;
         if((((rtc->year%4)==0)&&((rtc->year%100)!=0))||(rtc->year%400==0)){
             year_day = 366;
         }
         else{
             year_day = 365;
         }
-        us -= year_day;
     }
-    rtc->month = 0;
+    rtc->month = 1;
     if (year_day == 365){
         int month = 0;
         while (us>=months_common[month]){
@@ -48,12 +51,12 @@ void __am_timer_rtc(AM_TIMER_RTC_T *rtc) {
     }
     else{
         int month = 0;
-        while (us >= months_common[month])
+        while (us >= months_leap[month])
         {
-            us -= months_common[month];
+            us -= months_leap[month];
             rtc->month++;
             month++;
         }
     }
-    rtc->day = (us == 0) ? 1 : us;
+    rtc->day = 1 + us;
 }

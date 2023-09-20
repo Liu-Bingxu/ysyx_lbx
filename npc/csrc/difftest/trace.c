@@ -1,10 +1,14 @@
-#include <cpu/decode.h>
 #include "elf.h"
 #include "utils.h"
 
 // myitrace
+
+void assert_fail_msg(){
+    IFDEF(CONFIG_ITRACE, irangbuf_printf());
+}
+
 #ifdef CONFIG_ITRACE
-typedef struct{
+    typedef struct{
     char *myinst[20];
     int mypoint_to_myinst;
 }irangbuf_struct;

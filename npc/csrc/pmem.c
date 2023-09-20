@@ -2,6 +2,10 @@
 
 static char pmem[PMEM_SIZE];
 
+void *guest_to_host(paddr_t addr){
+    return (pmem + addr - PC_RST);
+}
+
 void pmem_read(uint32_t raddr,uint32_t *rdata){
     raddr &= (~0x80000003U);
     (*rdata) = (*((uint32_t *)(pmem + raddr)));
@@ -26,7 +30,3 @@ void pmem_write(uint32_t waddr, uint32_t wdata,char wmask){
     }
     return;
 }
-
-void init_mem(const char *img_file){
-    
-} 
