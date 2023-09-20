@@ -13,7 +13,7 @@ VerilatedVcdC* tfp = NULL;
 
 static Vtop* top;
 
-extern void init_monitor(int argc, char *argv[]);
+extern char *init_monitor(int argc, char *argv[]);
 
 void step_and_dump_wave(){
     // cout << "Hello Wrold" << top->sys_clk << "ByeBye" << endl;
@@ -30,9 +30,9 @@ void sim_init(int argc, char *argv[]){
     contextp->traceEverOn(true);
     contextp->commandArgs(argc, argv);
     top->trace(tfp, 0);
-    tfp->open("wave.vcd");
 
-    init_monitor(argc, argv);
+    char *wave_file=init_monitor(argc, argv);
+    tfp->open(wave_file);
 }
 
 void sim_exit(int code){

@@ -55,6 +55,7 @@ void audio_play(void *userdata, Uint8 *stream, int len){
         sb_start -= CONFIG_SB_SIZE;
     // sb_start = sbuf + (((sb_start - sbuf) + len) % CONFIG_SB_SIZE);
     audio_base[5] = (sb_end >= sb_start) ? (sb_end - sb_start ) : (CONFIG_SB_SIZE + sb_end - sb_start );
+    free(new_sb_buf);
 }
 
 static void audio_io_handler(uint32_t offset, int len, bool is_write) {
