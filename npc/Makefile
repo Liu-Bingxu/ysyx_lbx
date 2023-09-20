@@ -53,5 +53,6 @@ clean:
 	rm -rf .stamp.*;
 	rm -rf ./build
 	rm -rf wave.vcd
+	rm -rf *.txt
 
 include ../Makefile
