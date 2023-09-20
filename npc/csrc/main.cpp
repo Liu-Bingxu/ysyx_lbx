@@ -74,6 +74,10 @@ void halt(int code,int pc){
     sim_exit(code);
 }
 
+void exec(uint64_t n){
+    
+}
+
 int main(int argc, char *argv[]){
 
     sim_init(argc,argv);
