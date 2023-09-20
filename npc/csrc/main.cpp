@@ -7,6 +7,7 @@
 #include "pmem.h"
 #include "common.h"
 #include "utils.h"
+#include "debug.h"
 
 using namespace std;
 

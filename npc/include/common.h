@@ -7,7 +7,6 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "stdbool.h"
-#include "debug.h"
 
 typedef MUXDEF(RISCV64, uint64_t, uint32_t) vaddr_t;
 typedef MUXDEF(RISCV64, uint64_t, uint32_t) paddr_t;

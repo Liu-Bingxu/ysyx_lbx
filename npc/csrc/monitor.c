@@ -3,6 +3,7 @@
 #include "getopt.h"
 #include "sdb.h"
 #include "utils.h"
+#include "debug.h"
 
 static char *log_file = NULL;
 static char *diff_so_file = NULL;
