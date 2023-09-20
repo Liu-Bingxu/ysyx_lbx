@@ -7,6 +7,8 @@ INC=$(addprefix -CFLAGS -I,$(sort $(dir $(INC_file))))
 override ARGS ?= --log=$(BUILD_DIR)/npc-log.txt
 override ARGS+=
 
+CONFIG_ITRACE=true
+
 CFLAGS_add=$(addprefix -CFLAGS ,$(1))
 LD_add=$(addprefix -LDFLAGS ,$(1))
 
