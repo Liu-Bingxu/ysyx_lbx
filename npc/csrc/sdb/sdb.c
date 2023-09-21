@@ -45,6 +45,7 @@ static int cmd_c(char *args){
 static int cmd_q(char *args){
     IFDEF(CONFIG_FTRACE, delete_symbol_list());
     sim_exit(0);
+    return 0;
 }
 
 static int cmd_si(char *args){
