@@ -17,7 +17,9 @@ using namespace std;
 VerilatedContext* contextp = NULL;
 VerilatedVcdC* tfp = NULL;
 
-static Vtop* top;
+extern void sdb_mainloop();
+
+static Vtop *top;
 uint64_t g_nr_guest_inst = 0;
 static uint64_t g_timer = 0; // unit: us
 static bool g_print_step = false;
@@ -191,16 +193,17 @@ int main(int argc, char *argv[]){
 
     sim_init(argc,argv);
     sim_rst();
-    int count = 0;
-    while (!contextp->gotFinish()){
-        pmem_read(top->PC_out,&top->inst_in);
-        top->sys_clk = !top->sys_clk;
-        step_and_dump_wave();
-        top->sys_clk = !top->sys_clk;
-        step_and_dump_wave();
-        count++;
-        if(count==1000000)break;
-    }
-    top->sys_clk = !top->sys_clk;
+    // int count = 0;
+    // while (!contextp->gotFinish()){
+    //     pmem_read(top->PC_out,&top->inst_in);
+    //     top->sys_clk = !top->sys_clk;
+    //     step_and_dump_wave();
+    //     top->sys_clk = !top->sys_clk;
+    //     step_and_dump_wave();
+    //     count++;
+    //     if(count==1000000)break;
+    // }
+    // top->sys_clk = !top->sys_clk;
+    sdb_mainloop();
     sim_exit(0);
 }
