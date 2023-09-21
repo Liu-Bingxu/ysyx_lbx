@@ -284,8 +284,9 @@ static long eval(int p,int q){
 			}
 		}
 		else{
-			assert(0);
-		}
+            // printf("%d\n", tokens[p].type);
+            assert(0);
+        }
 	}
 	else if((tokens[p+1].type==TK_LP)&&(check_parentheses(p + 1, q) == check_expr_true)){	
 		if(tokens[p].type==TK_NEG){

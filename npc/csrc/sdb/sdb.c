@@ -131,7 +131,7 @@ static int cmd_x(char *args){
                     for (int y = 0; y < n; y++){
                         word_t val;
                         pmem_read(addr, &val);
-                        printf("%c", ((val>>((y%4)*8))&0xff));
+                        printf("%c", (char)((val>>((y%4)*8))&0xff));
                         if((y+1)%4==0){
                             addr += 4;
                         }
