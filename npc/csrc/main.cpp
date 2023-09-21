@@ -129,6 +129,14 @@ static void exec_once(char *p,paddr_t pc){
 #endif
 }
 
+#ifdef CONFIG_WATCHPOINT
+static void cpu_check_watchpoint()
+{
+    if ((check_watchpoint() == false) && (nemu_state.state != NPC_END))
+        nemu_state.state = NPC_STOP;
+}
+#endif
+
 static void trace_and_difftest(const char *buf,paddr_t pc, paddr_t dnpc) {
 #ifdef CONFIG_ITRACE_COND
     if (ITRACE_COND) { log_write("%s\n", buf); }
