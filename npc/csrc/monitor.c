@@ -100,9 +100,11 @@ static void parse_args(int argc,char *argv[]){
 }
 
 char *init_monitor(int argc,char *argv[]){
+    IFDEF(CONFIG_ITRACE, init_itrace());
     parse_args(argc, argv);
     init_log(log_file);
     long img_size=load_img();
+    init_sdb();
     welcome();
     return wave_file;
 }

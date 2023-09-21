@@ -1,8 +1,8 @@
 TOPNAME=top
 MODULE = $(shell find $(abspath ./vsrc) -name "*.v" -or -name "*.sv")
 CSRC = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cpp" -or -name "cc")
-INC_file=$(shell find $(abspath ./) -name "*.h")
-INC=$(addprefix -CFLAGS -I,$(sort $(dir $(INC_file))))
+INC_file=$(sort $(dir $(shell find $(abspath ./) -name "*.h")))
+LIBS+=-lreadline
 
 override ARGS ?= --log=$(BUILD_DIR)/npc-log.txt
 override ARGS+=
@@ -10,12 +10,15 @@ override ARGS+=
 CONFIG_ITRACE=true
 
 CFLAGS_add=$(addprefix -CFLAGS ,$(1))
+CFLAGS_inc_add=$(addprefix -CFLAGS -I,$(1))
+CFLAGS_lib_add=$(addprefix -CFLAGS -l,$(1))
 LD_add=$(addprefix -LDFLAGS ,$(1))
 
 BUILD_DIR?=.
 
 include $(NPC_HOME)/csrc/utils/filelist.mk
 
+INC=$(call CFLAGS_inc_add,$(INC_file))
 MY_CXXFLAGS=$(call CFLAGS_add,$(CXXFLAGS))
 MY_LDFLAGS=$(call LD_add,$(LIBS))
 
@@ -51,7 +54,6 @@ $(BUILD_DIR)/build/V$(TOPNAME): $(BUILD_DIR)/.stamp.verilate
 $(BUILD_DIR)/.stamp.verilate: $(MODULE) $(CSRC)
 	@echo
 	@echo "### VERILATING ###"
-	@echo verilator --Mdir $(BUILD_DIR)/build -Wall --trace --x-assign unique --x-initial unique --top-module $(TOPNAME)  -cc $(MODULE) --exe $(CSRC) $(INC) -CFLAGS -D__GUEST_ISA__=$(ISA) -Ivsrc $(MY_CXXFLAGS) $(MY_LDFLAGS)
 	verilator --Mdir $(BUILD_DIR)/build -Wall --trace --x-assign unique --x-initial unique --top-module $(TOPNAME)  -cc $(MODULE) --exe $(CSRC) $(INC) -CFLAGS -D__GUEST_ISA__=$(ISA) -Ivsrc $(MY_CXXFLAGS) $(MY_LDFLAGS)
 	@touch $(BUILD_DIR)/.stamp.verilate
 

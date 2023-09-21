@@ -3,10 +3,6 @@
 
 // myitrace
 
-void assert_fail_msg(){
-    IFDEF(CONFIG_ITRACE, irangbuf_printf());
-}
-
 #ifdef CONFIG_ITRACE
     typedef struct{
     char *myinst[20];
@@ -24,10 +20,10 @@ void init_itrace(){
     irangbuf.mypoint_to_myinst = 19;
 }
 
-void irangbuf_write(Decode *s){
+void irangbuf_write(const char *buf){
     irangbuf.mypoint_to_myinst = ((irangbuf.mypoint_to_myinst + 1) % 20);
     // memset(irangbuf.myinst[irangbuf.mypoint_to_myinst], '\0', 128);
-    strcpy(irangbuf.myinst[irangbuf.mypoint_to_myinst], s->logbuf);
+    strcpy(irangbuf.myinst[irangbuf.mypoint_to_myinst], buf);
 }
 
 void irangbuf_printf(){
