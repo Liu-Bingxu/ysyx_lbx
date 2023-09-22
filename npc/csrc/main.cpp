@@ -95,12 +95,7 @@ void sim_rst(){
     step_and_dump_wave();
     top->sys_clk = !top->sys_clk;
     step_and_dump_wave();
-    top->sys_clk = !top->sys_clk;
-    step_and_dump_wave();
-    top->sys_clk = !top->sys_clk;
-    step_and_dump_wave();
-    top->sys_clk = !top->sys_clk;
-    step_and_dump_wave();
+
 }
 
 void halt(int code,int pc){
