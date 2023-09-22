@@ -74,6 +74,7 @@ void sim_init(int argc, char *argv[]){
     init_gpr(top);
     top->sys_clk = 0;
     top->sys_rst_n = 1;
+    pmem_read(top->PC_out, &top->inst_in);
     init_monitor(top,tfp,argc, argv);
 }
 
@@ -92,7 +93,8 @@ void sim_rst(){
     step_and_dump_wave();
     top->sys_clk = !top->sys_clk;
     step_and_dump_wave();
-    pmem_read(top->PC_out, &top->inst_in);
+    top->sys_clk = !top->sys_clk;
+    step_and_dump_wave();
 }
 
 void halt(int code,int pc){
