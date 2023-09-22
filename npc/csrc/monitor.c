@@ -13,6 +13,7 @@ static char *wave_file = NULL;
 static int difftest_port = 0;
 
 extern void init_log(const char *log_file);
+extern void init_disasm(const char *triple);
 
 static void welcome() {
   Log("Trace: %s", MUXDEF(CONFIG_TRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
@@ -106,5 +107,6 @@ char *init_monitor(int argc,char *argv[]){
     long img_size=load_img();
     init_sdb();
     welcome();
+    init_disasm(MUXDEF(CONFIG_RV64, "riscv64", "riscv32") "-pc-linux-gnu");
     return wave_file;
 }

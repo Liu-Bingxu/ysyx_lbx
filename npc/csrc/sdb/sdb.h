@@ -24,7 +24,18 @@ typedef struct watchpoint {
 
 } WP;
 
-void init_sdb();
+typedef union{
+    word_t val;
+    struct{
+        char x1;
+        char x2;
+        char x3;
+        char x4;
+    };
+} printf_char;
+
+void
+init_sdb();
 
 bool check_watchpoint();
 

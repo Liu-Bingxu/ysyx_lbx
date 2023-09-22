@@ -9,6 +9,7 @@
 #include "utils.h"
 #include "debug.h"
 #include "regs.h"
+#include "sdb.h"
 
 using namespace std;
 
@@ -95,8 +96,9 @@ void sim_rst(){
 }
 
 void halt(int code,int pc){
-	Log("npc: %s at pc = " FMT_WORD,((code==0)?ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED)),pc); 
-    sim_exit(code);
+	// Log("npc: %s at pc = " FMT_WORD,((code==0)?ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED)),pc); 
+    // sim_exit(code);
+    set_npc_state(NPC_END, pc, code);
 }
 
 static void exec_once(char *p,paddr_t pc){
@@ -124,7 +126,6 @@ static void exec_once(char *p,paddr_t pc){
     memset(p, ' ', space_len);
     p += space_len;
 
-    void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
     disassemble(p, p + 128 - p,pc, (uint8_t *)&val, ilen);
 #endif
 }
@@ -132,8 +133,8 @@ static void exec_once(char *p,paddr_t pc){
 #ifdef CONFIG_WATCHPOINT
 static void cpu_check_watchpoint()
 {
-    if ((check_watchpoint() == false) && (nemu_state.state != NPC_END))
-        nemu_state.state = NPC_STOP;
+    if ((check_watchpoint() == false) && (npc_state.state != NPC_END))
+        npc_state.state = NPC_STOP;
 }
 #endif
 

@@ -1,6 +1,6 @@
 TOPNAME=top
 MODULE = $(shell find $(abspath ./vsrc) -name "*.v" -or -name "*.sv")
-CSRC = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cpp" -or -name "cc")
+CSRC = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cpp" -or -name "*.cc")
 INC_file=$(sort $(dir $(shell find $(abspath ./) -name "*.h")))
 LIBS+=-lreadline
 
@@ -54,6 +54,7 @@ $(BUILD_DIR)/build/V$(TOPNAME): $(BUILD_DIR)/.stamp.verilate
 $(BUILD_DIR)/.stamp.verilate: $(MODULE) $(CSRC)
 	@echo
 	@echo "### VERILATING ###"
+	@echo verilator --Mdir $(BUILD_DIR)/build -Wall --trace --x-assign unique --x-initial unique --top-module $(TOPNAME)  -cc $(MODULE) --exe $(CSRC) $(INC) -CFLAGS -D__GUEST_ISA__=$(ISA) -Ivsrc $(MY_CXXFLAGS) $(MY_LDFLAGS)
 	verilator --Mdir $(BUILD_DIR)/build -Wall --trace --x-assign unique --x-initial unique --top-module $(TOPNAME)  -cc $(MODULE) --exe $(CSRC) $(INC) -CFLAGS -D__GUEST_ISA__=$(ISA) -Ivsrc $(MY_CXXFLAGS) $(MY_LDFLAGS)
 	@touch $(BUILD_DIR)/.stamp.verilate
 

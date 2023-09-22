@@ -17,7 +17,10 @@
 #define __UTILS_H__
 
 #include <common.h>
-
+extern "C" {
+    void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
+    void init_disasm(const char *triple);
+}
 // ----------- state -----------
 
 enum { NPC_RUNNING, NPC_STOP, NPC_END, NPC_ABORT, NPC_QUIT };

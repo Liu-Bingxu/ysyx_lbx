@@ -130,12 +130,9 @@ static int cmd_x(char *args){
                 }
                 else if((*mode)=='s'){
                     for (int y = 0; y < n; y++){
-                        word_t val;
-                        pmem_read(addr, &val);
-                        printf("%c", (char)((val>>((y%4)*8))&0xff));
-                        if((y+1)%4==0){
-                            addr += 4;
-                        }
+                        printf_char val;
+                        pmem_read(addr, &(val.val));
+                        printf("%c%c%c%c",val.x1,val.x2,val.x3,val.x4);
                         if((y+1)%100==0)
                             printf("\n");
                     }
