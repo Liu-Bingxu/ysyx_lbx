@@ -1,6 +1,7 @@
 TOPNAME=top
 MODULE = $(shell find $(abspath ./vsrc) -name "*.v" -or -name "*.sv")
 CSRC = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cpp" -or -name "*.cc")
+HEAD_FILE=$(shell find $(abspath ./) -name "*.h")
 INC_file=$(sort $(dir $(shell find $(abspath ./) -name "*.h")))
 LIBS+=-lreadline
 
@@ -51,7 +52,7 @@ $(BUILD_DIR)/build/V$(TOPNAME): $(BUILD_DIR)/.stamp.verilate
 	@echo "### BUILDING SIM ###"
 	make -C $(BUILD_DIR)/build -f V$(TOPNAME).mk V$(TOPNAME) 
 
-$(BUILD_DIR)/.stamp.verilate: $(MODULE) $(CSRC)
+$(BUILD_DIR)/.stamp.verilate: $(MODULE) $(CSRC) $(HEAD_FILE)
 	@echo
 	@echo "### VERILATING ###"
 	@echo verilator --Mdir $(BUILD_DIR)/build -Wall --trace --x-assign unique --x-initial unique --top-module $(TOPNAME)  -cc $(MODULE) --exe $(CSRC) $(INC) -CFLAGS -D__GUEST_ISA__=$(ISA) -Ivsrc $(MY_CXXFLAGS) $(MY_LDFLAGS)
