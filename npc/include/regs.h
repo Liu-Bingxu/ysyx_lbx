@@ -5,8 +5,6 @@
 #include "Vtop.h"
 #include "Vtop___024root.h"
 
-#define gpr(a) concat3(top->rootp->top__DOT__u_regs__DOT__x, a, __DOT__data_out_reg)
-
 typedef struct{
     word_t *GPR[32];
     word_t *pc;

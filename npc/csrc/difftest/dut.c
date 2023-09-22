@@ -32,6 +32,7 @@ typedef void (*ref_difftest_raise_intr_func_point)(uint64_t NO);
 typedef void (*ref_difftest_init_func_point)(int);
 
 extern void irangbuf_printf();
+extern void init_ref(CPU_state *cpu);
 
 static CPU_state cpu;
 
@@ -96,6 +97,7 @@ void init_difftest(char *ref_so_file, long img_size, int port) {
       "If it is not necessary, you can turn it off in menuconfig.", ref_so_file);
   ref_difftest_init(port);
   ref_difftest_memcpy(PC_RST, guest_to_host(PC_RST), img_size, DIFFTEST_TO_REF);
+  init_ref(&cpu);
   ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
 }
 
