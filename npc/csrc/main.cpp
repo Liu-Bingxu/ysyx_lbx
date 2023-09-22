@@ -100,7 +100,8 @@ void sim_rst(){
 void halt(int code,int pc){
 	// Log("npc: %s at pc = " FMT_WORD,((code==0)?ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED)),pc); 
     // sim_exit(code);
-    set_npc_state(NPC_END, pc, code);
+    Assert(-1);
+    set_npc_state(NPC_END, pc, 0);
 }
 
 static void exec_once(char *p,paddr_t pc){

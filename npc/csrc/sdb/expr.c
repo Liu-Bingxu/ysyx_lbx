@@ -421,9 +421,9 @@ word_t expr(char *e, bool *success,bool mode,int *nr_tekones,Token *tekenes) {
 		}
 	}
 
-  for (int i = 0; i < nr_token;i++){
-    printf("%3d: %-20s\n", tokens[i].type, tokens[i].str);
-  }
+//   for (int i = 0; i < nr_token;i++){
+//     printf("%3d: %-20s\n", tokens[i].type, tokens[i].str);
+//   }
 
   word_t val = eval(0, (nr_token - 1));
 
