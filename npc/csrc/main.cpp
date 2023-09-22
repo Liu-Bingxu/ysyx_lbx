@@ -142,10 +142,7 @@ static void trace_and_difftest(const char *buf,paddr_t pc, paddr_t dnpc) {
 #ifdef CONFIG_ITRACE_COND
     if (ITRACE_COND) { log_write("%s\n", buf); }
 #endif
-    if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(buf));
-        printf("%s\n", buf);
-        printf("Hello\n");
-    }
+    if (g_print_step) { IFDEF(CONFIG_ITRACE, printf("%s\n", buf));}
     IFDEF(CONFIG_ITRACE, irangbuf_write(buf));
     IFDEF(CONFIG_DIFFTEST, difftest_step((pc), dnpc));
     IFDEF(CONFIG_WATCHPOINT, cpu_check_watchpoint());
