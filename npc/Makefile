@@ -33,7 +33,7 @@ sim:$(BUILD_DIR)/wave.vcd
 verilate: $(BUILD_DIR)/.stamp.verilate
 
 .PHONY:run
-run:sim waves
+run:sim $(BUILD_DIR)/wave.vcd
 
 .PHONY:waves
 waves: $(BUILD_DIR)/wave.vcd
