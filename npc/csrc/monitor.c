@@ -14,6 +14,7 @@ static int difftest_port = 0;
 
 extern void init_log(const char *log_file);
 extern void init_disasm(const char *triple);
+extern void init_itrace();
 
 static void welcome() {
   Log("Trace: %s", MUXDEF(CONFIG_TRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));

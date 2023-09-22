@@ -26,6 +26,8 @@ static uint64_t g_timer = 0; // unit: us
 static bool g_print_step = false;
 
 extern char *init_monitor(int argc, char *argv[]);
+extern void irangbuf_printf();
+extern void irangbuf_write(const char *buf);
 extern void device_update();
 
 void step_and_dump_wave(){
