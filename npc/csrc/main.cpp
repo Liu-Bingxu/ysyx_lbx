@@ -87,14 +87,14 @@ void sim_rst(){
             top->sys_rst_n = 1;
         step_and_dump_wave();
     }
-    top->sys_clk = !top->sys_clk;
-    step_and_dump_wave();
-    top->sys_clk = !top->sys_clk;
-    step_and_dump_wave();
-    top->sys_clk = !top->sys_clk;
-    step_and_dump_wave();
-    top->sys_clk = !top->sys_clk;
-    step_and_dump_wave();
+    // top->sys_clk = !top->sys_clk;
+    // step_and_dump_wave();
+    // top->sys_clk = !top->sys_clk;
+    // step_and_dump_wave();
+    // top->sys_clk = !top->sys_clk;
+    // step_and_dump_wave();
+    // top->sys_clk = !top->sys_clk;
+    // step_and_dump_wave();
 
 }
 

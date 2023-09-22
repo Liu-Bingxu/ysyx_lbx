@@ -14,7 +14,7 @@ void init_gpr(Vtop *top){
     for (int i = 0; i < 32;i++){
         reg.GPR[i] = (&(top->rootp->top__DOT__u_regs__DOT__riscv_reg[i]));
     }
-    reg.pc = (&top->rootp->PC_out);
+    reg.pc = (&top->rootp->top__DOT__u_ifu__DOT__PC);
 }
 
 word_t get_gpr(int i)
