@@ -73,7 +73,7 @@ assign ebreak   =   (inst       ==  32'h00100073) ? 1'b1 : 1'b0;
 
 assign operand1 = ((auipc)?PC:((J_flag|jalr)?PC_S:((I_flag)?src1:32'h0)));
 assign operand2 = ((jalr)?32'h0:(I_flag|U_flag)?imm:(32'h0));
-assign op1 = 1'b0;
+assign op1 = 1'b1;
 
 assign operand3 = (jalr)?src1:PC;
 assign operand4 = (I_flag|U_flag|J_flag)?imm:(32'h0);
