@@ -61,30 +61,37 @@ uint64_t get_time();
 
 #define ANSI_FMT(str, fmt) fmt str ANSI_NONE
 
-#define log_write(...)                    \
-    do                                    \
-    {                                     \
-        extern FILE *log_fp;              \
-        extern bool log_enable();         \
-        if (log_enable())                 \
-        {                                 \
-            fprintf(log_fp, __VA_ARGS__); \
-            fflush(log_fp);               \
-        }                                 \
+#define log_write(_code, ...)              \
+    do                                     \
+    {                                      \
+        extern FILE *log_fp;               \
+        extern bool log_enable(int code);  \
+        if (log_enable(_code))             \
+        {                                  \
+            fprintf(log_fp, __VA_ARGS__);  \
+            fflush(log_fp);                \
+        }                                  \
     } while (0)
 
-#define _Log(...)               \
-    do                          \
-    {                           \
-        printf(__VA_ARGS__);    \
-        log_write(__VA_ARGS__); \
+#define _Log(...)                 \
+    do                            \
+    {                             \
+        printf(__VA_ARGS__);      \
+        log_write(0,__VA_ARGS__); \
     } while (0)
 
-#define Log_mem(...)            \
-    do                          \
-    {                           \
-        printf(__VA_ARGS__);    \
-        log_write(__VA_ARGS__); \
+#define Log_mem(...)              \
+    do                            \
+    {                             \
+        printf(__VA_ARGS__);      \
+        log_write(2,__VA_ARGS__); \
+    } while (0)
+
+#define Log_func(...)             \
+    do                            \
+    {                             \
+        printf(__VA_ARGS__);      \
+        log_write(1,__VA_ARGS__); \
     } while (0)
 
 #endif

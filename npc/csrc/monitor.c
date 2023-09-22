@@ -15,6 +15,7 @@ static int difftest_port = 0;
 extern void init_log(const char *log_file);
 extern void init_disasm(const char *triple);
 extern void init_itrace();
+extern void init_ftrace(const char *ELF_FILE);
 
 static void welcome() {
   Log("Trace: %s", MUXDEF(CONFIG_TRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
@@ -105,6 +106,7 @@ char *init_monitor(int argc,char *argv[]){
     IFDEF(CONFIG_ITRACE, init_itrace());
     parse_args(argc, argv);
     init_log(log_file);
+    IFDEF(CONFIG_FTRACE, init_ftrace(ELF_FILE));
     long img_size=load_img();
     init_sdb();
     welcome();
