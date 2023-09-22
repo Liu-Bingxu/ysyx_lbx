@@ -27,7 +27,7 @@ all:
 
 sim:$(BUILD_DIR)/wave.vcd
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
-	@echo "Write this Makefile by your self."
+# @echo "Write this Makefile by your self."
 
 .PHONY:verilate
 verilate: $(BUILD_DIR)/.stamp.verilate
