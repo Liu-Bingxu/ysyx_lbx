@@ -159,10 +159,11 @@ static void execute(uint64_t n)
     for (; n > 0; n--)
     {
         char *p = (char *)malloc(128);
-        paddr_t pc = top->PC_out;
-        exec_once(p, top->PC_out);
+        paddr_t pc = get_gpr(32);
+        paddr_t dnpc = top->PC_out;
+        exec_once(p, pc);
         g_nr_guest_inst++;
-        trace_and_difftest(p,pc,top->PC_out);
+        trace_and_difftest(p, pc, dnpc);
         if (npc_state.state != NPC_RUNNING)
             break;
         IFDEF(CONFIG_DEVICE, device_update());
