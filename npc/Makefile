@@ -5,7 +5,7 @@ INC_file=$(sort $(dir $(shell find $(abspath ./) -name "*.h")))
 LIBS+=-lreadline
 
 override ARGS ?= --log=$(BUILD_DIR)/npc-log.txt
-override ARGS+=
+override ARGS += -d $(NEMU_HOME)/build/riscv32-nemu-interpreter-so
 
 CONFIG_ITRACE=true
 

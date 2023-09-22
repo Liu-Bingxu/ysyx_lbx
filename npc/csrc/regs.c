@@ -12,37 +12,10 @@ const char *regs[] = {
 
 void init_gpr(Vtop *top){
     reg.GPR[1] = (&gpr(1));
-    reg.GPR[2] = (&gpr(2));
-    reg.GPR[3] = (&gpr(3));
-    reg.GPR[4] = (&gpr(4));
-    reg.GPR[5] = (&gpr(5));
-    reg.GPR[6] = (&gpr(6));
-    reg.GPR[7] = (&gpr(7));
-    reg.GPR[8] = (&gpr(8));
-    reg.GPR[9] = (&gpr(9));
-    reg.GPR[10] = (&gpr(10));
-    reg.GPR[11] = (&gpr(11));
-    reg.GPR[12] = (&gpr(12));
-    reg.GPR[13] = (&gpr(13));
-    reg.GPR[14] = (&gpr(14));
-    reg.GPR[15] = (&gpr(15));
-    reg.GPR[16] = (&gpr(16));
-    reg.GPR[17] = (&gpr(17));
-    reg.GPR[18] = (&gpr(18));
-    reg.GPR[19] = (&gpr(19));
-    reg.GPR[20] = (&gpr(20));
-    reg.GPR[21] = (&gpr(21));
-    reg.GPR[22] = (&gpr(22));
-    reg.GPR[23] = (&gpr(23));
-    reg.GPR[24] = (&gpr(24));
-    reg.GPR[25] = (&gpr(25));
-    reg.GPR[26] = (&gpr(26));
-    reg.GPR[27] = (&gpr(27));
-    reg.GPR[28] = (&gpr(28));
-    reg.GPR[29] = (&gpr(29));
-    reg.GPR[30] = (&gpr(30));
-    reg.GPR[31] = (&gpr(31));
-    reg.pc = (&top->rootp->top__DOT__u_ifu__DOT__PC);
+    for (int i = 0; i < 32;i++){
+        reg.GPR[i] = (&(top->rootp->top__DOT__u_regs__DOT__riscv_reg[i]));
+    }
+    reg.pc = (&top->rootp->PC_out);
 }
 
 word_t get_gpr(int i)

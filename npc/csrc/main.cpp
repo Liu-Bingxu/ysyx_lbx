@@ -24,7 +24,7 @@ uint64_t g_nr_guest_inst = 0;
 static uint64_t g_timer = 0; // unit: us
 static bool g_print_step = false;
 
-extern char *init_monitor(int argc, char *argv[]);
+extern void init_monitor(Vtop *top, VerilatedVcdC *tfp,int argc, char *argv[]);
 extern void irangbuf_printf();
 extern void irangbuf_write(const char *buf);
 extern void ftrace_watch(paddr_t pc,paddr_t pc_jump);
@@ -72,11 +72,9 @@ void sim_init(int argc, char *argv[]){
     contextp->commandArgs(argc, argv);
     top->trace(tfp, 0);
     init_gpr(top);
-
-    char *wave_file=init_monitor(argc, argv);
-    tfp->open(wave_file);
     top->sys_clk = 0;
     top->sys_rst_n = 1;
+    init_monitor(top,tfp,argc, argv);
 }
 
 
@@ -205,7 +203,7 @@ void cpu_exec(uint64_t n)
 int main(int argc, char *argv[]){
 
     sim_init(argc,argv);
-    sim_rst();
+    // sim_rst();
     // int count = 0;
     // while (!contextp->gotFinish()){
     //     pmem_read(top->PC_out,&top->inst_in);
