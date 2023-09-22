@@ -2,7 +2,6 @@
 #include "verilated_vcd_c.h"
 #include "Vtop.h"
 #include <iostream>
-#include "svdpi.h"
 #include "Vtop__Dpi.h"
 #include "pmem.h"
 #include "common.h"
@@ -100,8 +99,8 @@ void sim_rst(){
 void halt(int code,int pc){
 	// Log("npc: %s at pc = " FMT_WORD,((code==0)?ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED)),pc); 
     // sim_exit(code);
-    Assert(1,"Hello");
-    set_npc_state(NPC_END, pc, 0);
+    // assert_fail_msg();
+    set_npc_state(NPC_END, pc, code);
 }
 
 static void exec_once(char *p,paddr_t pc){

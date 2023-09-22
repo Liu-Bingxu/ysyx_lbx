@@ -1,8 +1,9 @@
 #include "elf.h"
 #include "utils.h"
+#include "pmem.h"
+#include "Vtop__Dpi.h"
 
 // myitrace
-
 #ifdef CONFIG_ITRACE
     typedef struct{
     char *myinst[20];
@@ -233,3 +234,26 @@ void init_ftrace(const char *ELF_FILE){
 }
 #endif
 //myftrace
+
+// mymtrace
+
+#ifdef CONFIG_FTRACE
+
+void Log_mem_read(int addr){
+    word_t val;
+    pmem(addr,&val);
+    Log_mem(addr, "Read  Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, val);
+}
+
+void Log_mem_wirte(int addr,int data){
+    Log_mem(addr,"Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, data);
+}
+
+#else
+
+void Log_mem_read(int addr){}
+void Log_mem_wirte(int addr, int data){}
+
+#endif
+
+// mymtrace
