@@ -17,18 +17,23 @@
 #define __UTILS_H__
 
 #include <common.h>
-
+extern "C" {
+    void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
+    void init_disasm(const char *triple);
+}
 // ----------- state -----------
 
-enum { NEMU_RUNNING, NEMU_STOP, NEMU_END, NEMU_ABORT, NEMU_QUIT };
+enum { NPC_RUNNING, NPC_STOP, NPC_END, NPC_ABORT, NPC_QUIT };
 
 typedef struct {
   int state;
   vaddr_t halt_pc;
   uint32_t halt_ret;
-} NEMUState;
+} NPCState;
 
-extern NEMUState nemu_state;
+extern NPCState npc_state;
+
+void set_npc_state(int state, paddr_t pc, int halt_ret);
 
 // ----------- timer -----------
 
@@ -56,23 +61,37 @@ uint64_t get_time();
 
 #define ANSI_FMT(str, fmt) fmt str ANSI_NONE
 
-#define log_write(...)                    \
-    do                                    \
-    {                                     \
-        extern FILE *log_fp;              \
-        extern bool log_enable();         \
-        if (log_enable())                 \
-        {                                 \
-            fprintf(log_fp, __VA_ARGS__); \
-            fflush(log_fp);               \
-        }                                 \
+#define log_write(_code, ...)              \
+    do                                     \
+    {                                      \
+        extern FILE *log_fp;               \
+        extern bool log_enable(int code);  \
+        if (log_enable(_code))             \
+        {                                  \
+            fprintf(log_fp, __VA_ARGS__);  \
+            fflush(log_fp);                \
+        }                                  \
     } while (0)
 
-#define _Log(...)               \
-    do                          \
-    {                           \
-        printf(__VA_ARGS__);    \
-        log_write(__VA_ARGS__); \
+#define _Log(...)                 \
+    do                            \
+    {                             \
+        printf(__VA_ARGS__);      \
+        log_write(0,__VA_ARGS__); \
+    } while (0)
+
+#define Log_mem(...)              \
+    do                            \
+    {                             \
+        printf(__VA_ARGS__);      \
+        log_write(2,__VA_ARGS__); \
+    } while (0)
+
+#define Log_func(...)             \
+    do                            \
+    {                             \
+        printf(__VA_ARGS__);      \
+        log_write(1,__VA_ARGS__); \
     } while (0)
 
 #endif

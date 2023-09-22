@@ -12,6 +12,6 @@ void init_log(const char *log_file){
     Log("Open log file %s succces\n",log_file);
 }
 
-bool log_enable(){
+bool log_enable(int code){
     return true;
 }

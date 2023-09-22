@@ -4,6 +4,10 @@
 #include "sdb.h"
 #include "utils.h"
 #include "debug.h"
+#include "verilated.h"
+#include "verilated_vcd_c.h"
+#include "Vtop.h"
+#include "regs.h"
 
 static char *log_file = NULL;
 static char *diff_so_file = NULL;
@@ -13,6 +17,11 @@ static char *wave_file = NULL;
 static int difftest_port = 0;
 
 extern void init_log(const char *log_file);
+extern void init_disasm(const char *triple);
+extern void init_itrace();
+extern void sim_rst();
+extern void init_ftrace(const char *ELF_FILE);
+extern void init_difftest(char *ref_so_file, long img_size, int port);
 
 static void welcome() {
   Log("Trace: %s", MUXDEF(CONFIG_TRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
@@ -99,10 +108,18 @@ static void parse_args(int argc,char *argv[]){
   return;
 }
 
-char *init_monitor(int argc,char *argv[]){
+void init_monitor(Vtop *top, VerilatedVcdC *tfp, int argc, char *argv[]){
+    IFDEF(CONFIG_ITRACE, init_itrace());
     parse_args(argc, argv);
     init_log(log_file);
+    IFDEF(CONFIG_FTRACE, init_ftrace(ELF_FILE));
     long img_size=load_img();
+    init_sdb();
+    init_disasm(MUXDEF(CONFIG_RV64, "riscv64", "riscv32") "-pc-linux-gnu");
+    tfp->open(wave_file);
+    sim_rst();
+    // isa_reg_display();
+    init_difftest(diff_so_file, img_size, difftest_port);
     welcome();
-    return wave_file;
+    return;
 }

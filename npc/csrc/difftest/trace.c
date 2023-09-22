@@ -1,12 +1,11 @@
 #include "elf.h"
 #include "utils.h"
+#include "pmem.h"
+#include "Vtop__Dpi.h"
+#include "debug.h"
+#include "regs.h"
 
 // myitrace
-
-void assert_fail_msg(){
-    IFDEF(CONFIG_ITRACE, irangbuf_printf());
-}
-
 #ifdef CONFIG_ITRACE
     typedef struct{
     char *myinst[20];
@@ -24,10 +23,10 @@ void init_itrace(){
     irangbuf.mypoint_to_myinst = 19;
 }
 
-void irangbuf_write(Decode *s){
+void irangbuf_write(const char *buf){
     irangbuf.mypoint_to_myinst = ((irangbuf.mypoint_to_myinst + 1) % 20);
     // memset(irangbuf.myinst[irangbuf.mypoint_to_myinst], '\0', 128);
-    strcpy(irangbuf.myinst[irangbuf.mypoint_to_myinst], s->logbuf);
+    strcpy(irangbuf.myinst[irangbuf.mypoint_to_myinst], buf);
 }
 
 void irangbuf_printf(){
@@ -44,7 +43,7 @@ void irangbuf_printf(){
 #endif
 // myitrace
 
-//mytrace
+//myftrace
 #ifdef CONFIG_FTRACE
 typedef struct symbol_node{
     char *name;
@@ -60,7 +59,7 @@ typedef struct symbol_list{
     symbol_node *end;
 }symbol_list;
 
-static symbol_list symbol_tab_list={.end=NULL,.head=NULL,.node_num=0};
+static symbol_list symbol_tab_list = {.node_num = 0, .head = NULL,.end = NULL};
 static int func = 0;
 static bool can_func_trace = false;
 
@@ -89,9 +88,9 @@ void ftrce_text_jump(paddr_t pc){
     char *name = NULL;
     paddr_t first_addr = 0;
     name = symbol_find_name(pc,&first_addr);
-    printf("PC is %x\n", cpu.pc);
-    assert(name != NULL);
-    assert(first_addr != 0);
+    // printf("PC is %x\n", get_gpr(32));
+    Assert(name != NULL,"jump to a unkown space, PC is : "FMT_PADDR,pc);
+    Assert(first_addr != 0, "jump to a unkown space, PC is : " FMT_PADDR, pc);
     if(pc!=first_addr){
         return;
     }
@@ -118,8 +117,8 @@ void ftrce_text_retu(paddr_t pc){
     char *name = NULL;
     paddr_t first_addr=0;
     name = symbol_find_name(pc,&first_addr);
-    assert(name != NULL);
-    assert(first_addr != 0);
+    Assert(name != NULL,"jump to a unkown space, PC is : " FMT_PADDR, pc);
+    Assert(first_addr != 0, "jump to a unkown space, PC is : " FMT_PADDR, pc);
     // printf("Hello World\n");
     Log_func(ANSI_FMT("%s",ANSI_FG_YELLOW), name);
     Log_func("]\n");
@@ -127,19 +126,31 @@ void ftrce_text_retu(paddr_t pc){
     return;
 }
 
+void ftrace_watch(paddr_t pc, paddr_t pc_jump){
+    word_t inst;
+    pmem_read(pc, &inst);
+    word_t inst_mask = inst & 0x7f;
+    if (inst == 0x00008067){
+        ftrce_text_retu(pc);
+    }
+    else if((inst_mask==0x6f)||(inst_mask==0x67)){
+        ftrce_text_jump(pc_jump);
+    }
+}
+
 void symbol_list_push(symbol_list *list,char *name,word_t first_addr,word_t func_size){
     printf("name is %s\n", name);
-    symbol_node *new = (symbol_node *)malloc(sizeof(symbol_node));
+    symbol_node *_new = (symbol_node *)malloc(sizeof(symbol_node));
     int len=strlen(name);
-    new->name=(char *)malloc(len+1);
-    strcpy(new->name,name);
-    new->first_addr=first_addr;
-    new->end_addr=first_addr+func_size-4;
-    new->prev=NULL;
-    new->next=list->head;
-    list->head=new;
+    _new->name=(char *)malloc(len+1);
+    strcpy(_new->name,name);
+    _new->first_addr=first_addr;
+    _new->end_addr=first_addr+func_size-4;
+    _new->prev=NULL;
+    _new->next=list->head;
+    list->head=_new;
     list->node_num++;
-    if(list->node_num==1)list->end=new;
+    if(list->node_num==1)list->end=_new;
     can_func_trace = true;
 }
 void delete_symbol_list(){
@@ -165,24 +176,24 @@ void init_ftrace(const char *ELF_FILE){
     int a;
 
     //open file and get the ELF head
-    FILE *elf_file=fopen(ELF_FILE,"rb");
+    FILE *elf_file = fopen(ELF_FILE, "rb");
+    Assert(elf_file,"can't open the ELF file: %s",ELF_FILE);
     Elf32_Ehdr text;
     a=fread(&text,1,52,elf_file);
-    assert(a==52);
-    assert(elf_file);
+    Assert(a=52,"error read");
 
     //get shstrtab head
     fseek(elf_file,text.e_shoff+text.e_shentsize*text.e_shstrndx,SEEK_SET);
     Elf32_Shdr shstrtab_sh;
     a=fread(&shstrtab_sh,text.e_shentsize,1,elf_file);
-    assert(a==1);
+    Assert(a == 1, "error read");
 
     //get shstrtab
     fseek(elf_file,shstrtab_sh.sh_offset,SEEK_SET);
     char *shstrtab=(char *)malloc(shstrtab_sh.sh_size);
-    assert(shstrtab);
+    Assert(shstrtab,"fail to malloc");
     a=fread(shstrtab,shstrtab_sh.sh_size,1,elf_file);
-    assert(a==1);
+    Assert(a == 1, "error read");
 
     //get symboltab and strtab
     Elf32_Shdr symbol_tab = {.sh_offset = 0, .sh_size = 0};
@@ -191,7 +202,7 @@ void init_ftrace(const char *ELF_FILE){
         fseek(elf_file,text.e_shoff+text.e_shentsize*i,SEEK_SET);
         Elf32_Shdr shdr;
         a=fread(&shdr,text.e_shentsize,1,elf_file);
-        assert(a==1);
+        Assert(a == 1, "error read");
         if (strcmp(shstrtab + shdr.sh_name, ".symtab") == 0){
             symbol_tab=shdr;
         }
@@ -202,17 +213,17 @@ void init_ftrace(const char *ELF_FILE){
 
     //get str of symbol name
     char *symbol_name=(char *)malloc(str_tab.sh_size);
-    assert(symbol_name);
+    Assert(symbol_name, "fail to malloc");
     fseek(elf_file, str_tab.sh_offset, SEEK_SET);
     a=fread(symbol_name,str_tab.sh_size,1,elf_file);
-    assert(a ==1);
+    Assert(a == 1, "error read");
 
     // full search the symbol and find the FUNC
     for(int i=0;i<symbol_tab.sh_size/sizeof(Elf32_Sym);i++){
         Elf32_Sym symbol;
         fseek(elf_file,symbol_tab.sh_offset+sizeof(Elf32_Sym)*i,SEEK_SET);
         a=fread(&symbol,sizeof(Elf32_Sym),1,elf_file);
-        assert(a == 1);
+        Assert(a == 1, "error read");
         if ((symbol.st_info&0xf) == 2){
             symbol_list_push(&symbol_tab_list,symbol_name+symbol.st_name,symbol.st_value,symbol.st_size);
         }
@@ -237,3 +248,26 @@ void init_ftrace(const char *ELF_FILE){
 }
 #endif
 //myftrace
+
+// mymtrace
+
+#ifdef CONFIG_MTRACE
+
+void Log_mem_read(int addr){
+    word_t val;
+    pmem(addr,&val);
+    Log_mem(addr, "Read  Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, val);
+}
+
+void Log_mem_wirte(int addr,int data){
+    Log_mem(addr,"Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, data);
+}
+
+#else
+
+void Log_mem_read(int addr){}
+void Log_mem_wirte(int addr, int data){}
+
+#endif
+
+// mymtrace

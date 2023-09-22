@@ -71,8 +71,8 @@ assign jalr     =   (inst[6:0]  ==  7'b1100111  ) ? 1'b1 : 1'b0;
 
 assign ebreak   =   (inst       ==  32'h00100073) ? 1'b1 : 1'b0;
 
-assign operand1 = (I_flag)?src1:((auipc|J_flag)?PC_S:32'h0);
-assign operand2 = ((jalr)?PC_S:(I_flag|U_flag)?imm:(32'h0));
+assign operand1 = ((auipc)?PC:((J_flag|jalr)?PC_S:((I_flag)?src1:32'h0)));
+assign operand2 = ((jalr)?32'h0:(I_flag|U_flag)?imm:(32'h0));
 assign op1 = 1'b0;
 
 assign operand3 = (jalr)?src1:PC;
