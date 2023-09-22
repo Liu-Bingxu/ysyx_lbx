@@ -399,7 +399,7 @@ word_t expr(char *e, bool *success,bool mode,int *nr_tekones,Token *tekenes) {
 		if(tokens[i].type==TK_MUL){
 			if(i!=0){
 				if((check_is_OP(i-1)!=1)&&(tokens[i-1].type!=TK_LP)){
-					break;
+					continue;
 				}
 			}
 			tokens[i].type=TK_PIONT;
@@ -412,8 +412,8 @@ word_t expr(char *e, bool *success,bool mode,int *nr_tekones,Token *tekenes) {
 		if(tokens[i].type==TK_SUB){
 			if(i!=0){
 				if((check_is_OP(i-1)!=1)&&(tokens[i-1].type!=TK_LP)){
-					break;
-				}
+                    continue;
+                }
 			}
 			tokens[i].type=TK_NEG;
 			if((tokens[i+1].type!=TK_NUM)&&(tokens[i+1].type!=TK_HEXNUM)&&(tokens[i+1].type!=TK_LP)&&(tokens[i+1].type!=TK_REG))
@@ -421,9 +421,9 @@ word_t expr(char *e, bool *success,bool mode,int *nr_tekones,Token *tekenes) {
 		}
 	}
 
-//   for (int i = 0; i < 32;i++){
-//     printf("%3d: %-20s\n", tokens[i].type, tokens[i].str);
-//   }
+  for (int i = 0; i < nr_token;i++){
+    printf("%3d: %-20s\n", tokens[i].type, tokens[i].str);
+  }
 
   word_t val = eval(0, (nr_token - 1));
 
