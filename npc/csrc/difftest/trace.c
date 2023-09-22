@@ -88,7 +88,7 @@ void ftrce_text_jump(paddr_t pc){
     char *name = NULL;
     paddr_t first_addr = 0;
     name = symbol_find_name(pc,&first_addr);
-    printf("PC is %x\n", get_gpr(32));
+    // printf("PC is %x\n", get_gpr(32));
     Assert(name != NULL,"jump to a unkown space, PC is : "FMT_PADDR,pc);
     Assert(first_addr != 0, "jump to a unkown space, PC is : " FMT_PADDR, pc);
     if(pc!=first_addr){
@@ -124,6 +124,18 @@ void ftrce_text_retu(paddr_t pc){
     Log_func("]\n");
     func--;
     return;
+}
+
+void ftrace_watch(paddr_t pc, paddr_t pc_jump){
+    word_t inst;
+    pmem_read(pc, &inst);
+    word_t inst_mask = inst & 0x7f;
+    if (inst == 0x00008067){
+        ftrce_text_retu(pc);
+    }
+    else if((inst_mask==0x6f)||(inst_mask==0x67)){
+        ftrce_text_jump(pc_jump);
+    }
 }
 
 void symbol_list_push(symbol_list *list,char *name,word_t first_addr,word_t func_size){

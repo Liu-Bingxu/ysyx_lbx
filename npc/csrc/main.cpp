@@ -27,6 +27,7 @@ static bool g_print_step = false;
 extern char *init_monitor(int argc, char *argv[]);
 extern void irangbuf_printf();
 extern void irangbuf_write(const char *buf);
+extern void ftrace_watch(paddr_t pc,paddr_t pc_jump);
 extern void device_update();
 
 void step_and_dump_wave(){
@@ -159,6 +160,7 @@ static void execute(uint64_t n)
         exec_once(p, top->PC_out);
         g_nr_guest_inst++;
         trace_and_difftest(p,pc,top->PC_out);
+        IFDEF(CONFIG_FTRACE, ftrace_watch(pc, top->PC_out));
         if (npc_state.state != NPC_RUNNING)
             break;
         IFDEF(CONFIG_DEVICE, device_update());
