@@ -149,6 +149,7 @@ static void trace_and_difftest(const char *buf,paddr_t pc, paddr_t dnpc) {
     IFDEF(CONFIG_ITRACE, irangbuf_write(buf));
     IFDEF(CONFIG_DIFFTEST, difftest_step((pc), dnpc));
     IFDEF(CONFIG_WATCHPOINT, cpu_check_watchpoint());
+    IFDEF(CONFIG_FTRACE, ftrace_watch(pc, dnpc));
 }
 
 static void execute(uint64_t n)
@@ -160,7 +161,6 @@ static void execute(uint64_t n)
         exec_once(p, top->PC_out);
         g_nr_guest_inst++;
         trace_and_difftest(p,pc,top->PC_out);
-        IFDEF(CONFIG_FTRACE, ftrace_watch(pc, top->PC_out));
         if (npc_state.state != NPC_RUNNING)
             break;
         IFDEF(CONFIG_DEVICE, device_update());
