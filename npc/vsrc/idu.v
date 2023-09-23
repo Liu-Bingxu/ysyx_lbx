@@ -15,6 +15,7 @@ module idu#(parameter DATA_LEN=32) (
     output [DATA_LEN-1:0]   operand4,
     output [17:0]           control_sign, 
     output                  inst_jump_flag,
+    output                  jump_without,
     output [3:0]            store_sign,
     output                  ebreak,
     output                  dest_wen,
@@ -149,7 +150,8 @@ assign op       = (B_flag|is_cmp|sub);
 assign operand3 = (jalr)?src1:PC;
 assign operand4 = imm;
 
-assign inst_jump_flag = (jal|jalr|B_flag);
+assign inst_jump_flag = (B_flag);
+assign jump_without   = (jal|jalr);
 
 assign dest_wen = (!(B_flag|S_flag));
 

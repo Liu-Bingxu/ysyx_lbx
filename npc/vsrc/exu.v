@@ -5,6 +5,7 @@ module exu#(parameter DATA_LEN=32) (
     input  [DATA_LEN-1:0]   operand4,  
     input                   op,
     input                   inst_jump_flag,
+    input                   jump_without,
     input  [17:0]           Control_signal,
     input  [DATA_LEN-1:0]   pre_data,
     output [DATA_LEN-1:0]   addr_load,
@@ -121,7 +122,7 @@ assign blt  = is_blt&out_lt;
 assign bge  = is_bge&out_ge;
 assign bltu = is_bltu&out_ltu;
 assign bgeu = is_bgeu&out_geu;
-assign Jump_flag = (inst_jump_flag&((beq|bne|blt|bltu|bge|bgeu)));
+assign Jump_flag = ((inst_jump_flag&((beq|bne|blt|bltu|bge|bgeu)))|jump_without);
 
 endmodule //exu
 

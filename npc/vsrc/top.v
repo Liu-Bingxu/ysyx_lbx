@@ -35,6 +35,7 @@ wire [DATA_LEN-1:0] 	operand4;
 wire [17:0]         	control_sign;
 wire [3:0]          	store_sign;
 wire                	inst_jump_flag;
+wire                    jump_without;
 wire                	ebreak;
 wire                	op;
 
@@ -81,6 +82,7 @@ idu #(DATA_LEN)u_idu(
     .operand4       ( operand4          ),
     .control_sign   ( control_sign      ),
     .inst_jump_flag ( inst_jump_flag    ),
+    .jump_without   ( jump_without      ),
     .store_sign     ( store_sign        ),
     .ebreak         ( ebreak            ),
     .dest_wen       ( dest_wen          ),
@@ -106,6 +108,7 @@ exu #(DATA_LEN)u_exu(
     .operand4       	( operand4          ),
     .op             	( op                ),
     .inst_jump_flag 	( inst_jump_flag    ),
+    .jump_without       ( jump_without      ),
     .Jump_flag 	        ( Jump_flag         ),
     .addr_load      	( addr_load         ),
     .Control_signal 	( control_sign      ),
