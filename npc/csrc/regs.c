@@ -59,14 +59,14 @@ bool isa_difftest_checkregs(CPU_state *ref,paddr_t pc){
     for (int i = 0; i < MUXDEF(CONFIG_RVE, 16, 32); i++){
         if (ref->gpr[i] != get_gpr(i)){
             printf("error inst: "
-                   "\n" FMT_PADDR ": " FMT_WORD,
+                   "\n" FMT_PADDR ": " FMT_WORD"\n",
                    pc, val);
             return false;
         }
     }
     if (ref->pc != get_gpr(32)){
         printf("error inst: "
-               "\n" FMT_PADDR ": " FMT_WORD,
+               "\n" FMT_PADDR ": " FMT_WORD"\n",
                pc, val);
         return false;
     }
