@@ -3,6 +3,7 @@ module add_with_Cout #(parameter DATA_LEN=32)(
     input  [DATA_LEN-1:0]   OP_B,
     input                   Cin,
     output [DATA_LEN-1:0]   Sum,
+    output                  overflow,
     output                  Cout
 );
 
@@ -47,5 +48,7 @@ generate
         end
     end
 endgenerate
+
+assign overflow = ((a[DATA_LEN-1]==b[DATA_LEN-1])&(a[DATA_LEN-1]!=Sum[DATA_LEN-1]));
 
 endmodule //adadd_with_Cin

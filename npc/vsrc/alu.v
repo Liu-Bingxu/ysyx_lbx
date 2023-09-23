@@ -25,6 +25,7 @@ localparam FILLER_LEN = DATA_LEN-1;
 // arithmetic
 wire [DATA_LEN-1:0] 	Sum;
 wire                	Cout;
+wire                    overflow;
 
 //logic
 wire [DATA_LEN-1:0]     res_and;
@@ -46,11 +47,12 @@ wire                    res_geu;
 reg [DATA_LEN-1:0]      res_reg;
 
 add_with_Cout #(DATA_LEN)add_sub(
-    .OP_A 	( NUM_A ),
-    .OP_B 	( NUM_B ),
-    .Cin  	( OP    ),
-    .Sum  	( Sum   ),
-    .Cout 	( Cout  )
+    .OP_A 	    ( NUM_A     ),
+    .OP_B 	    ( NUM_B     ),
+    .Cin  	    ( OP        ),
+    .Sum  	    ( Sum       ),
+    .overflow   ( overflow  ),
+    .Cout 	    ( Cout      )
 );
 
 assign res_and = NUM_A & NUM_B;
@@ -65,19 +67,19 @@ buck_shift #(DATA_LEN,SHAMT_LEN)u_buck_shift(
     .data_out 	( res_shift             )
 );
 
-assign res_lt  = {{FILLER_LEN{1'b0}},Sum[DATA_LEN-1]};
+assign res_lt  = {{FILLER_LEN{1'b0}},((overflow)?((~NUM_A[DATA_LEN-1])&NUM_B[DATA_LEN-1]):Sum[DATA_LEN-1])};
 assign res_ltu = {{FILLER_LEN{1'b0}},(~Cout)};
 assign res_cmp = (is_sign)?res_lt:res_ltu;
 
 assign res_eq  = (Sum==0)?1'b1:1'b0;
 assign res_neq = (~res_eq);
 
-assign res_ge  = (~Sum[DATA_LEN-1]);
+assign res_ge  = ((overflow)?(NUM_A[DATA_LEN-1]&(~NUM_B[DATA_LEN-1])):(~Sum[DATA_LEN-1]));
 assign res_geu = Cout;
 
 assign out_eq  = res_eq;
 assign out_ge  = res_ge;
-assign out_lt  = Sum[DATA_LEN-1];
+assign out_lt  = ((overflow)?((~NUM_A[DATA_LEN-1])&NUM_B[DATA_LEN-1]):Sum[DATA_LEN-1]);
 assign out_ltu = (~Cout);
 assign out_neq = res_neq;
 assign out_geu = res_geu;
