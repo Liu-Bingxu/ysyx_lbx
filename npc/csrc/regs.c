@@ -52,7 +52,7 @@ void isa_reg_display(void)
 
 bool isa_difftest_checkregs(CPU_state *ref,paddr_t pc){
     word_t val;
-    // pmem_read(pc, &val);
+    pmem_read(pc, &val);
     // for (int i = 0; i < 32; i++)
     //     printf("%-4s : %-12u(" FMT_WORD ")\n", regs[i], ref->gpr[i], ref->gpr[i]);
     // printf("pc   : %-12u(" FMT_WORD ")\n", ref->pc,ref->pc);
