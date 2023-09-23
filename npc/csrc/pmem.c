@@ -14,19 +14,23 @@ void pmem_read(uint32_t raddr,uint32_t *rdata){
 
 void pmem_write(uint32_t waddr, uint32_t wdata,char wmask){
     waddr &= (~0x80000003U);
-    switch (wmask)
-    {
-    case 0x1:
-        pmem[waddr] = (wdata & 0xffU);
-        break;
-    case 0x3:
-        (*((uint16_t *)(pmem + waddr))) = (wdata & 0xffffU);
-        break;
-    case 0xf:
-        (*((uint32_t *)(pmem + waddr))) = wdata;
-    default:
-        assert(0);
-        break;
-    }
+    // switch (wmask){
+    // case 0x1:
+    //     pmem[waddr] = (wdata & 0xffU);
+    //     break;
+    // case 0x3:
+    //     (*((uint16_t *)(pmem + waddr))) = (wdata & 0xffffU);
+    //     break;
+    // case 0xf:
+    //     (*((uint32_t *)(pmem + waddr))) = wdata;
+    // default:
+    //     // assert(0);
+    //     printf("send wwth %d\n", wmask);
+    //     break;
+    // }
+    if(wmask==0xf)(*((uint32_t *)(pmem + waddr))) = wdata;
+    else if(wmask==0x3)(*((uint16_t *)(pmem + waddr))) = (wdata & 0xffffU);
+    else if(wmask==0x1)pmem[waddr] = (wdata & 0xffU);
+    else printf("send wwth %d\n", wmask);
     return;
 }
