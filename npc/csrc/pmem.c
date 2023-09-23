@@ -31,7 +31,6 @@ void pmem_write(uint32_t waddr, uint32_t wdata,char wmask){
     if(wmask==0xf)(*((uint32_t *)(pmem + waddr))) = wdata;
     else if(wmask==0x3)(*((uint16_t *)(pmem + waddr))) = (wdata & 0xffffU);
     else if(wmask==0x1)pmem[waddr] = (wdata & 0xffU);
-    // else printf("send wwth %d\n", wmask);
     else assert(0);
     return;
 }

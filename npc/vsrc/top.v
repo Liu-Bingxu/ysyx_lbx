@@ -118,15 +118,16 @@ exu #(DATA_LEN)u_exu(
 );
 
 monitor u_monitor(
-    .clk        	( sys_clk     ),
-    .store_sign 	( store_sign  ),
-    .store_addr 	( dest_data   ),
-    .store_data 	( src1        ),
-    .addr_load  	( addr_load   ),
-    .PC_out     	( PC_out      ),
-    .inst_in    	( inst_in     ),
-    .pre_data   	( pre_data    ),
-    .ebreak     	( ebreak      )
+    .clk        	( sys_clk           ),
+    .store_sign 	( store_sign        ),
+    .store_addr 	( dest_data         ),
+    .store_data 	( src1              ),
+    .addr_load  	( addr_load         ),
+    .PC_out     	( PC_out            ),
+    .inst_in    	( inst_in           ),
+    .pre_data   	( pre_data          ),
+    .is_load        ( control_sign[14]  ),
+    .ebreak     	( ebreak            )
 );
 
 
