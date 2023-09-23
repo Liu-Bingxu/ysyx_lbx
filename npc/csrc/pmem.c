@@ -17,10 +17,10 @@ void pmem_write(uint32_t waddr, uint32_t wdata,char wmask){
     switch (wmask)
     {
     case 0x1:
-        pmem[waddr] = (wdata & 0xfU);
+        pmem[waddr] = (wdata & 0xffU);
         break;
     case 0x3:
-        (*((uint16_t *)(pmem + waddr))) = (wdata & 0xffU);
+        (*((uint16_t *)(pmem + waddr))) = (wdata & 0xffffU);
         break;
     case 0xf:
         (*((uint32_t *)(pmem + waddr))) = wdata;

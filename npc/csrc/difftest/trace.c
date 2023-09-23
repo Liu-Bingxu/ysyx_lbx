@@ -253,20 +253,23 @@ void init_ftrace(const char *ELF_FILE){
 
 #ifdef CONFIG_MTRACE
 
-void Log_mem_read(int addr){
+void Log_mem_read(paddr_t addr){
     word_t val;
-    pmem(addr,&val);
-    Log_mem(addr, "Read  Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, val);
+    pmem_read(addr,&val);
+    Log_mem("Read  Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, val);
 }
 
-void Log_mem_wirte(int addr,int data){
-    Log_mem(addr,"Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, data);
+void Log_mem_wirte(paddr_t addr,word_t data,char wmask){
+    if(wmask==0x1)Log_mem("Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, (data&0xff));
+    else if(wmask==0x3)Log_mem("Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, (data&0xffff));
+    else if(wmask==0xf)Log_mem("Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, data);
+    else panic("error size");
 }
 
 #else
 
 void Log_mem_read(int addr){}
-void Log_mem_wirte(int addr, int data){}
+void Log_mem_wirte(int addr, int data,int wmask){}
 
 #endif
 
