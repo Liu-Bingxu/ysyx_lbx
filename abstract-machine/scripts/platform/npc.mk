@@ -26,6 +26,6 @@ image: $(IMAGE).elf
 
 run:image
 	@$(shell if [ ! -d $(NPCDIR)/RTL_build/build ]; then mkdir -p $(NPCDIR)/RTL_build/build ;fi)
-	$(MAKE) -C $(NPC_HOME) run ARGS="-w $(NPCDIR)/RTL_build/wave.vcd -l $(NPCFLAGS) $(B) -e $(IMAGE).elf" IMG=$(IMAGE).bin ISA=$(ISA) BUILD_DIR=$(NPCDIR)/RTL_build
+	$(MAKE) -C $(NPC_HOME) run ARGS="-w $(NPCDIR)/RTL_build/$(NAME)-wave.vcd -l $(NPCFLAGS) $(B) -e $(IMAGE).elf" IMG=$(IMAGE).bin ISA=$(ISA) BUILD_DIR=$(NPCDIR)/RTL_build
 
 
