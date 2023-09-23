@@ -15,7 +15,7 @@ LDFLAGS   += --gc-sections -e _start
 CFLAGS += -DMAINARGS=\"$(mainargs)\"
 
 NPCFLAGS += $(shell dirname $(IMAGE).elf)/npc-log.txt
-NPCDIR = $(dir $(abspath NPCFLAGS))
+NPCDIR = $(addsuffix $(NAME)-RTL_build,$(dir $(abspath NPCFLAGS)))
 
 .PHONY: $(AM_HOME)/am/src/riscv/npc/trm.c
 
@@ -25,7 +25,8 @@ image: $(IMAGE).elf
 	@$(OBJCOPY) -S --set-section-flags .bss=alloc,contents -O binary $(IMAGE).elf $(IMAGE).bin
 
 run:image
-	@$(shell if [ ! -d $(NPCDIR)/RTL_build/build ]; then mkdir -p $(NPCDIR)/RTL_build/build ;fi)
-	$(MAKE) -C $(NPC_HOME) run ARGS="-w $(NPCDIR)/RTL_build/$(NAME)-wave.vcd -l $(NPCFLAGS) $(B) -e $(IMAGE).elf" IMG=$(IMAGE).bin ISA=$(ISA) BUILD_DIR=$(NPCDIR)/RTL_build
+	$(shell if [ ! -d $(NPCDIR)/build ]; then mkdir -p $(NPCDIR)/build ;fi)
+	echo $(NPCDIR)
+	$(MAKE) -C $(NPC_HOME) run ARGS="-w $(NPCDIR)/$(NAME)-wave.vcd -l $(NPCFLAGS) $(B) -e $(IMAGE).elf" IMG=$(IMAGE).bin ISA=$(ISA) BUILD_DIR=$(NPCDIR) name=$(NAME)-
 
 

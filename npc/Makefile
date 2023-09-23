@@ -26,7 +26,7 @@ MY_LDFLAGS=$(call LD_add,$(LIBS))
 all:
 	@echo "Write this Makefile by your self."
 
-sim:$(BUILD_DIR)/$(NAME)-wave.vcd
+sim:$(BUILD_DIR)/$(name)wave.vcd
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
 # @echo "Write this Makefile by your self."
 
@@ -34,15 +34,15 @@ sim:$(BUILD_DIR)/$(NAME)-wave.vcd
 verilate: $(BUILD_DIR)/.stamp.verilate
 
 .PHONY:run
-run:sim $(BUILD_DIR)/$(NAME)-wave.vcd
+run:sim $(BUILD_DIR)/$(name)wave.vcd
 
 .PHONY:waves
-waves: $(BUILD_DIR)/$(NAME)-wave.vcd
+waves: $(BUILD_DIR)/$(name)wave.vcd
 	@echo
 	@echo "### WAVES ###"
-	gtkwave $(BUILD_DIR)/$(NAME)-wave.vcd
+	gtkwave $(BUILD_DIR)/$(name)wave.vcd
 
-$(BUILD_DIR)/$(NAME)-wave.vcd: $(BUILD_DIR)/build/V$(TOPNAME) $(IMG)
+$(BUILD_DIR)/$(name)wave.vcd: $(BUILD_DIR)/build/V$(TOPNAME) $(IMG)
 	@echo
 	@echo "### SIMULATING ###"
 	@$(BUILD_DIR)/build/V$(TOPNAME) $(ARGS) $(IMG) +verilator+rand+reset+2
