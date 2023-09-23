@@ -33,7 +33,7 @@ extern void device_update();
 void step_and_dump_wave(){
     top->eval();
     contextp->timeInc(1);
-    // tfp->dump(contextp->time());
+    tfp->dump(contextp->time());
 }
 
 static void statistic(){
@@ -51,9 +51,9 @@ void sim_exit(int code)
 {
     step_and_dump_wave();
     top->final();
-    // tfp->close();
+    tfp->close();
     delete contextp;
-    // delete tfp;
+    delete tfp;
     exit(code);
 }
 
@@ -66,11 +66,11 @@ void assert_fail_msg(){
 
 void sim_init(int argc, char *argv[]){
     contextp = new VerilatedContext;
-    // tfp = new VerilatedVcdC;
+    tfp = new VerilatedVcdC;
     top = new Vtop;
     contextp->traceEverOn(true);
     contextp->commandArgs(argc, argv);
-    // top->trace(tfp, 0);
+    top->trace(tfp, 0);
     init_gpr(top);
     top->sys_clk = 0;
     top->sys_rst_n = 1;
