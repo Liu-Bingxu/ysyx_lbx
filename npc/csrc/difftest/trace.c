@@ -268,8 +268,8 @@ void Log_mem_wirte(paddr_t addr,word_t data,char wmask){
 
 #else
 
-void Log_mem_read(int addr){}
-void Log_mem_wirte(int addr, int data,int wmask){}
+void Log_mem_read(paddr_t addr) {}
+void Log_mem_wirte(paddr_t addr, word_t data, char wmask) {}
 
 #endif
 
