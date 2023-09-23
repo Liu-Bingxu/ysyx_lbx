@@ -139,7 +139,7 @@ void ftrace_watch(paddr_t pc, paddr_t pc_jump){
 }
 
 void symbol_list_push(symbol_list *list,char *name,word_t first_addr,word_t func_size){
-    printf("name is %s\n", name);
+    // printf("name is %s\n", name);
     symbol_node *_new = (symbol_node *)malloc(sizeof(symbol_node));
     int len=strlen(name);
     _new->name=(char *)malloc(len+1);
