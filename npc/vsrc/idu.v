@@ -174,8 +174,10 @@ assign is_shift = sll|slli|srl|srli|sra|srai;
 assign LR       = sll|slli;
 assign AL       = inst[30];
 
-assign control_sign = {is_or,is_xor,is_and,LR,AL,is_shift,is_unsign,is_cmp,is_blt,is_bltu,
-                        is_beq,is_bne,is_bge,is_bgeu,is_load,is_byte,is_half,is_word};
+assign control_sign = {is_word,is_half,is_byte,is_load,is_bgeu,is_bge,is_bne,is_beq,is_bltu,is_blt,
+                        is_cmp,is_unsign,is_shift,AL,LR,is_and,is_xor,is_or};          
+// assign control_sign = {is_or,is_xor,is_and,LR,AL,is_shift,is_unsign,is_cmp,is_blt,is_bltu,
+//                         is_beq,is_bne,is_bge,is_bgeu,is_load,is_byte,is_half,is_word};
 
 assign store_sign = {sw,sh,sb,S_flag};
 
