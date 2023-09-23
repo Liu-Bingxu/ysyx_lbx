@@ -116,7 +116,7 @@ void init_monitor(Vtop *top, VerilatedVcdC *tfp, int argc, char *argv[]){
     long img_size=load_img();
     init_sdb();
     init_disasm(MUXDEF(CONFIG_RV64, "riscv64", "riscv32") "-pc-linux-gnu");
-    // tfp->open(wave_file);
+    tfp->open(wave_file);
     sim_rst();
     // isa_reg_display();
     init_difftest(diff_so_file, img_size, difftest_port);
