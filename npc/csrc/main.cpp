@@ -33,7 +33,7 @@ extern int  is_exit_status_bad();
 
 void step_and_dump_wave(){
     top->eval();
-    printf("Hello\n");
+    // printf("Hello\n");
     contextp->timeInc(1);
     tfp->dump(contextp->time());
 }
