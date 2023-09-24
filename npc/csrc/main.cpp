@@ -29,6 +29,7 @@ extern void irangbuf_printf();
 extern void irangbuf_write(const char *buf);
 extern void ftrace_watch(paddr_t pc,paddr_t pc_jump);
 extern void device_update();
+extern int  is_exit_status_bad();
 
 void step_and_dump_wave(){
     top->eval();
@@ -48,21 +49,22 @@ static void statistic(){
         Log("Finish running in less than 1 us and can not calculate the simulation frequency");
 }
 
-void sim_exit(int code)
+void sim_exit()
 {
     step_and_dump_wave();
     top->final();
     tfp->close();
     delete contextp;
     delete tfp;
-    exit(code);
+    exit(is_exit_status_bad());
 }
 
 void assert_fail_msg(){
     isa_reg_display();
     statistic();
     IFDEF(CONFIG_ITRACE, irangbuf_printf());
-    sim_exit(-1);
+    set_npc_state(NPC_ABORT, get_gpr(32), -1);
+    sim_exit();
 }
 
 void sim_init(int argc, char *argv[]){
@@ -130,7 +132,7 @@ static void exec_once(char *p,paddr_t pc){
     printf("%s\n", p);
 #endif
     // pmem_read(top->PC_out, &top->inst_in);
-    printf("%d\n", g_nr_guest_inst);
+    // printf("%d\n", g_nr_guest_inst);
     top->sys_clk = !top->sys_clk;
     step_and_dump_wave();
     // printf("%d\n", g_nr_guest_inst);
@@ -245,5 +247,5 @@ int main(int argc, char *argv[]){
     // }
     // top->sys_clk = !top->sys_clk;
     sdb_mainloop();
-    sim_exit(0);
+    sim_exit();
 }
