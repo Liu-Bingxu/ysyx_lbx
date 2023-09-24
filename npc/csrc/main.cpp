@@ -32,6 +32,7 @@ extern void device_update();
 
 void step_and_dump_wave(){
     top->eval();
+    // printf("Hello\n");
     contextp->timeInc(1);
     tfp->dump(contextp->time());
 }
@@ -108,6 +109,7 @@ void halt(int code,int pc){
 
 static void exec_once(char *p,paddr_t pc){
     // pmem_read(top->PC_out, &top->inst_in);
+    printf("%d\n", g_nr_guest_inst);
     top->sys_clk = !top->sys_clk;
     step_and_dump_wave();
     // pmem_read(top->PC_out, &top->inst_in);
