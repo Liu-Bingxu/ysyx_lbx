@@ -38,7 +38,7 @@ static char *rl_gets(){
 }
 
 static int cmd_c(char *args){
-    while (npc_state.state!=NPC_END){
+    while (npc_state.state==NPC_STOP){
         cpu_exec(-1);
     }
     return 0;

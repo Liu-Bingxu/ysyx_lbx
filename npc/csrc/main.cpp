@@ -111,6 +111,7 @@ void halt(int code,int pc){
 }
 
 static void exec_once(char *p,paddr_t pc){
+    // printf("H\n");
 #ifdef CONFIG_ITRACE
     p += snprintf(p, 128, FMT_WORD ":", (pc));
     int ilen = 4;
