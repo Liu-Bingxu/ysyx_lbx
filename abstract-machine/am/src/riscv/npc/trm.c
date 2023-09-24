@@ -2,7 +2,7 @@
 #include <klib-macros.h>
 // #include "npc.h"
 
-// #include <riscv/riscv.h> // the macro `ISA_H` is defined in CFLAGS
+#include <riscv/riscv.h> // the macro `ISA_H` is defined in CFLAGS
 
 extern char _heap_start;
 int main(const char *args);
