@@ -1,4 +1,5 @@
 #include "pmem.h"
+#include "device.h"
 
 static char pmem[PMEM_SIZE];
 
@@ -14,6 +15,7 @@ void pmem_read(uint32_t raddr,uint32_t *rdata){
 }
 
 void pmem_write(uint32_t waddr, uint32_t wdata,char wmask){
+    if(waddr==SERIAL_ADDR){serial_out(wdata);return;}
     waddr &= (~0x80000003U);
     assert(waddr < PMEM_SIZE);
     // switch (wmask){
