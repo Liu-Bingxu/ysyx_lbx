@@ -35,8 +35,7 @@ typedef union{
     };
 } printf_char;
 
-void
-init_sdb();
+void init_sdb();
 
 bool check_watchpoint();
 
