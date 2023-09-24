@@ -8,6 +8,8 @@ void *guest_to_host(paddr_t addr){
 }
 
 void pmem_read(uint32_t raddr,uint32_t *rdata){
+    if(raddr==TIMER_ADDR){(*rdata)=get_timer_reg(0);return;}
+    if(raddr==(TIMER_ADDR+4)){(*rdata)=get_timer_reg(1);return;}
     raddr &= (~0x80000003U);
     assert(raddr < PMEM_SIZE);
     (*rdata) = (*((uint32_t *)(pmem + raddr)));
@@ -16,6 +18,8 @@ void pmem_read(uint32_t raddr,uint32_t *rdata){
 
 void pmem_write(uint32_t waddr, uint32_t wdata,char wmask){
     if(waddr==SERIAL_ADDR){serial_out(wdata);return;}
+    if((waddr==TIMER_ADDR)&&(wdata==0)){get_uptime();return;}
+    if((waddr==TIMER_ADDR)&&(wdata==1)){get_rtc();return;}
     waddr &= (~0x80000003U);
     assert(waddr < PMEM_SIZE);
     // switch (wmask){

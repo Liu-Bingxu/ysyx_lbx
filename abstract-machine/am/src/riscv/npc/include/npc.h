@@ -3,6 +3,7 @@
 
 #define DAVICE_BASE     0xa0000000
 
-#define SERIAL_ADDR     (DAVICE_BASE+0x0)
+#define SERIAL_ADDR     (DAVICE_BASE+0x000)
+#define TIMER_ADDR      (DAVICE_BASE+0x100)
 
 #endif
