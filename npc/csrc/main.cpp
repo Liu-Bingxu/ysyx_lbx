@@ -35,7 +35,7 @@ void step_and_dump_wave(){
     top->eval();
     // printf("Hello\n");
     contextp->timeInc(1);
-    tfp->dump(contextp->time());
+    IFDEF(CONFIG_VCD_GET, tfp->dump(contextp->time()));
 }
 
 static void statistic(){
@@ -53,9 +53,9 @@ void sim_exit()
 {
     step_and_dump_wave();
     top->final();
-    tfp->close();
+    IFDEF(CONFIG_VCD_GET, tfp->close());
     delete contextp;
-    delete tfp;
+    IFDEF(CONFIG_VCD_GET, delete tfp);
     statistic();
     exit(is_exit_status_bad());
 }
@@ -70,11 +70,11 @@ void assert_fail_msg(){
 
 void sim_init(int argc, char *argv[]){
     contextp = new VerilatedContext;
-    tfp = new VerilatedVcdC;
+    IFDEF(CONFIG_VCD_GET, tfp = new VerilatedVcdC);
     top = new Vtop;
     contextp->traceEverOn(true);
     contextp->commandArgs(argc, argv);
-    top->trace(tfp, 0);
+    IFDEF(CONFIG_VCD_GET, top->trace(tfp, 0));
     init_gpr(top);
     top->sys_clk = 0;
     top->sys_rst_n = 1;
