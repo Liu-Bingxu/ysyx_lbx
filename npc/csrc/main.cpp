@@ -56,6 +56,7 @@ void sim_exit()
     tfp->close();
     delete contextp;
     delete tfp;
+    statistic();
     exit(is_exit_status_bad());
 }
 

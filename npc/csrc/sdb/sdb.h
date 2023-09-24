@@ -4,6 +4,7 @@
 #include "common.h"
 #include "debug.h"
 #include "pmem.h"
+#include "utils.h"
 
 typedef struct token {
   int type;

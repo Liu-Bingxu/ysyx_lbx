@@ -44,6 +44,7 @@ static int cmd_c(char *args){
 
 static int cmd_q(char *args){
     IFDEF(CONFIG_FTRACE, delete_symbol_list());
+    set_npc_state(NPC_QUIT, 0, 0);
     sim_exit();
     return 0;
 }
