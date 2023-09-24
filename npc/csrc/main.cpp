@@ -209,12 +209,12 @@ void cpu_exec(uint64_t n)
         npc_state.state = NPC_RUNNING;
     }
 
-    uint64_t timer_start = get_time();
+    IFDEF(CONFIG_GET_TIMER, uint64_t timer_start = get_time());
 
     execute(n);
 
-    uint64_t timer_end = get_time();
-    g_timer += timer_end - timer_start;
+    IFDEF(CONFIG_GET_TIMER, uint64_t timer_end = get_time());
+    IFDEF(CONFIG_GET_TIMER, g_timer += timer_end - timer_start);
 
     switch (npc_state.state){
     case NPC_RUNNING:

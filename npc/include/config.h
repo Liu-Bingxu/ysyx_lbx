@@ -8,5 +8,6 @@
 // #define CONFIG_MTRACE       1
 // #define CONFIG_DIFFTEST     1
 // #define CONFIG_VCD_GET      1
+// #define CONFIG_GET_TIMER    1
 
 #endif
