@@ -15,6 +15,8 @@ LDFLAGS   += --gc-sections -e _start
 CFLAGS += -DMAINARGS=\"$(mainargs)\"
 # CXXFLAGS+=-mstrict-align -mno-unaligned-access
 
+# LIBS+=am/src/riscv/npc
+
 NPCFLAGS += $(shell dirname $(IMAGE).elf)/npc-log.txt
 NPCDIR = $(addsuffix $(NAME)-RTL_build,$(dir $(abspath NPCFLAGS)))
 
