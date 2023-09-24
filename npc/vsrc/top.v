@@ -1,13 +1,12 @@
 module top#(parameter DATA_LEN=32) (
     input                   sys_clk,
-    input                   sys_rst_n,
-    input  [DATA_LEN-1:0]   inst_in,
-    // output [DATA_LEN-1:0]   vaddr,
-    output [DATA_LEN-1:0]   PC_out,
-
-    output [DATA_LEN-1:0]   src2_use
-
+    input                   sys_rst_n
+    // input  [DATA_LEN-1:0]   inst_in,
+    // output [DATA_LEN-1:0]   PC_out
 );
+
+wire [DATA_LEN-1:0] PC_out;
+wire [DATA_LEN-1:0] inst_in;
 
 reg  rst_n_s1, rst_n_s2;
 wire rst_n;
@@ -33,10 +32,12 @@ wire [DATA_LEN-1:0] 	operand1;
 wire [DATA_LEN-1:0] 	operand2;
 wire [DATA_LEN-1:0] 	operand3;
 wire [DATA_LEN-1:0] 	operand4;
+wire [17:0]         	control_sign;
+wire [3:0]          	store_sign;
 wire                	inst_jump_flag;
+wire                    jump_without;
 wire                	ebreak;
-wire                	op1;
-wire                	op2;
+wire                	op;
 
 wire [DATA_LEN-1:0] 	PC_S;
 wire [DATA_LEN-1:0] 	PC_D;
@@ -47,11 +48,11 @@ wire                	dest_wen;
 wire                	Jump_flag;
 wire [DATA_LEN-1:0] 	dest_data;
 wire [DATA_LEN-1:0] 	Jump_PC;
+wire [DATA_LEN-1:0] 	addr_load;
+wire [DATA_LEN-1:0]     pre_data;
 
 assign PC_out = PC_D;
-//
-assign src2_use = src2;
-//
+
 regs #(DATA_LEN)u_regs(
     .clk       	( sys_clk    ),
     .rst_n     	( rst_n      ),
@@ -69,7 +70,7 @@ idu #(DATA_LEN)u_idu(
     // .rst_n    	( rst_n             ),
     .inst     	    ( inst_fetch        ),
     .src1     	    ( src1              ),
-    // .src2     	( src2              ),
+    .src2     	    ( src2              ),
     .PC_S           ( PC_S              ),
     .PC             ( PC_now            ),
     .rs1      	    ( rs1               ),
@@ -79,10 +80,13 @@ idu #(DATA_LEN)u_idu(
     .operand2 	    ( operand2          ),
     .operand3       ( operand3          ),
     .operand4       ( operand4          ),
+    .control_sign   ( control_sign      ),
     .inst_jump_flag ( inst_jump_flag    ),
+    .jump_without   ( jump_without      ),
+    .store_sign     ( store_sign        ),
     .ebreak         ( ebreak            ),
-    .op1            ( op1               ),
-    .op2            ( op2               )
+    .dest_wen       ( dest_wen          ),
+    .op             ( op                )
 );
 
 ifu #(DATA_LEN)u_ifu(
@@ -97,22 +101,35 @@ ifu #(DATA_LEN)u_ifu(
     .inst_fetch 	( inst_fetch  )
 );
 
-
 exu #(DATA_LEN)u_exu(
-    .clk                ( sys_clk           ),
     .operand1  	        ( operand1          ),
     .operand2  	        ( operand2          ),
     .operand3       	( operand3          ),
     .operand4       	( operand4          ),
-    .op1            	( op1               ),
-    .op2            	( op2               ),
+    .op             	( op                ),
     .inst_jump_flag 	( inst_jump_flag    ),
-    .dest_wen  	        ( dest_wen          ),
+    .jump_without       ( jump_without      ),
     .Jump_flag 	        ( Jump_flag         ),
+    .addr_load      	( addr_load         ),
+    .Control_signal 	( control_sign      ),
+    .pre_data       	( pre_data          ),
     .dest_data 	        ( dest_data         ),
-    .ebreak             ( ebreak            ),
     .Jump_PC   	        ( Jump_PC           )
 );
+
+monitor u_monitor(
+    .clk        	( sys_clk           ),
+    .store_sign 	( store_sign        ),
+    .store_addr 	( dest_data         ),
+    .store_data 	( src2              ),
+    .addr_load  	( addr_load         ),
+    .PC_out     	( PC_out            ),
+    .inst_in    	( inst_in           ),
+    .pre_data   	( pre_data          ),
+    .is_load        ( control_sign[14]  ),
+    .ebreak     	( ebreak            )
+);
+
 
 
 endmodule //top

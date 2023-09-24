@@ -139,7 +139,7 @@ void ftrace_watch(paddr_t pc, paddr_t pc_jump){
 }
 
 void symbol_list_push(symbol_list *list,char *name,word_t first_addr,word_t func_size){
-    printf("name is %s\n", name);
+    // printf("name is %s\n", name);
     symbol_node *_new = (symbol_node *)malloc(sizeof(symbol_node));
     int len=strlen(name);
     _new->name=(char *)malloc(len+1);
@@ -235,11 +235,11 @@ void init_ftrace(const char *ELF_FILE){
     fclose(elf_file);
 
     //text list
-    symbol_node *now=symbol_tab_list.head;
-    for(int i=0;i<symbol_tab_list.node_num;i++){
-        printf("FUNC: %s, Addr from "FMT_PADDR" to "FMT_PADDR"\n",now->name,now->first_addr,now->end_addr);
-        now=now->next;
-    }
+    // symbol_node *now=symbol_tab_list.head;
+    // for(int i=0;i<symbol_tab_list.node_num;i++){
+    //     printf("FUNC: %s, Addr from "FMT_PADDR" to "FMT_PADDR"\n",now->name,now->first_addr,now->end_addr);
+    //     now=now->next;
+    // }
 
     if(can_func_trace)Log(ANSI_FMT("ELF file open and symbol tab OK", ANSI_FG_GREEN));
     else Log(ANSI_FMT("elf read error can't read function", ANSI_FG_RED));
@@ -253,20 +253,28 @@ void init_ftrace(const char *ELF_FILE){
 
 #ifdef CONFIG_MTRACE
 
-void Log_mem_read(int addr){
+void Log_mem_read(paddr_t addr){
     word_t val;
-    pmem(addr,&val);
-    Log_mem(addr, "Read  Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, val);
+    pmem_read(addr,&val);
+    Log_mem("Read  Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, val);
 }
 
-void Log_mem_wirte(int addr,int data){
-    Log_mem(addr,"Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, data);
+void Log_mem_wirte(paddr_t addr,word_t data,char wmask){
+    if(wmask==0x1)Log_mem("Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, (data&0xff));
+    else if(wmask==0x2)Log_mem("Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr+1, (data&0xff));
+    else if(wmask==0x4)Log_mem("Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr+2, (data&0xff));
+    else if(wmask==0x8)Log_mem("Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr+3, (data&0xff));
+    else if(wmask==0x3)Log_mem("Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, (data&0xffff));
+    else if(wmask==0x6)Log_mem("Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr+1, (data&0xffff));
+    else if(wmask==0xc)Log_mem("Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr+2, (data&0xffff));
+    else if(wmask==0xf)Log_mem("Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, data);
+    else panic("error size");
 }
 
 #else
 
-void Log_mem_read(int addr){}
-void Log_mem_wirte(int addr, int data){}
+void Log_mem_read(paddr_t addr) {}
+void Log_mem_wirte(paddr_t addr, word_t data, char wmask) {}
 
 #endif
 

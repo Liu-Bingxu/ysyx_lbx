@@ -32,6 +32,7 @@ extern void device_update();
 
 void step_and_dump_wave(){
     top->eval();
+    printf("Hello\n");
     contextp->timeInc(1);
     tfp->dump(contextp->time());
 }
@@ -74,7 +75,7 @@ void sim_init(int argc, char *argv[]){
     init_gpr(top);
     top->sys_clk = 0;
     top->sys_rst_n = 1;
-    pmem_read(top->PC_out, &top->inst_in);
+    // pmem_read(top->PC_out, &top->inst_in);
     init_monitor(top,tfp,argc, argv);
 }
 
@@ -107,10 +108,12 @@ void halt(int code,int pc){
 }
 
 static void exec_once(char *p,paddr_t pc){
-    pmem_read(top->PC_out, &top->inst_in);
+    // pmem_read(top->PC_out, &top->inst_in);
+    printf("%d\n", g_nr_guest_inst);
     top->sys_clk = !top->sys_clk;
     step_and_dump_wave();
-    pmem_read(top->PC_out, &top->inst_in);
+    printf("%d\n", g_nr_guest_inst);
+    // pmem_read(top->PC_out, &top->inst_in);
     top->sys_clk = !top->sys_clk;
     step_and_dump_wave();
 #ifdef CONFIG_ITRACE
@@ -160,7 +163,7 @@ static void execute(uint64_t n)
     {
         char *p = (char *)malloc(128);
         paddr_t pc = get_gpr(32);
-        paddr_t dnpc = top->PC_out;
+        paddr_t dnpc = top->rootp->top__DOT__PC_out;
         exec_once(p, pc);
         g_nr_guest_inst++;
         trace_and_difftest(p, pc, dnpc);

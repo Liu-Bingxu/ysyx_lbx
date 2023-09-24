@@ -52,22 +52,28 @@ void isa_reg_display(void)
 
 bool isa_difftest_checkregs(CPU_state *ref,paddr_t pc){
     word_t val;
-    // pmem_read(pc, &val);
+    pmem_read(pc, &val);
     // for (int i = 0; i < 32; i++)
     //     printf("%-4s : %-12u(" FMT_WORD ")\n", regs[i], ref->gpr[i], ref->gpr[i]);
     // printf("pc   : %-12u(" FMT_WORD ")\n", ref->pc,ref->pc);
     for (int i = 0; i < MUXDEF(CONFIG_RVE, 16, 32); i++){
         if (ref->gpr[i] != get_gpr(i)){
             printf("error inst: "
-                   "\n" FMT_PADDR ": " FMT_WORD,
+                   "\n" FMT_PADDR ": " FMT_WORD"\n",
                    pc, val);
+            for (int i = 0; i < 32; i++)
+                printf("%-4s : %-12u(" FMT_WORD ")\n", regs[i], ref->gpr[i], ref->gpr[i]);
+            printf("pc   : %-12u(" FMT_WORD ")\n", ref->pc,ref->pc);
             return false;
         }
     }
     if (ref->pc != get_gpr(32)){
         printf("error inst: "
-               "\n" FMT_PADDR ": " FMT_WORD,
+               "\n" FMT_PADDR ": " FMT_WORD"\n",
                pc, val);
+        for (int i = 0; i < 32; i++)
+            printf("%-4s : %-12u(" FMT_WORD ")\n", regs[i], ref->gpr[i], ref->gpr[i]);
+        printf("pc   : %-12u(" FMT_WORD ")\n", ref->pc,ref->pc);
         return false;
     }
     return true;
