@@ -13,7 +13,7 @@ void sdb_set_batch_mode(){
 void init_regex();
 void init_wp_pool();
 
-extern void sim_exit(int code);
+extern void sim_exit();
 
 extern void delete_symbol_list();
 extern void cpu_exec(uint64_t n);
@@ -44,7 +44,8 @@ static int cmd_c(char *args){
 
 static int cmd_q(char *args){
     IFDEF(CONFIG_FTRACE, delete_symbol_list());
-    sim_exit(0);
+    set_npc_state(NPC_QUIT, 0, 0);
+    sim_exit();
     return 0;
 }
 

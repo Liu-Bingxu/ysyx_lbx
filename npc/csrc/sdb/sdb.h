@@ -4,6 +4,7 @@
 #include "common.h"
 #include "debug.h"
 #include "pmem.h"
+#include "utils.h"
 
 typedef struct token {
   int type;
@@ -34,8 +35,7 @@ typedef union{
     };
 } printf_char;
 
-void
-init_sdb();
+void init_sdb();
 
 bool check_watchpoint();
 

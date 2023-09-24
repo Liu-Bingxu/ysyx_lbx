@@ -16,7 +16,6 @@
 #include <common.h>
 #include "utils.h"
 #include <sys/time.h>
-#include "time.h"
 
 // IFDEF(CONFIG_TIMER_CLOCK_GETTIME,
 //     static_assert(CLOCKS_PER_SEC == 1000000, "CLOCKS_PER_SEC != 1000000"));

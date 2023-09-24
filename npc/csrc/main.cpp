@@ -29,12 +29,13 @@ extern void irangbuf_printf();
 extern void irangbuf_write(const char *buf);
 extern void ftrace_watch(paddr_t pc,paddr_t pc_jump);
 extern void device_update();
+extern int  is_exit_status_bad();
 
 void step_and_dump_wave(){
     top->eval();
-    printf("Hello\n");
+    // printf("Hello\n");
     contextp->timeInc(1);
-    tfp->dump(contextp->time());
+    IFDEF(CONFIG_VCD_GET, tfp->dump(contextp->time()));
 }
 
 static void statistic(){
@@ -48,30 +49,32 @@ static void statistic(){
         Log("Finish running in less than 1 us and can not calculate the simulation frequency");
 }
 
-void sim_exit(int code)
+void sim_exit()
 {
     step_and_dump_wave();
     top->final();
-    tfp->close();
+    IFDEF(CONFIG_VCD_GET, tfp->close());
     delete contextp;
-    delete tfp;
-    exit(code);
+    IFDEF(CONFIG_VCD_GET, delete tfp);
+    statistic();
+    exit(is_exit_status_bad());
 }
 
 void assert_fail_msg(){
     isa_reg_display();
     statistic();
     IFDEF(CONFIG_ITRACE, irangbuf_printf());
-    sim_exit(-1);
+    set_npc_state(NPC_ABORT, get_gpr(32), -1);
+    sim_exit();
 }
 
 void sim_init(int argc, char *argv[]){
     contextp = new VerilatedContext;
-    tfp = new VerilatedVcdC;
+    IFDEF(CONFIG_VCD_GET, tfp = new VerilatedVcdC);
     top = new Vtop;
     contextp->traceEverOn(true);
     contextp->commandArgs(argc, argv);
-    top->trace(tfp, 0);
+    IFDEF(CONFIG_VCD_GET, top->trace(tfp, 0));
     init_gpr(top);
     top->sys_clk = 0;
     top->sys_rst_n = 1;
@@ -108,14 +111,6 @@ void halt(int code,int pc){
 }
 
 static void exec_once(char *p,paddr_t pc){
-    // pmem_read(top->PC_out, &top->inst_in);
-    printf("%d\n", g_nr_guest_inst);
-    top->sys_clk = !top->sys_clk;
-    step_and_dump_wave();
-    printf("%d\n", g_nr_guest_inst);
-    // pmem_read(top->PC_out, &top->inst_in);
-    top->sys_clk = !top->sys_clk;
-    step_and_dump_wave();
 #ifdef CONFIG_ITRACE
     p += snprintf(p, 128, FMT_WORD ":", (pc));
     int ilen = 4;
@@ -124,18 +119,47 @@ static void exec_once(char *p,paddr_t pc){
     pmem_read(pc, &val);
     uint8_t *inst = (uint8_t *)&val;
     for (i = ilen - 1; i >= 0; i--){
-        p += snprintf(p, 4, " %02x", inst[i]);
+    p += snprintf(p, 4, " %02x", inst[i]);
     }
     int ilen_max = MUXDEF(CONFIG_ISA_x86, 8, 4);
     int space_len = ilen_max - ilen;
     if (space_len < 0)
-        space_len = 0;
+    space_len = 0;
     space_len = space_len * 3 + 1;
     memset(p, ' ', space_len);
     p += space_len;
-
+    
     disassemble(p, p + 128 - p,pc, (uint8_t *)&val, ilen);
+    printf("%s\n", p);
 #endif
+    // pmem_read(top->PC_out, &top->inst_in);
+    // printf("%d\n", g_nr_guest_inst);
+    top->sys_clk = !top->sys_clk;
+    step_and_dump_wave();
+    // printf("%d\n", g_nr_guest_inst);
+    // pmem_read(top->PC_out, &top->inst_in);
+    top->sys_clk = !top->sys_clk;
+    step_and_dump_wave();
+// #ifdef CONFIG_ITRACE
+    // p += snprintf(p, 128, FMT_WORD ":", (pc));
+    // int ilen = 4;
+    // int i;
+    // word_t val;
+    // pmem_read(pc, &val);
+    // uint8_t *inst = (uint8_t *)&val;
+    // for (i = ilen - 1; i >= 0; i--){
+        // p += snprintf(p, 4, " %02x", inst[i]);
+    // }
+    // int ilen_max = MUXDEF(CONFIG_ISA_x86, 8, 4);
+    // int space_len = ilen_max - ilen;
+    // if (space_len < 0)
+        // space_len = 0;
+    // space_len = space_len * 3 + 1;
+    // memset(p, ' ', space_len);
+    // p += space_len;
+// 
+    // disassemble(p, p + 128 - p,pc, (uint8_t *)&val, ilen);
+// #endif
 }
 
 #ifdef CONFIG_WATCHPOINT
@@ -150,7 +174,7 @@ static void trace_and_difftest(const char *buf,paddr_t pc, paddr_t dnpc) {
 #ifdef CONFIG_ITRACE_COND
     if (ITRACE_COND) { log_write("%s\n", buf); }
 #endif
-    if (g_print_step) { IFDEF(CONFIG_ITRACE, printf("%s\n", buf));}
+    // if (g_print_step) { IFDEF(CONFIG_ITRACE, printf("%s\n", buf));}
     IFDEF(CONFIG_ITRACE, irangbuf_write(buf));
     IFDEF(CONFIG_DIFFTEST, difftest_step((pc), dnpc));
     IFDEF(CONFIG_WATCHPOINT, cpu_check_watchpoint());
@@ -224,5 +248,5 @@ int main(int argc, char *argv[]){
     // }
     // top->sys_clk = !top->sys_clk;
     sdb_mainloop();
-    sim_exit(0);
+    sim_exit();
 }
