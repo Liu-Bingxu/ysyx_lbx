@@ -8,12 +8,14 @@ void *guest_to_host(paddr_t addr){
 
 void pmem_read(uint32_t raddr,uint32_t *rdata){
     raddr &= (~0x80000003U);
+    assert(raddr < PMEM_SIZE);
     (*rdata) = (*((uint32_t *)(pmem + raddr)));
     return;
 }
 
 void pmem_write(uint32_t waddr, uint32_t wdata,char wmask){
     waddr &= (~0x80000003U);
+    assert(waddr < PMEM_SIZE);
     // switch (wmask){
     // case 0x1:
     //     pmem[waddr] = (wdata & 0xffU);

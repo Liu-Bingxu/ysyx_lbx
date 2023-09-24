@@ -32,7 +32,7 @@ extern void device_update();
 
 void step_and_dump_wave(){
     top->eval();
-    // printf("Hello\n");
+    printf("Hello\n");
     contextp->timeInc(1);
     tfp->dump(contextp->time());
 }
@@ -108,13 +108,6 @@ void halt(int code,int pc){
 }
 
 static void exec_once(char *p,paddr_t pc){
-    // pmem_read(top->PC_out, &top->inst_in);
-    printf("%d\n", g_nr_guest_inst);
-    top->sys_clk = !top->sys_clk;
-    step_and_dump_wave();
-    // pmem_read(top->PC_out, &top->inst_in);
-    top->sys_clk = !top->sys_clk;
-    step_and_dump_wave();
 #ifdef CONFIG_ITRACE
     p += snprintf(p, 128, FMT_WORD ":", (pc));
     int ilen = 4;
@@ -123,18 +116,47 @@ static void exec_once(char *p,paddr_t pc){
     pmem_read(pc, &val);
     uint8_t *inst = (uint8_t *)&val;
     for (i = ilen - 1; i >= 0; i--){
-        p += snprintf(p, 4, " %02x", inst[i]);
+    p += snprintf(p, 4, " %02x", inst[i]);
     }
     int ilen_max = MUXDEF(CONFIG_ISA_x86, 8, 4);
     int space_len = ilen_max - ilen;
     if (space_len < 0)
-        space_len = 0;
+    space_len = 0;
     space_len = space_len * 3 + 1;
     memset(p, ' ', space_len);
     p += space_len;
-
+    
     disassemble(p, p + 128 - p,pc, (uint8_t *)&val, ilen);
+    printf("%s\n", p);
 #endif
+    // pmem_read(top->PC_out, &top->inst_in);
+    printf("%d\n", g_nr_guest_inst);
+    top->sys_clk = !top->sys_clk;
+    step_and_dump_wave();
+    // printf("%d\n", g_nr_guest_inst);
+    // pmem_read(top->PC_out, &top->inst_in);
+    top->sys_clk = !top->sys_clk;
+    step_and_dump_wave();
+// #ifdef CONFIG_ITRACE
+    // p += snprintf(p, 128, FMT_WORD ":", (pc));
+    // int ilen = 4;
+    // int i;
+    // word_t val;
+    // pmem_read(pc, &val);
+    // uint8_t *inst = (uint8_t *)&val;
+    // for (i = ilen - 1; i >= 0; i--){
+        // p += snprintf(p, 4, " %02x", inst[i]);
+    // }
+    // int ilen_max = MUXDEF(CONFIG_ISA_x86, 8, 4);
+    // int space_len = ilen_max - ilen;
+    // if (space_len < 0)
+        // space_len = 0;
+    // space_len = space_len * 3 + 1;
+    // memset(p, ' ', space_len);
+    // p += space_len;
+// 
+    // disassemble(p, p + 128 - p,pc, (uint8_t *)&val, ilen);
+// #endif
 }
 
 #ifdef CONFIG_WATCHPOINT
