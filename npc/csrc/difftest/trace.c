@@ -261,7 +261,12 @@ void Log_mem_read(paddr_t addr){
 
 void Log_mem_wirte(paddr_t addr,word_t data,char wmask){
     if(wmask==0x1)Log_mem("Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, (data&0xff));
+    else if(wmask==0x2)Log_mem("Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr+1, (data&0xff));
+    else if(wmask==0x4)Log_mem("Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr+2, (data&0xff));
+    else if(wmask==0x8)Log_mem("Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr+3, (data&0xff));
     else if(wmask==0x3)Log_mem("Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, (data&0xffff));
+    else if(wmask==0x6)Log_mem("Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr+1, (data&0xffff));
+    else if(wmask==0xc)Log_mem("Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr+2, (data&0xffff));
     else if(wmask==0xf)Log_mem("Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, data);
     else panic("error size");
 }

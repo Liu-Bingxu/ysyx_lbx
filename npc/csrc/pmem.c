@@ -30,7 +30,12 @@ void pmem_write(uint32_t waddr, uint32_t wdata,char wmask){
     // }
     if(wmask==0xf)(*((uint32_t *)(pmem + waddr))) = wdata;
     else if(wmask==0x3)(*((uint16_t *)(pmem + waddr))) = (wdata & 0xffffU);
+    else if(wmask==0x6)(*((uint16_t *)(pmem + waddr + 1))) = (wdata & 0xffffU);
+    else if(wmask==0xc)(*((uint16_t *)(pmem + waddr + 2))) = (wdata & 0xffffU);
     else if(wmask==0x1)pmem[waddr] = (wdata & 0xffU);
+    else if(wmask==0x2)pmem[waddr+1] = (wdata & 0xffU);
+    else if(wmask==0x4)pmem[waddr+2] = (wdata & 0xffU);
+    else if(wmask==0x8)pmem[waddr+3] = (wdata & 0xffU);
     else assert(0);
     return;
 }
