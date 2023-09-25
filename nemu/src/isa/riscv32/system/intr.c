@@ -25,7 +25,7 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc) {
     cpu.mepc = epc;
     cpu.mcause = NO;
 
-    IFDEF(CONFIG_ETRACE, Log_func(ANSI_FMT("ENTER the irq in the PC is: ", ANSI_FG_BLUE) ANSI_FMT(FMT_PADDR, ANSI_FG_YELLOW) ", the macuse is " ANSI_FMT("%d", ANSI_FG_GREEN)"\n",epc,NO));
+    IFDEF(CONFIG_ETRACE, Log_func(ANSI_FMT("ENTER the irq in the PC is: ", ANSI_FG_BLUE) ANSI_FMT(FMT_PADDR, ANSI_FG_YELLOW) ANSI_FMT(", the macuse is ",ANSI_FG_BLUE) ANSI_FMT("%d", ANSI_FG_GREEN)"\n",epc,NO));
 
     return cpu.mtvec;
 }
