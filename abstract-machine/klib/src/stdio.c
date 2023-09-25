@@ -189,7 +189,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
 
 int printf(const char *fmt, ...) {
     assert(fmt != NULL);
-    char buf[1024];
+    char buf[1024*100];
     va_list ap;
     va_start(ap, fmt);
     int res = vsprintf(buf, fmt, ap);
