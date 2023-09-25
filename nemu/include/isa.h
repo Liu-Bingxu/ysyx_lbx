@@ -54,6 +54,7 @@ word_t isa_query_intr();
 word_t get_csr(word_t csr_num);
 void set_csr(word_t csr_num, word_t mask);
 void clr_csr(word_t csr_num, word_t mask);
+void wirte_csr(word_t csr_num, word_t num);
 // myself
 
 // difftest

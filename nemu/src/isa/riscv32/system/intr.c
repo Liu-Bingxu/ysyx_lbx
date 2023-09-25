@@ -87,3 +87,23 @@ void clr_csr(word_t csr_num, word_t mask){
         panic("unkown CSR number: %u", csr_num);
     }
 }
+
+void wirte_csr(word_t csr_num,word_t num){
+    csr_num &= 0xfff;
+    switch (csr_num){
+    case 0x300:
+        cpu.mstatus = num;
+        return;
+    case 0x305:
+        cpu.mtvec = num;
+        return;
+    case 0x341:
+        cpu.mepc = num;
+        return;
+    case 0x342:
+        cpu.mcause = num;
+        return;
+    default:
+        panic("unkown CSR number: %u", csr_num);
+    }
+}
