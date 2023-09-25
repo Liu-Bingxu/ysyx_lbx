@@ -15,16 +15,19 @@
 
 #include <isa.h>
 #include "debug.h"
+#include "utils.h"
 
 word_t isa_raise_intr(word_t NO, vaddr_t epc) {
-  /* TODO: Trigger an interrupt/exception with ``NO''.
-   * Then return the address of the interrupt/exception vector.
-   */
+    /* TODO: Trigger an interrupt/exception with ``NO''.
+     * Then return the address of the interrupt/exception vector.
+     */
 
-  cpu.mepc = epc;
-  cpu.mcause = NO;
+    cpu.mepc = epc;
+    cpu.mcause = NO;
 
-  return cpu.mtvec;
+    IFDEF(CONFIG_ETRACE, Log_func(ANSI_FMT("ENTER the irq in the PC is: ", ANSI_FG_BLUE) ANSI_FMT(FMT_PADDR, ANSI_FG_YELLOW) ", the macuse is " ANSI_FMT("%d", ANSI_FG_GREEN),epc,NO));
+
+    return cpu.mtvec;
 }
 
 word_t isa_query_intr() {
