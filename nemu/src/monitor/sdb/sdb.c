@@ -53,7 +53,10 @@ static int cmd_c(char *args) {
 
 static int cmd_q(char *args) {
     IFDEF(CONFIG_FTRACE,delete_symbol_list());
-    exit(0);
+    // exit(0);
+    bool succes_test = true;
+    set_nemu_state(NEMU_QUIT, isa_reg_str2val("pc", &succes_test), 0);
+    return -1;
 }
 
 static int cmd_si(char *args){
