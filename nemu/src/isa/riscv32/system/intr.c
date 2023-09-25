@@ -14,15 +14,76 @@
 ***************************************************************************************/
 
 #include <isa.h>
+#include "debug.h"
 
 word_t isa_raise_intr(word_t NO, vaddr_t epc) {
   /* TODO: Trigger an interrupt/exception with ``NO''.
    * Then return the address of the interrupt/exception vector.
    */
 
-  return 0;
+  cpu.mepc = epc;
+  cpu.mcause = NO;
+
+  return cpu.mtvec;
 }
 
 word_t isa_query_intr() {
   return INTR_EMPTY;
+}
+
+word_t get_csr(word_t csr_num){
+    csr_num &= 0xfff;
+    switch (csr_num){
+    case 0x300:
+        return cpu.mstatus;
+    case 0x305:
+        return cpu.mtvec;
+    case 0x341:
+        return cpu.mepc;
+    case 0x342:
+        return cpu.mcause;
+    default:
+        panic("unkown CSR number: %u", csr_num);
+    }
+}
+
+void set_csr(word_t csr_num,word_t mask){
+    csr_num &= 0xfff;
+    switch (csr_num){
+    case 0x300:
+        cpu.mstatus|=mask;
+        return;
+    case 0x305:
+        cpu.mtvec|=mask;
+        return;
+    case 0x341:
+        cpu.mepc|=mask;
+        return;
+    case 0x342:
+        cpu.mcause|=mask;
+        return;
+    default:
+        panic("unkown CSR number: %u", csr_num);
+    }
+}
+
+void clr_csr(word_t csr_num, word_t mask){
+    csr_num &= 0xfff;
+    mask = ~mask;
+    switch (csr_num){
+    case 0x300:
+        cpu.mstatus &= mask;
+        return;
+    case 0x305:
+        cpu.mtvec &= mask;
+        return;
+    case 0x341:
+        cpu.mepc &= mask;
+        return;
+    case 0x342:
+        cpu.mcause &= mask;
+        return;
+    default:
+        panic("unkown CSR number: %u", csr_num);
+    }
 }
