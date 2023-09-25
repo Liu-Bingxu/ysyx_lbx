@@ -24,9 +24,9 @@ bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
     for (int i = 0; i < MUXDEF(CONFIG_RVE, 16, 32);i++){
         if(ref_r->gpr[i]!=cpu.gpr[i]){
             for (int i = 0; i < 32;i++){
-                printf("%-4s : %-12u(0x%012x)\n", regs[i], ref_r->gpr[i], ref_r->gpr[i]);
+                printf("%-4s : %-12u(0x%08x)\n", regs[i], ref_r->gpr[i], ref_r->gpr[i]);
             }
-            printf("pc   : %-12u(0x%012x)\n", ref_r->pc,ref_r->pc);
+            printf("pc   : %-12u(0x%08x)\n", ref_r->pc,ref_r->pc);
             printf("error inst: "
                    "\n" FMT_PADDR ": " FMT_WORD "\n",
                    pc, vaddr_read(pc, 4));
@@ -35,9 +35,9 @@ bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
     }
     if(ref_r->pc!=cpu.pc){
         for (int i = 0; i < 32; i++){
-            printf("%-4s : %-12u(0x%012x)\n", regs[i], ref_r->gpr[i], ref_r->gpr[i]);
+            printf("%-4s : %-12u(0x%08x)\n", regs[i], ref_r->gpr[i], ref_r->gpr[i]);
         }
-        printf("pc   : %-12u(0x%012x)\n", ref_r->pc, ref_r->pc);
+        printf("pc   : %-12u(0x%08x)\n", ref_r->pc, ref_r->pc);
         printf("error inst: "
                "\n" FMT_PADDR ": " FMT_WORD"\n"
                 , pc, vaddr_read(pc, 4));
