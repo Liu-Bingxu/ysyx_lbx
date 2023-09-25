@@ -111,6 +111,7 @@ void halt(int code,int pc){
 }
 
 static void exec_once(char *p,paddr_t pc){
+    // printf("H\n");
 #ifdef CONFIG_ITRACE
     p += snprintf(p, 128, FMT_WORD ":", (pc));
     int ilen = 4;
@@ -209,12 +210,12 @@ void cpu_exec(uint64_t n)
         npc_state.state = NPC_RUNNING;
     }
 
-    uint64_t timer_start = get_time();
+    IFDEF(CONFIG_GET_TIMER, uint64_t timer_start = get_time());
 
     execute(n);
 
-    uint64_t timer_end = get_time();
-    g_timer += timer_end - timer_start;
+    IFDEF(CONFIG_GET_TIMER, uint64_t timer_end = get_time());
+    IFDEF(CONFIG_GET_TIMER, g_timer += timer_end - timer_start);
 
     switch (npc_state.state){
     case NPC_RUNNING:
