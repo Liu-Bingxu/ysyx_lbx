@@ -148,6 +148,8 @@ static int decode_exec(Decode *s) {
     INSTPAT("??????? ????? ????? 110 ????? 11100 11", csrrsi , I, R(rd) = get_csr(imm); if ((BITS(s->isa.inst.val, 19, 15)) != 0) set_csr(imm, BITS(s->isa.inst.val, 19, 15)););
     INSTPAT("??????? ????? ????? 111 ????? 11100 11", csrrci , I, R(rd) = get_csr(imm); if ((BITS(s->isa.inst.val, 19, 15)) != 0) clr_csr(imm, BITS(s->isa.inst.val, 19, 15)););
 
+    INSTPAT("0011000 00010 00000 000 00000 11100 11", mret   , N, s->dnpc = get_csr(0x341););
+
     INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , N, s->dnpc=isa_raise_intr(11,s->pc););
     // myself
 
