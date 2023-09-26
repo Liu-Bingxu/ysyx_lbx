@@ -10,6 +10,18 @@ int SYS_yield(){
     return 0;
 }
 
+int SYS_write(int fd,void *buf,size_t count){
+    const char *buff = buf;
+    if ((fd == 1) || (fd == 2)){
+        for (int i = 0; i < count;i++){
+            putch(*buff);
+            buff++;
+        }
+        return count;
+    }
+    return -1;
+}
+
 const char *sys_call_name[] = {
     TOSTRING(sys_exit),
     TOSTRING(sys_yield),
@@ -47,6 +59,10 @@ void do_syscall(Context *c) {
         SYS_exit(a[1]);
     case sys_yield:
         c->GPRx=SYS_yield();
+        c->mepc += 4;
+        break;
+    case sys_write:
+        c->GPRx = SYS_write(a[1], (void *)a[2], a[3]);
         c->mepc += 4;
         break;
     default:
