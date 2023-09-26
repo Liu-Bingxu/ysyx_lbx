@@ -13,24 +13,24 @@ int SYS_yield(){
 const char *sys_call_name[] = {
     TOSTRING(sys_exit),
     TOSTRING(sys_yield),
-    // sys_open,
-    // sys_read,
-    // sys_write,
-    // sys_kill,
-    // sys_getpid,
-    // sys_close,
-    // sys_lseek,
-    // sys_brk,
-    // sys_fstat,
-    // sys_time,
-    // sys_signal,
-    // sys_execve,
-    // sys_fork,
-    // sys_link,
-    // sys_unlink,
-    // sys_wait,
-    // sys_times,
-    // sys_gettimeofday
+    TOSTRING(sys_open),
+    TOSTRING(sys_read),
+    TOSTRING(sys_write),
+    TOSTRING(sys_kill),
+    TOSTRING(sys_getpid),
+    TOSTRING(sys_close),
+    TOSTRING(sys_lseek),
+    TOSTRING(sys_brk),
+    TOSTRING(sys_fstat),
+    TOSTRING(sys_time),
+    TOSTRING(sys_signal),
+    TOSTRING(sys_execve),
+    TOSTRING(sys_fork),
+    TOSTRING(sys_link),
+    TOSTRING(sys_unlink),
+    TOSTRING(sys_wait),
+    TOSTRING(sys_times),
+    TOSTRING(sys_gettimeofday)
 };
 
 // #define str(x) #x
@@ -47,11 +47,11 @@ void do_syscall(Context *c) {
         SYS_exit(a[1]);
     case sys_yield:
         c->GPRx=SYS_yield();
-        Log("%s", sys_call_name[a[0]]);
         c->mepc += 4;
         return;
     default:
         panic("Unhandled syscall ID = %d", a[0]);
-  }
+    }
+    Log("syscall the %s with %d %d %d return the %d", sys_call_name[a[0]], a[1], a[2], a[3], c->GPRx);
 }
 
