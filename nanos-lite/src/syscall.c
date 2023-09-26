@@ -23,7 +23,9 @@ int SYS_write(int fd,void *buf,size_t count){
 }
 
 int SYS_brk(intptr_t increment){
-    return 0;
+    if(increment==1048)
+        return 0;
+    return -1;
 }
 
 const char *sys_call_name[] = {
@@ -70,7 +72,7 @@ void do_syscall(Context *c) {
         c->mepc += 4;
         break;
     case sys_brk:
-        c->GPRx=SYS_brk(a[1]);
+        c->GPRx = SYS_brk(a[1]);
         c->mepc += 4;
         break;
     default:
