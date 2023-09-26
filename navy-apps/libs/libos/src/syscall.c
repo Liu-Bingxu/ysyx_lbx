@@ -72,7 +72,18 @@ int _write(int fd, void *buf, size_t count) {
 }
 
 void *_sbrk(intptr_t increment) {
-    return _syscall_(SYS_brk, increment, 0, 0);
+    extern uint8_t _end;
+    static void *program_break = 0;
+    if(program_break==0){
+        program_break = &_end;
+    }
+    int i=_syscall_(SYS_brk, increment, 0, 0);
+    if(i==0){
+        void *ptr = program_break;
+        program_break += increment;
+        return ptr;
+    }
+    return (void *)-1;
     //   return (void *)-1;
 }
 
