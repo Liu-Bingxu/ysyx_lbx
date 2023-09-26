@@ -23,8 +23,6 @@ int SYS_write(int fd,void *buf,size_t count){
 }
 
 int SYS_brk(intptr_t increment){
-    if(increment==1048)
-        return 0;
     return -1;
 }
 
