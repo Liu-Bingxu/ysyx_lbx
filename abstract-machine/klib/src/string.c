@@ -144,21 +144,28 @@ void *memcpy(void *out, const void *in, size_t n) {
 }
 
 void *memmove(void *dst, const void *src, size_t n) {
-    word_t main_cnt = n / sizeof(word_t);
-    word_t second_cnt = n % sizeof(word_t);
+    // word_t main_cnt = n / sizeof(word_t);
+    // word_t second_cnt = n % sizeof(word_t);
+    char *out = dst + n - 1;
+    const char *in = src + n - 1;
     if(dst!=src){
         if ((src<dst)&&((src+n)>dst)){
-            word_t *dest = dst + n - sizeof(word_t) ;
-            const word_t *rs = src + n - sizeof(word_t) ;
-            for (; main_cnt > 0; main_cnt--){
-                (*dest) = (*rs);
-                dest--;
-                rs--;
-            }
-            dest++;
-            rs++;
-            for (int i = 1; i <= second_cnt; i++){
-                *(((char *)dest) - i) = *(((char *)rs) - i);
+            // word_t *dest = dst + n - sizeof(word_t) ;
+            // const word_t *rs = src + n - sizeof(word_t) ;
+            // for (; main_cnt > 0; main_cnt--){
+            //     (*dest) = (*rs);
+            //     dest--;
+            //     rs--;
+            // }
+            // dest++;
+            // rs++;
+            // for (int i = 1; i <= second_cnt; i++){
+            //     *(((char *)dest) - i) = *(((char *)rs) - i);
+            // }
+            for (int i = 0; i < n;i++){
+                (*out) = (*in);
+                out--;
+                in--;
             }
         }
         else{
