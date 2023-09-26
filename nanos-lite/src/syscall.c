@@ -33,7 +33,7 @@ const char *sys_call_name[] = {
     // sys_gettimeofday
 };
 
-#define str(x) #x
+// #define str(x) #x
 
 void do_syscall(Context *c) {
     uintptr_t a[4];
@@ -47,7 +47,7 @@ void do_syscall(Context *c) {
         SYS_exit(a[1]);
     case sys_yield:
         c->GPRx=SYS_yield();
-        Log("%s", str(sys_yield));
+        Log("%s", sys_call_name[a[0]]);
         c->mepc += 4;
         return;
     default:
