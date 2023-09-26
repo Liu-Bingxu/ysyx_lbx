@@ -23,7 +23,7 @@ int SYS_write(int fd,void *buf,size_t count){
 }
 
 int SYS_brk(intptr_t increment){
-    return -1;
+    return 0;
 }
 
 const char *sys_call_name[] = {
