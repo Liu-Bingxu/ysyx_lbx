@@ -22,6 +22,10 @@ int SYS_write(int fd,void *buf,size_t count){
     return -1;
 }
 
+int SYS_brk(word_t increment){
+    return 0;
+}
+
 const char *sys_call_name[] = {
     TOSTRING(sys_exit),
     TOSTRING(sys_yield),
@@ -65,6 +69,9 @@ void do_syscall(Context *c) {
         c->GPRx = SYS_write(a[1], (void *)a[2], a[3]);
         c->mepc += 4;
         break;
+    case sys_brk:
+        c->GPRx=SYS_brk(a[1]);
+        c->mepc += 4;
     default:
         panic("Unhandled syscall ID = %d", a[0]);
     }
