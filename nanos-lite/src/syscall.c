@@ -72,6 +72,7 @@ void do_syscall(Context *c) {
     case sys_brk:
         c->GPRx=SYS_brk(a[1]);
         c->mepc += 4;
+        break;
     default:
         panic("Unhandled syscall ID = %d", a[0]);
     }
