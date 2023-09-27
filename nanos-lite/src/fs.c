@@ -40,13 +40,13 @@ static Finfo file_table[] __attribute__((used)) = {
     [FD_STDOUT] = {"stdout", 0, 0, invalid_read, serial_write},
     [FD_STDERR] = {"stderr", 0, 0, invalid_read, serial_write},
     [FD_FB] = {},
-    [FD_KEYBORAD] = {"/dev/events", 0, 0, events_read, invalid_write},
+    [FD_KEYBORAD] = {"/dev/events", 0, 0, invalid_read, invalid_write},
 #include "files.h"
 };
 
 int fs_open(const char *path,int flag,word_t mode){
     for (int i = 0; i < LENGTH(file_table);i++){
-        Log("Hello");
+        // Log("Hello");
         if (strcmp(path, file_table[i].name)==0){
             file_table[i].open_offset = 0;
             return i;
