@@ -13,8 +13,8 @@ int fs_write(int fd, const void *buf, size_t count);
 size_t fs_lseek(int fd, size_t offset, int whence);
 
 struct timeval{
-    long tv_sec;   /* seconds */
-    long tv_usec; /* microseconds */
+    uint32_t tv_sec;   /* seconds */
+    uint32_t tv_usec; /* microseconds */
 };
 
 #endif
