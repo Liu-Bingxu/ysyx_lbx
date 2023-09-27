@@ -19,7 +19,13 @@ uint32_t NDL_GetTicks() {
 }
 
 int NDL_PollEvent(char *buf, int len) {
-  return 0;
+    FILE *event_fp = fopen("/dev/events", "r");
+    int read_len = fread(buf, len, 1, event_fp);
+    fclose(event_fp);
+    if (read_len == 0)
+        return 0;
+    else
+        return 1;
 }
 
 void NDL_OpenCanvas(int *w, int *h) {
