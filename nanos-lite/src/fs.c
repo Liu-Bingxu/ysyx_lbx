@@ -6,6 +6,7 @@ typedef size_t (*WriteFn) (const void *buf, size_t offset, size_t len);
 extern size_t serial_write(const void *buf, size_t offset, size_t len);
 extern size_t events_read(void *buf, size_t offset, size_t len);
 extern size_t dispinfo_read(void *buf, size_t offset, size_t len);
+extern size_t fb_write(const void *buf, size_t offset, size_t len);
 
 typedef struct {
   char *name;
@@ -41,7 +42,7 @@ static Finfo file_table[] __attribute__((used)) = {
     [FD_STDIN] = {"stdin", 0, 0, invalid_read, invalid_write},
     [FD_STDOUT] = {"stdout", 0, 0, invalid_read, serial_write},
     [FD_STDERR] = {"stderr", 0, 0, invalid_read, serial_write},
-    [FD_FB] = {"/dev/fb"},
+    [FD_FB] = {"/dev/fb", 0, 0, invalid_read, fb_write},
     [FD_KEYBORAD] = {"/dev/events", 0, 0, events_read, invalid_write},
     [FD_DISPINFO] = {"/proc/dispinfo", 0, 0, dispinfo_read, invalid_write},
 #include "files.h"
@@ -138,11 +139,13 @@ long my_atoi(const char *args)
 }
 
 void init_fs() {
-    int fb_fp = fs_open("/proc/dispinfo", 0, 0);
+    int fb_info_fp = fs_open("/proc/dispinfo", 0, 0);
     char buf[64];
-    fs_read(fb_fp, buf, sizeof(buf));
+    fs_read(fb_info_fp, buf, sizeof(buf));
     long width = my_atoi(buf + 6);
     long height = my_atoi(buf + 17);
-    Log("the width is %ld, the height is %ld", width, height);
+    int fb_fp = fs_open("/dev/fb", 0, 0);
+    // Log("the width is %ld, the height is %ld", width, height);
+    file_table[fb_fp].size = width * height * 8;
     // TODO: initialize the size of /dev/fb
 }
