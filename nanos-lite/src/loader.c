@@ -11,9 +11,9 @@
 #endif
 
 static uintptr_t loader(PCB *pcb, const char *filename) {
-    Log("Hello");
     int fd = fs_open(filename, 0, 0);
     assert(fd > 0);
+    Log("Hello");
     int offset = fs_lseek(fd, 0, SEEK_SET);
     assert(offset == 0);
     Elf_Ehdr ehdr;
