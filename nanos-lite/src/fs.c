@@ -47,12 +47,14 @@ int fs_open(const char *path,int flag,word_t mode){
 int fs_read(int fd, void *buf, size_t count){
     if((file_table[fd].size-file_table[fd].open_offset)<count)
         count = file_table[fd].size - file_table[fd].open_offset;
+    file_table[fd].open_offset += count;
     return ramdisk_read(buf, file_table[fd].disk_offset + file_table[fd].open_offset, count);
 }
 
 int fs_write(int fd, const void *buf, size_t count){
     if ((file_table[fd].size - file_table[fd].open_offset) < count)
         count = file_table[fd].size - file_table[fd].open_offset;
+    file_table[fd].open_offset += count;
     return ramdisk_write(buf, file_table[fd].disk_offset + file_table[fd].open_offset, count);
 }
 
