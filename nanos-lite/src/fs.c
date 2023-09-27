@@ -45,8 +45,8 @@ static Finfo file_table[] __attribute__((used)) = {
 };
 
 int fs_open(const char *path,int flag,word_t mode){
-    Log("Hello");
     for (int i = 0; i < LENGTH(file_table);i++){
+        Log("Hello");
         if (strcmp(path, file_table[i].name)==0){
             file_table[i].open_offset = 0;
             return i;
