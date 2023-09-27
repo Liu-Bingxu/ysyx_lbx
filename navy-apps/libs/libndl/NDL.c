@@ -63,8 +63,8 @@ void NDL_OpenCanvas(int *w, int *h) {
         fscanf(dispinfo, "WIDTH:%d", &width);
         fscanf(dispinfo, "HEIGHT:%d", &height);
         fclose(dispinfo);
-        assert((*w) < width);
-        assert((*h) < height);
+        assert((*w) <= width);
+        assert((*h) <= height);
         screen_w = (*w)?(*w):width;
         screen_h = (*h)?(*h):height;
         start_x = (width - screen_w) / 2;
