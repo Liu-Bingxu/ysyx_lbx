@@ -7,4 +7,6 @@
 enum {SEEK_SET, SEEK_CUR, SEEK_END};
 #endif
 
+int get_file_descriptor(const char *path, int flag, word_t mode);
+
 #endif

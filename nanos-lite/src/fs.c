@@ -31,6 +31,17 @@ static Finfo file_table[] __attribute__((used)) = {
 #include "files.h"
 };
 
+int get_file_descriptor(const char *path,int flag,word_t mode){
+    for (int i = 0; i < LENGTH(file_table);i++){
+        if (strcmp(path, file_table[i].name)==0){
+            return i;
+        }
+    }
+    // return -1;
+    Log("the path file %s is zero", path);
+    assert(0);
+}
+
 void init_fs() {
   // TODO: initialize the size of /dev/fb
 }
