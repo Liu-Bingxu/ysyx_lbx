@@ -12,13 +12,16 @@
 
 static uintptr_t loader(PCB *pcb, const char *filename) {
     int fd = fs_open(filename, 0, 0);
+    assert(fd > 0);
+    int offset = fs_lseek(fd, 0, SEEK_SET);
+    assert(offset == 0);
     Elf_Ehdr ehdr;
     int len = fs_read(fd, &ehdr, sizeof(Elf_Ehdr));
     assert(len == sizeof(Elf_Ehdr));
     assert(*(uint32_t *)ehdr.e_ident == 0x464c457f);
     for (int i = 0; i < ehdr.e_phnum;i++){
         Elf_Phdr phdr;
-        int offset = fs_lseek(fd, ehdr.e_phoff + (i * ehdr.e_phentsize), SEEK_SET);
+        offset = fs_lseek(fd, ehdr.e_phoff + (i * ehdr.e_phentsize), SEEK_SET);
         assert(offset == (ehdr.e_phoff + (i * ehdr.e_phentsize)));
         // len = ramdisk_read(&phdr, ehdr.e_phoff + (i * ehdr.e_phentsize), sizeof(Elf_Phdr));
         len = fs_read(fd, &phdr, sizeof(Elf_Phdr));
