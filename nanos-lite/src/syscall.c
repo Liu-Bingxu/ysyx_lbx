@@ -12,11 +12,15 @@ int sys_yield(){
 }
 
 int sys_open(const char *path,int flag,word_t mode){
-    return get_file_descriptor(path, flag, mode);
+    return fs_open(path, flag, mode);
 }
 
-int sys_write(int fd,void *buf,size_t count){
-    const char *buff = buf;
+int sys_read(int fd,void *buf,size_t count){
+    return fs_read(fd, buf, count);
+}
+
+int sys_write(int fd,const void *buf,size_t count){
+    const char *buff = (const char *)buf;
     if ((fd == 1) || (fd == 2)){
         for (int i = 0; i < count;i++){
             putch(*buff);
@@ -24,7 +28,11 @@ int sys_write(int fd,void *buf,size_t count){
         }
         return count;
     }
-    return -1;
+    return fs_write(fd, buf, count);
+}
+
+int sys_lseek(int fd, size_t offset, int whence){
+    return fs_lseek(fd, offset, whence);
 }
 
 int sys_brk(intptr_t increment){
@@ -74,10 +82,16 @@ void do_syscall(Context *c) {
         c->GPRx=sys_yield();
         break;
     case SYS_open:
-        c->GPRx = sys_open(a[1],a[2],a[3]);
+        c->GPRx = sys_open((const char *)a[1],a[2],a[3]);
+        break;
+    case SYS_read:
+        c->GPRx = sys_read(a[1], (void *)a[2], a[3]);
         break;
     case SYS_write:
         c->GPRx = sys_write(a[1], (void *)a[2], a[3]);
+        break;
+    case SYS_lseek:
+        c->GPRx = sys_lseek(a[1], a[2], a[3]);
         break;
     case SYS_brk:
         c->GPRx = sys_brk(a[1]);

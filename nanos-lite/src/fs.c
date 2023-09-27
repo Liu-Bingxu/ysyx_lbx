@@ -9,6 +9,7 @@ typedef struct {
   size_t disk_offset;
   ReadFn read;
   WriteFn write;
+  size_t open_offset;
 } Finfo;
 
 enum {FD_STDIN, FD_STDOUT, FD_STDERR, FD_FB};
@@ -31,15 +32,52 @@ static Finfo file_table[] __attribute__((used)) = {
 #include "files.h"
 };
 
-int get_file_descriptor(const char *path,int flag,word_t mode){
+int fs_open(const char *path,int flag,word_t mode){
     for (int i = 0; i < LENGTH(file_table);i++){
         if (strcmp(path, file_table[i].name)==0){
+            file_table[i].open_offset = 0;
             return i;
         }
     }
     // return -1;
     Log("the path file %s is zero", path);
     assert(0);
+}
+
+int fs_read(int fd, void *buf, size_t count){
+    if((file_table[fd].size-file_table[fd].open_offset)<count)
+        count = file_table[fd].size - file_table[fd].open_offset;
+    return ramdisk_read(buf, file_table[fd].disk_offset + file_table[fd].open_offset, count);
+}
+
+int fs_write(int fd, const void *buf, size_t count){
+    if ((file_table[fd].size - file_table[fd].open_offset) < count)
+        count = file_table[fd].size - file_table[fd].open_offset;
+    return ramdisk_write(buf, file_table[fd].disk_offset + file_table[fd].open_offset, count);
+}
+
+size_t fs_lseek(int fd, size_t offset, int whence){
+    switch (whence){
+    case SEEK_SET:
+        file_table[fd].open_offset = offset;
+        break;
+    case SEEK_CUR:
+        file_table[fd].open_offset += offset;
+        break;
+    case SEEK_END:
+        file_table[fd].open_offset += (offset + file_table[fd].size);
+        break;
+    default:
+        panic("unknow value");
+        break;
+    }
+    if (file_table[fd].open_offset <= file_table[fd].size){
+        return file_table[fd].open_offset;
+    }
+    else{
+        file_table[fd].open_offset = file_table[fd].size;
+        return -1;
+    }
 }
 
 void init_fs() {
