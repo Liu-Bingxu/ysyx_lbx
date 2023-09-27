@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include "assert.h"
 #include "sys/time.h"
 
 static int evtdev = -1;
@@ -12,6 +13,7 @@ static int screen_w = 0, screen_h = 0;
 uint32_t NDL_GetTicks() {
     struct timeval tv;
     int succes = gettimeofday(&tv, NULL);
+    assert(succes == 0);
     uint32_t msec = tv.tv_sec * 1000 + tv.tv_usec / 1000;
     return msec;
 }
