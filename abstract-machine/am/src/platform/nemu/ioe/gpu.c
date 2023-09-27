@@ -38,7 +38,7 @@ void __am_gpu_config(AM_GPU_CONFIG_T *cfg) {
 }
 
 void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
-    printf("the x is %d, the y is %d, the w is %d, the h is %d\n", ctl->x, ctl->y, ctl->w, ctl->h);
+    // printf("the x is %d, the y is %d, the w is %d, the h is %d\n", ctl->x, ctl->y, ctl->w, ctl->h);
     assert((ctl->x + ctl->w) <= io_read(AM_GPU_CONFIG).width);
     assert((ctl->y + ctl->h) <= io_read(AM_GPU_CONFIG).height);
     const void *pixels = ctl->pixels;
