@@ -27,13 +27,19 @@ size_t events_read(void *buf, size_t offset, size_t len) {
     AM_INPUT_KEYBRD_T ev = io_read(AM_INPUT_KEYBRD);
     if(ev.keycode==0)return 0;
     char char_buf[40];
-    sprintf(char_buf,"%s %s\n", ev.keydown ? "kd" : "ku", keyname[ev.keycode]);
+    int write_len = sprintf(char_buf, "%s %s\n", ev.keydown ? "kd" : "ku", keyname[ev.keycode]);
+    len = (write_len < len) ? write_len : len;
     memcpy(buf, char_buf, len);
     return len;
 }
 
 size_t dispinfo_read(void *buf, size_t offset, size_t len) {
-  return 0;
+    AM_GPU_CONFIG_T gpu_cfg = io_read(AM_GPU_CONFIG);
+    char char_buf[40];
+    int write_len = sprintf(char_buf, "WIDTH:%d\n""HEIGHT:%d\n", gpu_cfg.width,gpu_cfg.height);
+    len = (write_len < len) ? write_len : len;
+    memcpy(buf, char_buf, len);
+    return len;
 }
 
 size_t fb_write(const void *buf, size_t offset, size_t len) {

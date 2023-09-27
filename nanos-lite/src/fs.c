@@ -5,6 +5,7 @@ typedef size_t (*WriteFn) (const void *buf, size_t offset, size_t len);
 
 extern size_t serial_write(const void *buf, size_t offset, size_t len);
 extern size_t events_read(void *buf, size_t offset, size_t len);
+extern size_t dispinfo_read(void *buf, size_t offset, size_t len);
 
 typedef struct {
   char *name;
@@ -21,7 +22,8 @@ enum
     FD_STDOUT,
     FD_STDERR,
     FD_FB,
-    FD_KEYBORAD
+    FD_KEYBORAD,
+    FD_DISPINFO,
 };
 
 size_t invalid_read(void *buf, size_t offset, size_t len) {
@@ -41,6 +43,7 @@ static Finfo file_table[] __attribute__((used)) = {
     [FD_STDERR] = {"stderr", 0, 0, invalid_read, serial_write},
     [FD_FB] = {"/dev/fb"},
     [FD_KEYBORAD] = {"/dev/events", 0, 0, events_read, invalid_write},
+    [FD_DISPINFO] = {"/proc/dispinfo", 0, 0, dispinfo_read, invalid_write},
 #include "files.h"
 };
 

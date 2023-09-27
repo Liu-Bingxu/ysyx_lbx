@@ -12,6 +12,7 @@
 static int evtdev = -1;
 static int fbdev = -1;
 static int screen_w = 0, screen_h = 0;
+static int start_x = 0, start_y = 0;
 
 uint32_t NDL_GetTicks() {
     struct timeval tv;
@@ -35,23 +36,40 @@ int NDL_PollEvent(char *buf, int len) {
 }
 
 void NDL_OpenCanvas(int *w, int *h) {
-  if (getenv("NWM_APP")) {
-    int fbctl = 4;
-    fbdev = 5;
-    screen_w = *w; screen_h = *h;
-    char buf[64];
-    int len = sprintf(buf, "%d %d", screen_w, screen_h);
-    // let NWM resize the window and create the frame buffer
-    write(fbctl, buf, len);
-    while (1) {
-      // 3 = evtdev
-      int nread = read(3, buf, sizeof(buf) - 1);
-      if (nread <= 0) continue;
-      buf[nread] = '\0';
-      if (strcmp(buf, "mmap ok") == 0) break;
+    if (getenv("NWM_APP")) {
+        int fbctl = 4;
+        fbdev = 5;
+        screen_w = *w;
+        screen_h = *h;
+        char buf[64];
+        int len = sprintf(buf, "%d %d", screen_w, screen_h);
+        // let NWM resize the window and create the frame buffer
+        write(fbctl, buf, len);
+        while (1){
+            // 3 = evtdev
+            int nread = read(3, buf, sizeof(buf) - 1);
+            if (nread <= 0)
+                continue;
+            buf[nread] = '\0';
+            if (strcmp(buf, "mmap ok") == 0)
+                break;
+        }
+        close(fbctl);
     }
-    close(fbctl);
-  }
+    else{
+        FILE *dispinfo = fopen("/proc/dispinfo", "r");
+        assert(dispinfo);
+        int width, height;
+        fscanf(dispinfo, "WIDTH:%d", &width);
+        fscanf(dispinfo, "HEIGHT:%d", &height);
+        fclose(dispinfo);
+        assert((*w) < width);
+        assert((*h) < height);
+        screen_w = (*w)?(*w):width;
+        screen_h = (*h)?(*h):height;
+        start_x = (width - screen_w) / 2;
+        start_y = (height - screen_h) / 2;
+    }
 }
 
 void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
