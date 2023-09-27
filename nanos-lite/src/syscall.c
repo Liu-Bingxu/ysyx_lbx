@@ -43,6 +43,16 @@ int sys_close(int fd){
     return 0;
 }
 
+int sys_gettimeofday(struct timeval *tv,void *tz){
+    if(tv!=NULL){
+        uint64_t us = io_read(AM_TIMER_UPTIME).us;
+        tv->tv_sec = us / 1000000;
+        tv->tv_usec = us % 1000000;
+        return 0;
+    }
+    return -1;
+}
+
 const char *sys_call_name[] = {
     TOSTRING(SYS_exit),
     TOSTRING(SYS_yield),
@@ -98,6 +108,9 @@ void do_syscall(Context *c) {
         break;
     case SYS_close:
         c->GPRx = sys_close(a[1]);
+        break;
+    case SYS_gettimeofday:
+        c->GPRx = sys_gettimeofday((struct timeval *)a[1], (void *)a[2]);
         break;
     default:
         panic("Unhandled syscall ID = %d", a[0]);
