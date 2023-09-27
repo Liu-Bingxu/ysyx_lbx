@@ -116,6 +116,6 @@ void do_syscall(Context *c) {
         panic("Unhandled syscall ID = %d", a[0]);
     }
     c->mepc += 4;
-    // Log("syscall the %s with %d %d %d return the %d", sys_call_name[a[0]], a[1], a[2], a[3], c->GPRx);
+    Log("syscall the %s with %d %d %d return the %d", sys_call_name[a[0]], a[1], a[2], a[3], c->GPRx);
 }
 
