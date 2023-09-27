@@ -20,7 +20,7 @@ int main(int argc , char* argv[]){
 
     // printf("the size of timeval is %d, the size of tv_sec is %d, the size of tv_usec is %d\n", sizeof(struct timeval), sizeof(tv.tv_sec), sizeof(tv.tv_usec));
 
-    uint64_t times = 1;
+    uint32_t times = 1;
 
     uint32_t rtc_old, rtc_new;
 
@@ -37,7 +37,7 @@ int main(int argc , char* argv[]){
             continue;
         }
         rtc_old = rtc_new;
-        printf("Hello world!! It is the %lld times\n", times);
+        printf("Hello world!! It is the %d times\n", times);
 
         times++;
     }
