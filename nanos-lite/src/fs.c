@@ -47,15 +47,17 @@ int fs_open(const char *path,int flag,word_t mode){
 int fs_read(int fd, void *buf, size_t count){
     if((file_table[fd].size-file_table[fd].open_offset)<count)
         count = file_table[fd].size - file_table[fd].open_offset;
+    size_t read_num=ramdisk_read(buf, file_table[fd].disk_offset + file_table[fd].open_offset, count);
     file_table[fd].open_offset += count;
-    return ramdisk_read(buf, file_table[fd].disk_offset + file_table[fd].open_offset, count);
+    return read_num;
 }
 
 int fs_write(int fd, const void *buf, size_t count){
     if ((file_table[fd].size - file_table[fd].open_offset) < count)
         count = file_table[fd].size - file_table[fd].open_offset;
+    size_t write_num=ramdisk_write(buf, file_table[fd].disk_offset + file_table[fd].open_offset, count);
     file_table[fd].open_offset += count;
-    return ramdisk_write(buf, file_table[fd].disk_offset + file_table[fd].open_offset, count);
+    return write_num;
 }
 
 size_t fs_lseek(int fd, size_t offset, int whence){
