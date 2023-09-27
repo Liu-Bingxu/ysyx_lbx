@@ -12,7 +12,6 @@
 
 static uintptr_t loader(PCB *pcb, const char *filename) {
     int fd = fs_open(filename, 0, 0);
-    Log("Hello");
     assert(fd > 0);
     int offset = fs_lseek(fd, 0, SEEK_SET);
     assert(offset == 0);
