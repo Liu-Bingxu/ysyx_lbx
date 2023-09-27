@@ -5,6 +5,9 @@
 #include <unistd.h>
 #include "assert.h"
 #include "sys/time.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 static int evtdev = -1;
 static int fbdev = -1;
@@ -22,7 +25,7 @@ int NDL_PollEvent(char *buf, int len) {
     // FILE *event_fp = fopen("/dev/events", "r");
     // int read_len = fread(buf, len, 1, event_fp);
     // fclose(event_fp);
-    int event_fp = open("/dev/events", "r",0);
+    int event_fp = open("/dev/events", 0, 0);
     int read_len = read(event_fp, buf, len);
     close(event_fp);
     if (read_len == 0)
