@@ -113,6 +113,36 @@ size_t fs_lseek(int fd, size_t offset, int whence){
     }
 }
 
+static int isnum(char argc)
+{
+    return ((argc >= 0x30) && (argc <= 0x39)) ? 1 : 0;
+}
+
+long my_atoi(const char *args)
+{
+    long res = 0;
+    for (int i = 0; i < 18; i++)
+    {
+        // printf("%-3d: %x\n", i, args[i]);
+        if (isnum(args[i]))
+        {
+            res *= 10;
+            res += (args[i] - 0x30);
+        }
+        else
+        {
+            return res;
+        }
+    }
+    return res;
+}
+
 void init_fs() {
-  // TODO: initialize the size of /dev/fb
+    int fb_fp = fs_open("/proc/dispinfo", 0, 0);
+    char buf[64];
+    fs_read(fb_fp, buf, sizeof(buf));
+    long width = my_atoi(buf + 6);
+    long height = my_atoi(buf + 17);
+    Log("the width is %ld, the height is %ld", width, height);
+    // TODO: initialize the size of /dev/fb
 }
