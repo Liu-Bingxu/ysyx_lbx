@@ -37,7 +37,8 @@ size_t dispinfo_read(void *buf, size_t offset, size_t len) {
     AM_GPU_CONFIG_T gpu_cfg = io_read(AM_GPU_CONFIG);
     char char_buf[40];
     int write_len = sprintf(char_buf, "WIDTH:%d\n""HEIGHT:%d\n", gpu_cfg.width,gpu_cfg.height);
-    Log("the size of width is %d\nthe size of height is %d\n", gpu_cfg.width, gpu_cfg.height);
+    Log("the size of width is %d, the size of height is %d", gpu_cfg.width, gpu_cfg.height);
+    Log("%s", char_buf);
     len = (write_len < len) ? write_len : len;
     memcpy(buf, char_buf, len);
     return len;
