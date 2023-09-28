@@ -33,7 +33,7 @@ static inline int maskToShift(uint32_t mask) {
 
 SDL_Surface* SDL_CreateRGBSurface(uint32_t flags, int width, int height, int depth,
     uint32_t Rmask, uint32_t Gmask, uint32_t Bmask, uint32_t Amask) {
-    assert(0);
+    // assert(0);
     assert(depth == 8 || depth == 32);
     SDL_Surface *s = malloc(sizeof(SDL_Surface));
     assert(s);
@@ -98,7 +98,7 @@ void SDL_FreeSurface(SDL_Surface *s) {
 }
 
 SDL_Surface* SDL_SetVideoMode(int width, int height, int bpp, uint32_t flags) {
-    assert(0);
+    // assert(0);
     if (flags & SDL_HWSURFACE)
         NDL_OpenCanvas(&width, &height);
     return SDL_CreateRGBSurface(flags, width, height, bpp,
