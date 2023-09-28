@@ -27,6 +27,7 @@ void render() {
   sprintf(fname, path, cur);
   slide = SDL_LoadBMP(fname);
   assert(slide);
+  printf("hello\n");
   SDL_UpdateRect(slide, 0, 0, 0, 0);
 }
 
@@ -52,8 +53,7 @@ int main() {
 
   render();
 
-  while(1)
-      ;
+//   while(1)
 
   while (1) {
     SDL_Event e;
