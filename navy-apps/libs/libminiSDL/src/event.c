@@ -2,6 +2,7 @@
 #include <SDL.h>
 #include "assert.h"
 #include "string.h"
+#include "stdio.h"
 
 #define keyname(k) #k,
 
@@ -31,6 +32,7 @@ int SDL_WaitEvent(SDL_Event *event) {
         event->type = SDL_KEYDOWN;
     }
     else{
+        printf("%s\n", buf);
         assert(0);
     }
     for (int i = 0; i < (sizeof(keyname) / sizeof(char *));i++){
