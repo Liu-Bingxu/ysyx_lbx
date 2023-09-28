@@ -30,7 +30,7 @@ size_t events_read(void *buf, size_t offset, size_t len) {
     int write_len = sprintf(char_buf, "%s %s\n", ev.keydown ? "kd" : "ku", keyname[ev.keycode]);
     // printf("%d\n", write_len);
     len = ((write_len + 1) < len) ? write_len + 1 : len;
-    // printf("%d\n", len);
+    printf("%d\n", len);
     memcpy(buf, char_buf, len);
     return len;
 }
