@@ -28,8 +28,9 @@ size_t events_read(void *buf, size_t offset, size_t len) {
     if(ev.keycode==0)return 0;
     char char_buf[40];
     int write_len = sprintf(char_buf, "%s %s\n", ev.keydown ? "kd" : "ku", keyname[ev.keycode]);
-    printf("%d", write_len);
+    printf("%d\n", write_len);
     len = ((write_len + 1) < len) ? write_len + 1 : len;
+    printf("%d\n", len);
     memcpy(buf, char_buf, len);
     return len;
 }
