@@ -85,6 +85,10 @@ void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
     // printf("befoe x is %d, y is %d\n", x, y);
     x += start_x;
     y += start_y;
+    if((w==0)&&(h==0)){
+        w = width;
+        h = height;
+    }
     // printf("after x is %d, y is %d\n", x, y);
     for (int i = 0; i < h;i++){
         lseek(fb_fp, (((y + i) * width * 4) + (x * 4)), SEEK_SET);

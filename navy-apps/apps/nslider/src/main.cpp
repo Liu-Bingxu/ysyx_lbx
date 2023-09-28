@@ -52,6 +52,9 @@ int main() {
 
   render();
 
+  while(1)
+      ;
+
   while (1) {
     SDL_Event e;
     SDL_WaitEvent(&e);
