@@ -74,7 +74,7 @@ SDL_Surface* SDL_CreateRGBSurface(uint32_t flags, int width, int height, int dep
 
 SDL_Surface* SDL_CreateRGBSurfaceFrom(void *pixels, int width, int height, int depth,
     int pitch, uint32_t Rmask, uint32_t Gmask, uint32_t Bmask, uint32_t Amask) {
-    assert(0);
+    // assert(0);
     SDL_Surface *s = SDL_CreateRGBSurface(SDL_PREALLOC, width, height, depth,
                                           Rmask, Gmask, Bmask, Amask);
     assert(pitch == s->pitch);
@@ -83,7 +83,7 @@ SDL_Surface* SDL_CreateRGBSurfaceFrom(void *pixels, int width, int height, int d
 }
 
 void SDL_FreeSurface(SDL_Surface *s) {
-    assert(0);
+    // assert(0);
   if (s != NULL) {
     if (s->format != NULL) {
       if (s->format->palette != NULL) {
