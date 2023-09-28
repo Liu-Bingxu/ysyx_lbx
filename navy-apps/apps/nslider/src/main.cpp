@@ -27,7 +27,7 @@ void render() {
   sprintf(fname, path, cur);
   slide = SDL_LoadBMP(fname);
   assert(slide);
-  printf("hello\n");
+//   printf("hello\n");
   SDL_UpdateRect(slide, 0, 0, 0, 0);
 }
 
