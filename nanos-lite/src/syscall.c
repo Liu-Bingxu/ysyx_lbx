@@ -88,6 +88,7 @@ void do_syscall(Context *c) {
     switch (a[0]){
     case SYS_exit:
         sys_exit(a[1]);
+        break;
     case SYS_yield:
         c->GPRx=sys_yield();
         break;
