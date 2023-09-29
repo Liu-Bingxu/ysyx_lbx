@@ -44,6 +44,7 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
             (*pixel) = color;
             pixel++;
         }
+        return;
         // NDL_DrawRect(dst->pixels, 0, 0, dst->w, dst->h);
     }
     assert(0);
