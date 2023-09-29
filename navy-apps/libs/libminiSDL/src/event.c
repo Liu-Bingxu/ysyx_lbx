@@ -40,7 +40,13 @@ int SDL_WaitEvent(SDL_Event *event) {
                 assert(0);
             }
             // printf("%s\n", buf + 3);
-            printf("num is %d\n", sizeof(keyname) / sizeof(char *));
+            // printf("num is %d\n", sizeof(keyname) / sizeof(char *));
+            for(int i=0;i<100;i++){
+                if((*(buf+3+i))=='\n'){
+                    (*(buf + 3 + i)) = '\0';
+                    break;
+                }
+            }
             for (int i = 0; i < (sizeof(keyname) / sizeof(char *)); i++){
                 printf("%s and %s res is %d\n", buf + 3, keyname[i], strcmp(buf + 3, keyname[i]));
                 if (strcmp((buf + 3), keyname[i]) == 0){
