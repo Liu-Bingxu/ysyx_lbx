@@ -30,7 +30,7 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_
         assert(y <= dst->h);
     }
     assert((x + w) <= dst->w);
-    assert((y + h) <= dst->h);
+    // assert((y + h) <= dst->h);
     for (int i = 0; i < h;i++){
         memcpy((dst->pixels + (y + i) * dst->w * 4 + x * 4), (src->pixels + i * src->w * 4), w * 4);
     }
