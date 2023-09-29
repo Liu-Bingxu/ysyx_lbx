@@ -78,12 +78,12 @@ void NDL_OpenCanvas(int *w, int *h) {
         screen_h = (*h);
         start_x = (width - screen_w) / 2;
         start_y = (height - screen_h) / 2;
-        // printf("the size of width  is %d\n", width );
-        // printf("the size of height is %d\n", height);
-        // printf("the size of input width  is %d\n", *w);
-        // printf("the size of input height is %d\n", *h);
-        // printf("the size of start width  is %d\n", start_x);
-        // printf("the size of start height is %d\n", start_y);
+        printf("the size of width  is %d\n", width );
+        printf("the size of height is %d\n", height);
+        printf("the size of input width  is %d\n", *w);
+        printf("the size of input height is %d\n", *h);
+        printf("the size of start width  is %d\n", start_x);
+        printf("the size of start height is %d\n", start_y);
     }
 }
 
