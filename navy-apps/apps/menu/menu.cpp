@@ -36,6 +36,9 @@ struct MenuItem {
   {"dhrystone", "/bin/dhrystone", NULL},
   {"typing-game", "/bin/typing-game", NULL},
   {"ONScripter", "/bin/onscripter", NULL},
+  {"event-test","/bin/event-test",NULL},
+  {"timer-test","/bin/timer-test",NULL},
+  {"file-test","/bin/file-test",NULL},
 };
 
 #define nitems (sizeof(items) / sizeof(items[0]))
