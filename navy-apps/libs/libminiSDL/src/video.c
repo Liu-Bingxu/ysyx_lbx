@@ -9,7 +9,7 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_
     // assert(0);
     assert(dst && src);
     assert(dst->format->BitsPerPixel == src->format->BitsPerPixel);
-    int x, y;
+    int16_t x, y;
     int w, h;
     if (srcrect == NULL){
         w = src->w;
@@ -31,8 +31,8 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_
         assert(x <= dst->w);
         assert(y <= dst->h);
     }
-    // printf("x is %d, y is %d, w is %u, h is %u\n", x, y, w, h);
-    // printf("w1 is %d, h1 is %d, w2 is %d, h2 is %d\n", src->w, src->h, dst->w, dst->h);
+    printf("x is %d, y is %d, w is %u, h is %u\n", x, y, w, h);
+    printf("w1 is %d, h1 is %d, w2 is %d, h2 is %d\n", src->w, src->h, dst->w, dst->h);
     assert((x + w) <= dst->w);
     assert((y + h) <= dst->h);
     for (int i = 0; i < h;i++){
