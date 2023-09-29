@@ -93,8 +93,8 @@ void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
     x += start_x;
     y += start_y;
     if((w==0)&&(h==0)){
-        w = width;
-        h = height;
+        w = screen_w;
+        h = screen_h;
     }
     printf("after x is %d, y is %d, w is %d, h is %d\n", x, y, w, h);
     for (int i = 0; i < h;i++){
