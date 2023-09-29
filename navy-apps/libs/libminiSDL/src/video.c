@@ -11,7 +11,15 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_
 }
 
 void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
-    assert(0);
+    // assert(0);
+    if (dstrect==NULL){
+        uint32_t *pixel = (uint32_t *)dst->pixels;
+        for (int i = 0; i < (dst->w * dst->h); i++){
+            (*pixel) = color;
+            pixel++;
+        }
+        NDL_DrawRect(dst->pixels, 0, 0, dst->w, dst->h);
+    }
 }
 
 void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
