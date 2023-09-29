@@ -19,6 +19,7 @@
 #include <readline/history.h>
 #include "sdb.h"
 #include <memory/vaddr.h>
+#include <memory/paddr.h>
 
 static int is_batch_mode = false;
 extern void set_difftest_mode(bool code);
@@ -208,11 +209,35 @@ static int cmd_d(char *args){
 
 static int cmd_detach(char *args){
     set_difftest_mode(false);
+    printf("back from difftest\n");
     return 0;
 }
 
 static int cmd_attch(char *args){
     set_difftest_mode(true);
+    printf("enter the difftest mode\n");
+    return 0;
+}
+
+static int cmd_save(char *args){
+    FILE *save_fp = NULL;
+    save_fp = fopen(args, "wb");
+    assert(save_fp);
+    int len=fwrite(&cpu, sizeof(cpu), 1, save_fp);
+    assert(len == 1);
+    len = fwrite(guest_to_host(RESET_VECTOR), CONFIG_MSIZE, 1, save_fp);
+    assert(len == 1);
+    return 0;
+}
+
+static int cmd_load(char *args){
+    FILE *load_fp = NULL;
+    load_fp = fopen(args, "rb");
+    assert(load_fp);
+    int len = fread(&cpu, sizeof(cpu), 1, load_fp);
+    assert(len == 1);
+    len = fread(guest_to_host(RESET_VECTOR), CONFIG_MSIZE, 1, load_fp);
+    assert(len == 1);
     return 0;
 }
 
@@ -236,6 +261,8 @@ static struct {
     {"d", "To detele the watchpoint by NO", cmd_d},
     {"detach","To back from difftest",cmd_detach},
     {"attch","To enter the difftest mode",cmd_attch},
+    {"save","To save the status",cmd_save},
+    {"load","To load the status",cmd_load},
 };
 
 #define NR_CMD ARRLEN(cmd_table)
