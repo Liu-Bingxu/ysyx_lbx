@@ -26,6 +26,7 @@ int SDL_WaitEvent(SDL_Event *event) {
     char buf[64];
     while(1){
         if (NDL_PollEvent(buf, sizeof(buf))){
+            printf("hello\n");
             if (buf[1] == 'u'){
                 event->type = SDL_KEYUP;
             }
