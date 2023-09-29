@@ -1,9 +1,12 @@
 #include <common.h>
 #include "fs.h"
 #include "syscall.h"
+#include "proc.h"
 
 int sys_exit(int code){
-    halt(code);
+    // halt(code);
+    naive_uload(NULL, "/bin/menu");
+    return 0;
 }
 
 int sys_yield(){
@@ -51,6 +54,11 @@ int sys_gettimeofday(struct timeval *tv,void *tz){
         return 0;
     }
     return -1;
+}
+
+int sys_execve(const char *fname, char * const argv[], char *const envp[]){
+    naive_uload(NULL, fname);
+    return 0;
 }
 
 const char *sys_call_name[] = {
@@ -109,6 +117,9 @@ void do_syscall(Context *c) {
         break;
     case SYS_close:
         c->GPRx = sys_close(a[1]);
+        break;
+    case SYS_execve:
+        c->GPRx = sys_execve((const char *)a[1], (void *)a[2], (void *)a[3]);
         break;
     case SYS_gettimeofday:
         c->GPRx = sys_gettimeofday((struct timeval *)a[1], (void *)a[2]);

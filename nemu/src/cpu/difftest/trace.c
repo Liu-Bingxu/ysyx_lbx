@@ -2,6 +2,15 @@
 #include "elf.h"
 #include "utils.h"
 
+static int func = 0;
+int get_func(){
+    return func;
+}
+
+void set_func(int code){
+    func = code;
+}
+
 // myitrace
 #ifdef CONFIG_ITRACE
 typedef struct{
@@ -57,7 +66,6 @@ typedef struct symbol_list{
 }symbol_list;
 
 static symbol_list symbol_tab_list={.end=NULL,.head=NULL,.node_num=0};
-static int func = 0;
 static bool can_func_trace = false;
 
 char *symbol_find_name(paddr_t pc,paddr_t *first_addr){
@@ -85,7 +93,7 @@ void ftrce_text_jump(paddr_t pc){
     char *name = NULL;
     paddr_t first_addr = 0;
     name = symbol_find_name(pc,&first_addr);
-    printf("PC is %x\n", cpu.pc);
+    // printf("PC is %x\n", cpu.pc);
     assert(name != NULL);
     assert(first_addr != 0);
     if(pc!=first_addr){

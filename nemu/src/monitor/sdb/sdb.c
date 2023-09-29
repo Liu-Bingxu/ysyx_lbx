@@ -19,13 +19,18 @@
 #include <readline/history.h>
 #include "sdb.h"
 #include <memory/vaddr.h>
+#include <memory/paddr.h>
 
 static int is_batch_mode = false;
+extern void set_difftest_mode(bool code);
 
 void init_regex();
 void init_wp_pool();
 
 extern void delete_symbol_list();
+
+extern int get_func();
+extern void set_func(int code);
 
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
@@ -205,24 +210,73 @@ static int cmd_d(char *args){
     return 0;
 }
 
+static int cmd_detach(char *args){
+    set_difftest_mode(false);
+    printf("back from difftest\n");
+    return 0;
+}
+
+static int cmd_attch(char *args){
+    set_difftest_mode(true);
+    printf("enter the difftest mode\n");
+    return 0;
+}
+
+static int cmd_save(char *args){
+    FILE *save_fp = NULL;
+    save_fp = fopen(args, "wb");
+    assert(save_fp);
+    int len=fwrite(&cpu, sizeof(cpu), 1, save_fp);
+    assert(len == 1);
+    len = fwrite(guest_to_host(RESET_VECTOR), CONFIG_MSIZE, 1, save_fp);
+    assert(len == 1);
+    int func = get_func();
+    len=fwrite(&func, sizeof(func), 1, save_fp);
+    assert(len == 1);
+    printf("save the status to %s\n", args);
+    return 0;
+}
+
+static int cmd_load(char *args){
+    FILE *load_fp = NULL;
+    load_fp = fopen(args, "rb");
+    assert(load_fp);
+    int len = fread(&cpu, sizeof(cpu), 1, load_fp);
+    assert(len == 1);
+    len = fread(guest_to_host(RESET_VECTOR), CONFIG_MSIZE, 1, load_fp);
+    assert(len == 1);
+    int func;
+    len = fread(&func, sizeof(func), 1, load_fp);
+    assert(len == 1);
+    set_func(func);
+    printf("load the status from %s\n", args);
+    set_difftest_mode(false);
+    set_difftest_mode(true);
+    return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct {
   const char *name;
   const char *description;
   int (*handler) (char *);
-} cmd_table [] = {
-  { "help", "Display information about all supported commands", cmd_help },
-  { "c", "Continue the execution of the program", cmd_c },
-  { "q", "Exit NEMU", cmd_q },
+} cmd_table[] = {
+    {"help", "Display information about all supported commands", cmd_help},
+    {"c", "Continue the execution of the program", cmd_c},
+    {"q", "Exit NEMU", cmd_q},
 
-  /* TODO: Add more commands */
-  { "si","Step yoour program n times",cmd_si},
-  {"info","Printf register or information of monitor",cmd_info},
-  {"x","Printf the memory in your addr, the number is n",cmd_x},
-  {"p","To calculate the value of expression",cmd_p},
-  {"w","To create a watchpoint, system will stop after the vlaue of expr changing",cmd_w},
-  {"d","To detele the watchpoint by NO",cmd_d},
+    /* TODO: Add more commands */
+    {"si", "Step yoour program n times", cmd_si},
+    {"info", "Printf register or information of monitor", cmd_info},
+    {"x", "Printf the memory in your addr, the number is n", cmd_x},
+    {"p", "To calculate the value of expression", cmd_p},
+    {"w", "To create a watchpoint, system will stop after the vlaue of expr changing", cmd_w},
+    {"d", "To detele the watchpoint by NO", cmd_d},
+    {"detach","To back from difftest",cmd_detach},
+    {"attch","To enter the difftest mode",cmd_attch},
+    {"save","To save the status",cmd_save},
+    {"load","To load the status",cmd_load},
 };
 
 #define NR_CMD ARRLEN(cmd_table)

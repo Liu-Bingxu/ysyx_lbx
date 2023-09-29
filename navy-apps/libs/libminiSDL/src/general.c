@@ -1,10 +1,15 @@
 #include <NDL.h>
 #include "assert.h"
 #include "stdio.h"
+#include "sdl-timer.h"
+#include "sdl-general.h"
 
 int SDL_Init(uint32_t flags) {
     // assert(0);
     printf("now sdl init\n");
+    if(flags&SDL_INIT_TIMER){
+        SDL_GetTicks();
+    }
     return NDL_Init(flags);
 }
 
