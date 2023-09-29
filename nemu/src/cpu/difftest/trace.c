@@ -60,6 +60,14 @@ static symbol_list symbol_tab_list={.end=NULL,.head=NULL,.node_num=0};
 static int func = 0;
 static bool can_func_trace = false;
 
+int get_func(){
+    return func;
+}
+
+void set_func(int code){
+    func = code;
+}
+
 char *symbol_find_name(paddr_t pc,paddr_t *first_addr){
     symbol_node *now = symbol_tab_list.head;
     for (int i = 0; i < symbol_tab_list.node_num; i++){
@@ -85,7 +93,7 @@ void ftrce_text_jump(paddr_t pc){
     char *name = NULL;
     paddr_t first_addr = 0;
     name = symbol_find_name(pc,&first_addr);
-    printf("PC is %x\n", cpu.pc);
+    // printf("PC is %x\n", cpu.pc);
     assert(name != NULL);
     assert(first_addr != 0);
     if(pc!=first_addr){

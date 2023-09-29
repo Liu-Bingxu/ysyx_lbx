@@ -29,6 +29,9 @@ void init_wp_pool();
 
 extern void delete_symbol_list();
 
+extern int get_func();
+extern void set_func(int code);
+
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
   static char *line_read = NULL;
@@ -227,6 +230,9 @@ static int cmd_save(char *args){
     assert(len == 1);
     len = fwrite(guest_to_host(RESET_VECTOR), CONFIG_MSIZE, 1, save_fp);
     assert(len == 1);
+    int func = get_func();
+    len=fwrite(&func, sizeof(func), 1, save_fp);
+    assert(len == 1);
     return 0;
 }
 
@@ -238,6 +244,10 @@ static int cmd_load(char *args){
     assert(len == 1);
     len = fread(guest_to_host(RESET_VECTOR), CONFIG_MSIZE, 1, load_fp);
     assert(len == 1);
+    int func;
+    len = fread(&func, sizeof(func), 1, load_fp);
+    assert(len == 1);
+    set_func(func);
     return 0;
 }
 
