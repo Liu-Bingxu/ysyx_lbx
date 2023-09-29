@@ -72,7 +72,7 @@ void NDL_OpenCanvas(int *w, int *h) {
             (*w) = width;
         }
         if(*h==0){
-            (*h) == height;
+            (*h) = height;
         }
         screen_w = (*w);
         screen_h = (*h);
