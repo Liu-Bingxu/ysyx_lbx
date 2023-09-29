@@ -21,6 +21,7 @@
 #include <memory/vaddr.h>
 
 static int is_batch_mode = false;
+extern void set_difftest_mode(bool code);
 
 void init_regex();
 void init_wp_pool();
@@ -205,24 +206,36 @@ static int cmd_d(char *args){
     return 0;
 }
 
+static int cmd_detach(char *args){
+    set_difftest_mode(false);
+    return 0;
+}
+
+static int cmd_attch(char *args){
+    set_difftest_mode(true);
+    return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct {
   const char *name;
   const char *description;
   int (*handler) (char *);
-} cmd_table [] = {
-  { "help", "Display information about all supported commands", cmd_help },
-  { "c", "Continue the execution of the program", cmd_c },
-  { "q", "Exit NEMU", cmd_q },
+} cmd_table[] = {
+    {"help", "Display information about all supported commands", cmd_help},
+    {"c", "Continue the execution of the program", cmd_c},
+    {"q", "Exit NEMU", cmd_q},
 
-  /* TODO: Add more commands */
-  { "si","Step yoour program n times",cmd_si},
-  {"info","Printf register or information of monitor",cmd_info},
-  {"x","Printf the memory in your addr, the number is n",cmd_x},
-  {"p","To calculate the value of expression",cmd_p},
-  {"w","To create a watchpoint, system will stop after the vlaue of expr changing",cmd_w},
-  {"d","To detele the watchpoint by NO",cmd_d},
+    /* TODO: Add more commands */
+    {"si", "Step yoour program n times", cmd_si},
+    {"info", "Printf register or information of monitor", cmd_info},
+    {"x", "Printf the memory in your addr, the number is n", cmd_x},
+    {"p", "To calculate the value of expression", cmd_p},
+    {"w", "To create a watchpoint, system will stop after the vlaue of expr changing", cmd_w},
+    {"d", "To detele the watchpoint by NO", cmd_d},
+    {"detach","To back from difftest",cmd_detach},
+    {"attch","To enter the difftest mode",cmd_attch},
 };
 
 #define NR_CMD ARRLEN(cmd_table)

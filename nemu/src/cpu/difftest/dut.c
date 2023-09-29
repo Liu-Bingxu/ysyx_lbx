@@ -28,6 +28,9 @@ void (*ref_difftest_raise_intr)(uint64_t NO) = NULL;
 
 extern void irangbuf_printf();
 
+static bool difftest_mode = true;
+static long size = 0;
+
 #ifdef CONFIG_DIFFTEST
 
 static bool is_skip_ref = false;
@@ -36,6 +39,9 @@ static int skip_dut_nr_inst = 0;
 // this is used to let ref skip instructions which
 // can not produce consistent behavior with NEMU
 void difftest_skip_ref() {
+    if (difftest_mode == false){
+        return;
+    }
   is_skip_ref = true;
   // If such an instruction is one of the instruction packing in QEMU
   // (see below), we end the process of catching up with QEMU's pc to
@@ -54,6 +60,9 @@ void difftest_skip_ref() {
 //   Let REF run `nr_ref` instructions first.
 //   We expect that DUT will catch up with REF within `nr_dut` instructions.
 void difftest_skip_dut(int nr_ref, int nr_dut) {
+    if (difftest_mode == false){
+        return;
+    }
   skip_dut_nr_inst += nr_dut;
 
   while (nr_ref -- > 0) {
@@ -62,34 +71,36 @@ void difftest_skip_dut(int nr_ref, int nr_dut) {
 }
 
 void init_difftest(char *ref_so_file, long img_size, int port) {
-  assert(ref_so_file != NULL);
+    size = img_size;
+    assert(ref_so_file != NULL);
 
-  void *handle;
-  handle = dlopen(ref_so_file, RTLD_LAZY);
-  assert(handle);
+    void *handle;
+    handle = dlopen(ref_so_file, RTLD_LAZY);
+    assert(handle);
 
-  ref_difftest_memcpy = dlsym(handle, "difftest_memcpy");
-  assert(ref_difftest_memcpy);
+    ref_difftest_memcpy = dlsym(handle, "difftest_memcpy");
+    assert(ref_difftest_memcpy);
 
-  ref_difftest_regcpy = dlsym(handle, "difftest_regcpy");
-  assert(ref_difftest_regcpy);
+    ref_difftest_regcpy = dlsym(handle, "difftest_regcpy");
+    assert(ref_difftest_regcpy);
 
-  ref_difftest_exec = dlsym(handle, "difftest_exec");
-  assert(ref_difftest_exec);
+    ref_difftest_exec = dlsym(handle, "difftest_exec");
+    assert(ref_difftest_exec);
 
-  ref_difftest_raise_intr = dlsym(handle, "difftest_raise_intr");
-  assert(ref_difftest_raise_intr);
+    ref_difftest_raise_intr = dlsym(handle, "difftest_raise_intr");
+    assert(ref_difftest_raise_intr);
 
-  void (*ref_difftest_init)(int) = dlsym(handle, "difftest_init");
-  assert(ref_difftest_init);
+    void (*ref_difftest_init)(int) = dlsym(handle, "difftest_init");
+    assert(ref_difftest_init);
 
-  Log("Differential testing: %s", ANSI_FMT("ON", ANSI_FG_GREEN));
-  Log("The result of every instruction will be compared with %s. "
-      "This will help you a lot for debugging, but also significantly reduce the performance. "
-      "If it is not necessary, you can turn it off in menuconfig.", ref_so_file);
-  ref_difftest_init(port);
-  ref_difftest_memcpy(RESET_VECTOR, guest_to_host(RESET_VECTOR), img_size, DIFFTEST_TO_REF);
-  ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
+    Log("Differential testing: %s", ANSI_FMT("ON", ANSI_FG_GREEN));
+    Log("The result of every instruction will be compared with %s. "
+        "This will help you a lot for debugging, but also significantly reduce the performance. "
+        "If it is not necessary, you can turn it off in menuconfig.",
+        ref_so_file);
+    ref_difftest_init(port);
+    ref_difftest_memcpy(RESET_VECTOR, guest_to_host(RESET_VECTOR), img_size, DIFFTEST_TO_REF);
+    ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
 }
 
 static void checkregs(CPU_state *ref, vaddr_t pc) {
@@ -102,19 +113,25 @@ static void checkregs(CPU_state *ref, vaddr_t pc) {
 }
 
 void difftest_step(vaddr_t pc, vaddr_t npc) {
-  CPU_state ref_r;
-
-  if (skip_dut_nr_inst > 0) {
-    ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);
-    if (ref_r.pc == npc) {
-      skip_dut_nr_inst = 0;
-      checkregs(&ref_r, npc);
-      return;
+    if(difftest_mode==false){
+        return;
     }
-    skip_dut_nr_inst --;
-    if (skip_dut_nr_inst == 0)
-      panic("can not catch up with ref.pc = " FMT_WORD " at pc = " FMT_WORD, ref_r.pc, pc);
-    return;
+    printf("Hello\n");
+    CPU_state ref_r;
+
+    if (skip_dut_nr_inst > 0)
+    {
+        ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);
+        if (ref_r.pc == npc)
+        {
+            skip_dut_nr_inst = 0;
+            checkregs(&ref_r, npc);
+            return;
+        }
+        skip_dut_nr_inst--;
+        if (skip_dut_nr_inst == 0)
+            panic("can not catch up with ref.pc = " FMT_WORD " at pc = " FMT_WORD, ref_r.pc, pc);
+        return;
   }
 
   if (is_skip_ref) {
@@ -129,6 +146,18 @@ void difftest_step(vaddr_t pc, vaddr_t npc) {
 
   checkregs(&ref_r, pc);
 }
+
+void reload(void){
+    ref_difftest_memcpy(RESET_VECTOR, guest_to_host(RESET_VECTOR), size, DIFFTEST_TO_REF);
+    ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
+}
 #else
 void init_difftest(char *ref_so_file, long img_size, int port) { }
 #endif
+
+void set_difftest_mode(bool code){
+    if ((difftest_mode == false) && (code == true)){
+        IFDEF(CONFIG_DIFFTEST, reload());
+    }
+    difftest_mode = code;
+}
