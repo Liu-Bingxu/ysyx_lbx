@@ -30,6 +30,7 @@ int NDL_PollEvent(char *buf, int len) {
     int event_fp = open("/dev/events", 0, 0);
     int read_len = read(event_fp, buf, len);
     close(event_fp);
+    // printf("%d\n", read_len);
     if (read_len == 0)
         return 0;
     else
@@ -85,6 +86,10 @@ void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
     // printf("befoe x is %d, y is %d\n", x, y);
     x += start_x;
     y += start_y;
+    if((w==0)&&(h==0)){
+        w = width;
+        h = height;
+    }
     // printf("after x is %d, y is %d\n", x, y);
     for (int i = 0; i < h;i++){
         lseek(fb_fp, (((y + i) * width * 4) + (x * 4)), SEEK_SET);

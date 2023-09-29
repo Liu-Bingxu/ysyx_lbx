@@ -14,6 +14,7 @@ extern "C" {
 #include "sdl-video.h"
 #include "sdl-audio.h"
 #include "sdl-file.h"
+#include "assert.h"
 
 #ifdef __cplusplus
 }
