@@ -68,8 +68,14 @@ void NDL_OpenCanvas(int *w, int *h) {
         // printf("%s\n", char_buf);
         assert((*w) <= width);
         assert((*h) <= height);
-        screen_w = (*w)?(*w):width;
-        screen_h = (*h)?(*h):height;
+        if(*w==0){
+            (*w) = width;
+        }
+        if(*h==0){
+            (*h) = height;
+        }
+        screen_w = (*w);
+        screen_h = (*h);
         start_x = (width - screen_w) / 2;
         start_y = (height - screen_h) / 2;
         // printf("the size of width  is %d\n", width );

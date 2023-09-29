@@ -3,14 +3,54 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include "stdio.h"
 
 void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect) {
-    assert(0);
+    // assert(0);
     assert(dst && src);
     assert(dst->format->BitsPerPixel == src->format->BitsPerPixel);
+    int16_t x, y;
+    int w, h;
+    if (srcrect == NULL){
+        w = src->w;
+        h = src->h;
+    }
+    else{
+        w = srcrect->w;
+        h = srcrect->h;
+        assert(w <= src->w);
+        assert(h <= src->h);
+    }
+    if (dstrect == NULL){
+        x = 0;
+        y = 0;
+    }
+    else{
+        x = dstrect->x;
+        y = dstrect->y;
+        assert(x <= dst->w);
+        assert(y <= dst->h);
+    }
+    // printf("x is %d, y is %d, w is %u, h is %u\n", x, y, w, h);
+    // printf("w1 is %d, h1 is %d, w2 is %d, h2 is %d\n", src->w, src->h, dst->w, dst->h);
+    assert((x + w) <= dst->w);
+    assert((y + h) <= dst->h);
+    for (int i = 0; i < h;i++){
+        memcpy((dst->pixels + (y + i) * dst->w * 4 + x * 4), (src->pixels + i * src->w * 4), w * 4);
+    }
 }
 
 void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
+    // assert(0);
+    if (dstrect==NULL){
+        uint32_t *pixel = (uint32_t *)dst->pixels;
+        for (int i = 0; i < (dst->w * dst->h); i++){
+            (*pixel) = color;
+            pixel++;
+        }
+        return;
+        // NDL_DrawRect(dst->pixels, 0, 0, dst->w, dst->h);
+    }
     assert(0);
 }
 
