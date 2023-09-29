@@ -233,6 +233,7 @@ static int cmd_save(char *args){
     int func = get_func();
     len=fwrite(&func, sizeof(func), 1, save_fp);
     assert(len == 1);
+    printf("save the status to %s\n", args);
     return 0;
 }
 
@@ -248,6 +249,7 @@ static int cmd_load(char *args){
     len = fread(&func, sizeof(func), 1, load_fp);
     assert(len == 1);
     set_func(func);
+    printf("load the status from %s\n", args);
     cmd_detach(NULL);
     cmd_attch(NULL);
     return 0;
