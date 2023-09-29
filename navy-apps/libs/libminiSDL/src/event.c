@@ -26,22 +26,24 @@ int SDL_WaitEvent(SDL_Event *event) {
     char buf[64];
     while(1){
         if (NDL_PollEvent(buf, sizeof(buf))){
-            printf("hello\n");
+            // printf("hello\n");
             if (buf[1] == 'u'){
-                printf("UP\n");
+                // printf("UP\n");
                 event->type = SDL_KEYUP;
             }
             else if (buf[1] == 'd'){
-                printf("down\n");
+                // printf("down\n");
                 event->type = SDL_KEYDOWN;
             }
             else{
                 printf("%s\n", buf);
                 assert(0);
             }
-            printf("%s\n", buf + 3);
+            // printf("%s\n", buf + 3);
+            printf("num is %d\n", sizeof(keyname) / sizeof(char *));
             for (int i = 0; i < (sizeof(keyname) / sizeof(char *)); i++){
-                if(strcmp((buf+3),keyname[i])==0){
+                printf("%s and %s res is %d\n", buf + 3, keyname[i], strcmp(buf + 3, keyname[i]));
+                if (strcmp((buf + 3), keyname[i]) == 0){
                     event->key.keysym.sym = i;
                     printf("%s\n", buf);
                     return 1;
