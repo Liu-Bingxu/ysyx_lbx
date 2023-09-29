@@ -248,6 +248,8 @@ static int cmd_load(char *args){
     len = fread(&func, sizeof(func), 1, load_fp);
     assert(len == 1);
     set_func(func);
+    cmd_detach(NULL);
+    cmd_attch(NULL);
     return 0;
 }
 
