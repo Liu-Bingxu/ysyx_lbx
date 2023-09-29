@@ -250,8 +250,8 @@ static int cmd_load(char *args){
     assert(len == 1);
     set_func(func);
     printf("load the status from %s\n", args);
-    cmd_detach(NULL);
-    cmd_attch(NULL);
+    set_difftest_mode(false);
+    set_difftest_mode(true);
     return 0;
 }
 
