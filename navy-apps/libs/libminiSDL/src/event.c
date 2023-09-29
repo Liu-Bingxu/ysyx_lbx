@@ -48,10 +48,10 @@ int SDL_WaitEvent(SDL_Event *event) {
                 }
             }
             for (int i = 0; i < (sizeof(keyname) / sizeof(char *)); i++){
-                printf("%s and %s res is %d\n", buf + 3, keyname[i], strcmp(buf + 3, keyname[i]));
+                // printf("%s and %s res is %d\n", buf + 3, keyname[i], strcmp(buf + 3, keyname[i]));
                 if (strcmp((buf + 3), keyname[i]) == 0){
                     event->key.keysym.sym = i;
-                    printf("%s\n", buf);
+                    // printf("%s\n", buf);
                     return 1;
                 }
             }
