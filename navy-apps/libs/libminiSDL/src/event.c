@@ -23,8 +23,8 @@ int SDL_PollEvent(SDL_Event *ev) {
 
 int SDL_WaitEvent(SDL_Event *event) {
     // assert(0);
-    char buf[30];
-    while(NDL_PollEvent(buf,sizeof(buf))==0);
+    char buf[64];
+    while(!NDL_PollEvent(buf,sizeof(buf)));
     if(buf[1]=='u'){
         event->type = SDL_KEYUP;
     }
