@@ -89,14 +89,14 @@ void NDL_OpenCanvas(int *w, int *h) {
 
 void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
     int fb_fp = open("/dev/fb", 0, 0);
-    printf("x is %d, y is %d, w is %d, h is %d\n", x, y, w, h);
+    printf("before x is %d, y is %d, w is %d, h is %d\n", x, y, w, h);
     x += start_x;
     y += start_y;
     if((w==0)&&(h==0)){
         w = width;
         h = height;
     }
-    // printf("after x is %d, y is %d\n", x, y);
+    printf("after x is %d, y is %d, w is %d, h is %d\n", x, y, w, h);
     for (int i = 0; i < h;i++){
         lseek(fb_fp, (((y + i) * width * 4) + (x * 4)), SEEK_SET);
         write(fb_fp, pixels, w * 4);
