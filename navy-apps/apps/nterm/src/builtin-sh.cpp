@@ -31,9 +31,11 @@ static void sh_handle_cmd(char *cmd) {
     if(res==0){
         char *val=strtok(cmd, " ");
         val = strtok(NULL, " ");
-        printf("%s\n", val);
-        res = setenv("PATH", val, 1);
-        assert(res == 0);
+        // printf("%s\n", val);
+        if(val!=NULL){
+            res = setenv("PATH", val, 1);
+            assert(res == 0);
+        }
         return;
     }
     execvp(cmd, NULL);
