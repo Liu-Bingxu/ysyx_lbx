@@ -24,12 +24,6 @@ static void sh_prompt() {
 }
 
 static void sh_handle_cmd(const char *cmd) {
-    for (int i = 0; i < strlen(cmd);i++){
-        if(cmd[i]=='\n'){
-            cmd[i] = '\0';
-            break;
-        }
-    }
     execve(cmd, NULL, NULL);
 }
 
@@ -43,6 +37,14 @@ void builtin_sh_run() {
       if (ev.type == SDL_KEYUP || ev.type == SDL_KEYDOWN) {
         const char *res = term->keypress(handle_key(&ev));
         if (res) {
+            char cmd[100];
+            strcpy(cmd, res);
+            for (int i = 0; i < strlen(cmd); i++){
+                if (cmd[i] == '\n'){
+                    cmd[i] = '\0';
+                    break;
+                }
+            }
           sh_handle_cmd(res);
           sh_prompt();
         }
