@@ -45,7 +45,7 @@ void builtin_sh_run() {
                     break;
                 }
             }
-          sh_handle_cmd(res);
+          sh_handle_cmd(cmd);
           sh_prompt();
         }
       }
