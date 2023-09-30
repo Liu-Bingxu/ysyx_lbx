@@ -33,7 +33,7 @@ static void sh_handle_cmd(char *cmd) {
         val = strtok(NULL, " ");
         // printf("%s\n", val);
         if(val!=NULL){
-            res = setenv("PATH", val, 1);
+            res = setenv("PATH", val, 0);
             assert(res == 0);
         }
         return;
