@@ -27,6 +27,8 @@
 #define FTRACE_RETU(pc) IFDEF(CONFIG_FTRACE,ftrce_text_retu(pc))
 extern void ftrce_text_jump(paddr_t pc);
 extern void ftrce_text_retu(paddr_t pc);
+
+static char *GPR1_name = MUXDEF(CONFIG_RVE, "a5", "a7");
 // myself
 
 enum
@@ -150,7 +152,7 @@ static int decode_exec(Decode *s) {
 
     INSTPAT("0011000 00010 00000 000 00000 11100 11", mret   , N, s->dnpc = cpu.mepc ;);
 
-    INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , N, s->dnpc=isa_raise_intr(11,s->pc););
+    INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , N, bool _y; if (isa_reg_str2val(GPR1_name, &_y) != -2) s->dnpc = isa_raise_intr(11, s->pc); else printf("Hello\n"););
     // myself
 
     INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak , N, NEMUTRAP(s->pc, R(10))); // R(10) is $a0
