@@ -25,6 +25,7 @@ void init_sdb();
 void init_disasm(const char *triple);
 
 extern void init_itrace();
+extern void init_fsming_path();
 
 static void welcome() {
   Log("Trace: %s", MUXDEF(CONFIG_TRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
@@ -140,16 +141,16 @@ void init_monitor(int argc, char *argv[]) {
 
     //ftrace init
     IFDEF(CONFIG_FTRACE, init_ftrace(ELF_FILE));
+    init_fsming_path();
 
 #ifndef CONFIG_ISA_loongarch32r
-  IFDEF(CONFIG_ITRACE, init_disasm(
-    MUXDEF(CONFIG_ISA_x86,     "i686",
-    MUXDEF(CONFIG_ISA_mips32,  "mipsel",
-    MUXDEF(CONFIG_ISA_riscv,
-      MUXDEF(CONFIG_RV64,      "riscv64",
-                               "riscv32"),
-                               "bad"))) "-pc-linux-gnu"
-  ));
+        IFDEF(CONFIG_ITRACE, init_disasm(
+                                 MUXDEF(CONFIG_ISA_x86, "i686",
+                                        MUXDEF(CONFIG_ISA_mips32, "mipsel",
+                                               MUXDEF(CONFIG_ISA_riscv,
+                                                      MUXDEF(CONFIG_RV64, "riscv64",
+                                                             "riscv32"),
+                                                      "bad"))) "-pc-linux-gnu"));
 #endif
 
   /* Display welcome message. */
@@ -165,7 +166,6 @@ static long load_img() {
 }
 
 void am_init_monitor() {
-  IFDEF(CONFIG_ITRACE,init_itrace());
     init_rand();
     init_mem();
     init_isa();
