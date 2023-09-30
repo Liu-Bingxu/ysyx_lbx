@@ -29,6 +29,7 @@ static void sh_handle_cmd(char *cmd) {
     int res=memcmp(cmd, "setenv", 6);
     if(res==0){
         char *val=strtok(cmd, " ");
+        val = strtok(NULL, " ");
         printf("%s\n", val);
         res = setenv("PATH", val, 1);
         return;
