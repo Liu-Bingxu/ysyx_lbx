@@ -165,7 +165,7 @@ static int decode_exec(Decode *s) {
 
     INSTPAT("0011000 00010 00000 000 00000 11100 11", mret   , N, s->dnpc = cpu.mepc ;);
 
-    INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , N, char _path[500]; if (gpr(GPR1_name) != -2) s->dnpc = isa_raise_intr(11, s->pc); else{sprintf(_path,"%s%s", fsming_path,(char *)guest_to_host(gpr(5)));/* difftest_skip_ref(); */IFDEF(CONFIG_FTRACE,init_ftrace(_path));});
+    INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , N, char _path[500]; if (gpr(GPR1_name) != -2) s->dnpc = isa_raise_intr(11, s->pc); else{sprintf(_path,"%s%s", fsming_path,(char *)guest_to_host(gpr(5)));difftest_skip_ref();IFDEF(CONFIG_FTRACE,init_ftrace(_path));});
     // myself
 
     INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak , N, NEMUTRAP(s->pc, R(10))); // R(10) is $a0
