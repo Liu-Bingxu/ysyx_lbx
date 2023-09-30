@@ -167,6 +167,8 @@ void init_ftrace(const char *ELF_FILE){
         Log(ANSI_FMT("No elf file", ANSI_FG_RED));
         return;
     }
+    
+    set_func(0);
 
     for (int _i = 0; _i < 100;_i++){
         if(elf_open[_i]==NULL){
