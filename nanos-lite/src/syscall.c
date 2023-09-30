@@ -5,7 +5,7 @@
 
 int sys_exit(int code){
     // halt(code);
-    naive_uload(NULL, "/bin/menu");
+    naive_uload(NULL, "/bin/nterm");
     return 0;
 }
 
