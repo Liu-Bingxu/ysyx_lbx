@@ -38,10 +38,20 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
     //   TODO();
     return ehdr.e_entry;
 }
+#ifdef __riscv_e
+#define MYGPR0 "a5"
+#else
+#define MYGPR0 "a7"
+#endif
 
 void naive_uload(PCB *pcb, const char *filename) {
   uintptr_t entry = loader(pcb, filename);
   Log("Jump to entry = %p", entry);
-  ((void(*)())entry) ();
+  register intptr_t _gpr1 asm(MYGPR0) = -2;
+  register intptr_t _gpr2 asm("t0") = (intptr_t)filename;
+  asm volatile (
+        "ecall" : : "r"(_gpr2),"r"(_gpr1)
+    );
+  ((void (*)())entry)();
 }
 

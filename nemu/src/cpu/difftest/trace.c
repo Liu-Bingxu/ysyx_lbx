@@ -101,7 +101,7 @@ void ftrce_text_jump(paddr_t pc){
     }
     Log_func(ANSI_FMT("func trace", ANSI_FG_BLUE)" "FMT_PADDR ": \t", pc);
     for (int i = 0; i < func;i++){
-        Log_func(" ");
+        Log_func("\t");
     }
     Log_func(ANSI_FMT("call",ANSI_FG_GREEN)" [");
     Log_func(ANSI_FMT("%s@"FMT_PADDR,ANSI_FG_YELLOW), name,first_addr);
@@ -116,7 +116,7 @@ void ftrce_text_retu(paddr_t pc){
     }
     Log_func(ANSI_FMT("func trace", ANSI_FG_BLUE)" "FMT_PADDR ": \t", pc);
     for (int i = 1; i < func;i++){
-        Log_func(" ");
+        Log_func("\t");
     }
     Log_func(ANSI_FMT("ret",ANSI_FG_GREEN)"  [");
     char *name = NULL;
