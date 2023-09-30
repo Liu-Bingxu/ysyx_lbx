@@ -5,6 +5,7 @@
 #include "string.h"
 #include "stdlib.h"
 #include "stdio.h"
+#include "assert.h"
 
 char handle_key(SDL_Event *ev);
 
@@ -32,9 +33,10 @@ static void sh_handle_cmd(char *cmd) {
         val = strtok(NULL, " ");
         printf("%s\n", val);
         res = setenv("PATH", val, 1);
+        assert(res == 0);
         return;
     }
-    execve(cmd, NULL, NULL);
+    execvp(cmd, NULL);
 }
 
 void builtin_sh_run() {
