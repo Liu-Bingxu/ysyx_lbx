@@ -2,6 +2,7 @@
 #include <stdarg.h>
 #include <unistd.h>
 #include <SDL.h>
+#include "string.h"
 
 char handle_key(SDL_Event *ev);
 
@@ -23,6 +24,12 @@ static void sh_prompt() {
 }
 
 static void sh_handle_cmd(const char *cmd) {
+    for (int i = 0; i < strlen(cmd);i++){
+        if(cmd[i]=='\n'){
+            cmd[i] = '\0';
+            break;
+        }
+    }
     execve(cmd, NULL, NULL);
 }
 
