@@ -127,7 +127,7 @@ void ftrce_text_retu(paddr_t pc){
     // printf("Hello World\n");
     Log_func(ANSI_FMT("%s",ANSI_FG_YELLOW), name);
     Log_func("]\n");
-    func--;
+    if(func>0)func--;
     return;
 }
 
@@ -167,7 +167,7 @@ void init_ftrace(const char *ELF_FILE){
         Log(ANSI_FMT("No elf file", ANSI_FG_RED));
         return;
     }
-    
+
     set_func(0);
 
     for (int _i = 0; _i < 100;_i++){
