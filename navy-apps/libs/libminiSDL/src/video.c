@@ -212,8 +212,8 @@ void SDL_SetPalette(SDL_Surface *s, int flags, SDL_Color *colors, int firstcolor
     assert(firstcolor == 0);
 
     s->format->palette->ncolors = ncolors;
-    // memcpy(s->format->palette->colors, colors, sizeof(SDL_Color) * ncolors);
-    ConvertPixelsARGB_ABGR(s->format->palette->colors, colors, ncolors);
+    memcpy(s->format->palette->colors, colors, sizeof(SDL_Color) * ncolors);
+    // ConvertPixelsARGB_ABGR(s->format->palette->colors, colors, ncolors);
 
     if (s->flags & SDL_HWSURFACE)
     {
