@@ -184,6 +184,7 @@ void SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_
     }
     else {
         printf("x is %d, y is %d, w is %d, h is %d\n", x, y, w, h);
+        printf("src x is %d, y is %d, w is %d, h is %d\n", 0,0, src->w, src->h);
         printf("dst x is %d, y is %d, w is %d, h is %d\n", dstrect->x, dstrect->y, dstrect->w, dstrect->h);
         assert(0);
     }
