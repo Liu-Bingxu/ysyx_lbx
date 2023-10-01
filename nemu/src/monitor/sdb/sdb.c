@@ -51,8 +51,9 @@ static char* rl_gets() {
 }
 
 static int cmd_c(char *args) {
-  cpu_exec(-1);
-  return 0;
+    if (nemu_state.state == NEMU_STOP)
+        cpu_exec(-1);
+    return -1;
 }
 
 
