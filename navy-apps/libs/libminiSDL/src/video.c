@@ -60,6 +60,7 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h){
     printf("w is %d, h is %d\n",w,h);
     w = (w == 0) ? s->w : w;
     h = (h == 0) ? s->h : h;
+    printf("then w is %d, h is %d\n", w, h);
     if (s->format->BitsPerPixel==32){
         uint32_t *buf = malloc(sizeof(uint32_t) * w * h);
         assert(buf);
