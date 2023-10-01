@@ -212,7 +212,8 @@ void SDL_SetPalette(SDL_Surface *s, int flags, SDL_Color *colors, int firstcolor
     assert(firstcolor == 0);
 
     s->format->palette->ncolors = ncolors;
-    memcpy(s->format->palette->colors, colors, sizeof(SDL_Color) * ncolors);
+    // memcpy(s->format->palette->colors, colors, sizeof(SDL_Color) * ncolors);
+    ConvertPixelsARGB_ABGR(s->format->palette->colors, colors, ncolors);
 
     if (s->flags & SDL_HWSURFACE)
     {
@@ -227,7 +228,7 @@ void SDL_SetPalette(SDL_Surface *s, int flags, SDL_Color *colors, int firstcolor
   }
 }
 
-static void ConvertPixelsARGB_ABGR(void *dst, void *src, int len) {
+static void x(void *dst, void *src, int len) {
   int i;
   uint8_t (*pdst)[4] = dst;
   uint8_t (*psrc)[4] = src;
@@ -255,7 +256,7 @@ static void ConvertPixelsARGB_ABGR(void *dst, void *src, int len) {
 }
 
 SDL_Surface *SDL_ConvertSurface(SDL_Surface *src, SDL_PixelFormat *fmt, uint32_t flags) {
-    assert(0);
+    // assert(0);
     assert(src->format->BitsPerPixel == 32);
     assert(src->w * src->format->BytesPerPixel == src->pitch);
     assert(src->format->BitsPerPixel == fmt->BitsPerPixel);
