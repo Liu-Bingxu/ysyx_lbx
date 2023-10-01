@@ -1,5 +1,6 @@
 #include <NDL.h>
 #include <SDL.h>
+#include "sdl-event.h"
 #include "assert.h"
 #include "string.h"
 #include "stdio.h"
@@ -10,6 +11,8 @@ static const char *keyname[] = {
   "NONE",
   _KEYS(keyname)
 };
+
+static uint8_t status[SDLK_PAGEDOWN + 1] = {0};
 
 int SDL_PushEvent(SDL_Event *ev) {
     assert(0);
@@ -106,6 +109,22 @@ int SDL_PeepEvents(SDL_Event *ev, int numevents, int action, uint32_t mask) {
 }
 
 uint8_t* SDL_GetKeyState(int *numkeys) {
-    assert(0);
-    return NULL;
+    // assert(0);
+    SDL_Event ev;
+    int ret = SDL_PollEvent(&ev);
+    if(ret==1){
+        if (ev.type == SDL_KEYDOWN){
+            status[ev.key.keysym.sym] = 1;
+        }
+        else if (ev.type == SDL_KEYUP){
+            status[ev.key.keysym.sym] = 0;
+        }
+        else{
+            assert(0);
+        }
+    }
+    else{
+        memset(status, '\0', sizeof(status));
+    }
+    return status;
 }
