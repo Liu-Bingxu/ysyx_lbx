@@ -255,7 +255,7 @@ static void ConvertPixelsARGB_ABGR(void *dst, void *src, int len) {
 }
 
 SDL_Surface *SDL_ConvertSurface(SDL_Surface *src, SDL_PixelFormat *fmt, uint32_t flags) {
-    // assert(0);
+    assert(0);
     assert(src->format->BitsPerPixel == 32);
     assert(src->w * src->format->BytesPerPixel == src->pitch);
     assert(src->format->BitsPerPixel == fmt->BitsPerPixel);
