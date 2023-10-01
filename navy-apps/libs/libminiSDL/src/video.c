@@ -68,6 +68,7 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
     for (int _i = 0; _i < (w * h);_i++){
         buf[_i] = s->format->palette->colors[s->pixels[_i + x + y * s->w]].val;
     }
+    free(buf);
     // printf("hello\n");
     NDL_DrawRect(buf, x, y, w, h);
 }
@@ -183,9 +184,9 @@ void SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_
         SDL_BlitSurface(src, &rect, dst, dstrect);
     }
     else {
-        printf("x is %d, y is %d, w is %d, h is %d\n", x, y, w, h);
-        printf("src x is %d, y is %d, w is %d, h is %d\n", 0,0, src->w, src->h);
-        printf("dst x is %d, y is %d, w is %d, h is %d\n", dstrect->x, dstrect->y, dstrect->w, dstrect->h);
+        // printf("x is %d, y is %d, w is %d, h is %d\n", x, y, w, h);
+        // printf("src x is %d, y is %d, w is %d, h is %d\n", 0,0, src->w, src->h);
+        // printf("dst x is %d, y is %d, w is %d, h is %d\n", dstrect->x, dstrect->y, dstrect->w, dstrect->h);
         assert(0);
     }
 }
