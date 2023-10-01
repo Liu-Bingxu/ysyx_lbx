@@ -56,18 +56,23 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
     assert(0);
 }
 
-void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
-    if (s->format->BitsPerPixel==32){
-        NDL_DrawRect(s->pixels, x, y, w, h);
-        return;
-    }
+void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h){
     w = (w == 0) ? s->w : w;
     h = (h == 0) ? s->h : h;
+    if (s->format->BitsPerPixel==32){
+        uint32_t *buf = malloc(sizeof(uint32_t) * w * h);
+        assert(buf);
+        for (int _i = 0; _i < h; _i++)
+            for (int _y = 0; _y < w;_y++)
+                buf[_i * w + _y] = s->pixels[x + (_i + y) * s->w + _y];
+        NDL_DrawRect(buf, x, y, w, h);
+        return;
+    }
     uint32_t *buf = malloc(sizeof(uint32_t) * w * h);
     assert(buf);
-    for (int _i = 0; _i < (w * h);_i++){
-        buf[_i] = s->format->palette->colors[s->pixels[_i + x + y * s->w]].val;
-    }
+    for (int _i = 0; _i < h;_i++)
+        for (int _y = 0; _y < w;_y++)
+            buf[_i * w + _y] = s->format->palette->colors[s->pixels[_y + x + (_i + y) * s->w]].val;
     // printf("hello\n");
     NDL_DrawRect(buf, x, y, w, h);
     free(buf);
