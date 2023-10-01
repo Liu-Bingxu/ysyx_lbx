@@ -147,7 +147,7 @@ SDL_Surface* SDL_SetVideoMode(int width, int height, int bpp, uint32_t flags) {
 }
 
 void SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect) {
-    assert(0);
+    // assert(0);
     assert(src && dst);
     assert(dst->format->BitsPerPixel == src->format->BitsPerPixel);
     assert(dst->format->BitsPerPixel == 8);
@@ -176,9 +176,9 @@ void SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_
 }
 
 void SDL_SetPalette(SDL_Surface *s, int flags, SDL_Color *colors, int firstcolor, int ncolors) {
-    if(s==NULL){
-        printf("error\n");
-    }
+    // if(s==NULL){
+    //     printf("error\n");
+    // }
     assert(s);
     assert(s->format);
     assert(s->format->palette);
