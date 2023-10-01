@@ -7,7 +7,7 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained) {
 }
 
 void SDL_CloseAudio() {
-    assert(0);
+    // assert(0);
 }
 
 void SDL_PauseAudio(int pause_on) {
