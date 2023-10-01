@@ -171,8 +171,7 @@ void SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_
     int h = (srcrect == NULL ? src->h : srcrect->h);
 
     assert(dstrect);
-    if (w == dstrect->w && h == dstrect->h)
-    {
+    if (w == dstrect->w && h == dstrect->h){
         /* The source rectangle and the destination rectangle
          * are of the same size. If that is the case, there
          * is no need to stretch, just copy. */
@@ -182,10 +181,12 @@ void SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_
         rect.w = w;
         rect.h = h;
         SDL_BlitSurface(src, &rect, dst, dstrect);
-  }
-  else {
-    assert(0);
-  }
+    }
+    else {
+        printf("x is %d, y is %d, w is %d, h is %d\n", x, y, w, h);
+        printf("dst x is %d, y is %d, w is %d, h is %d\n", dstrect->x, dstrect->y, dstrect->w, dstrect->h);
+        assert(0);
+    }
 }
 
 void SDL_SetPalette(SDL_Surface *s, int flags, SDL_Color *colors, int firstcolor, int ncolors) {
