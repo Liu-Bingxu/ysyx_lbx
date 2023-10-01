@@ -176,7 +176,7 @@ void SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_
 }
 
 void SDL_SetPalette(SDL_Surface *s, int flags, SDL_Color *colors, int firstcolor, int ncolors) {
-    assert(0);
+    // assert(0);
     assert(s);
     assert(s->format);
     assert(s->format->palette);
