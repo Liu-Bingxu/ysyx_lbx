@@ -147,8 +147,9 @@ void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl){
     assert((ctl->y + ctl->h) <= (record_height==0)?(io_read(AM_GPU_CONFIG).height):record_height);
     const uint32_t *pixels = (uint32_t *)ctl->pixels;
     int fb_fp = open("/dev/fb", 0, 0);
+    int width=(record_width==0)?(io_read(AM_GPU_CONFIG).width):record_width;
     for (int i = 0; i < ctl->h; i++){
-        lseek(fb_fp, (((ctl->y + i) * ctl->w * 4) + (ctl->x * 4)), SEEK_SET);
+        lseek(fb_fp, (((ctl->y + i) * width * 4) + (ctl->x * 4)), SEEK_SET);
         write(fb_fp, pixels, ctl->w * 4);
         pixels += ctl->w;
     }
