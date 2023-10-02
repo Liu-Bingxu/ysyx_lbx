@@ -109,7 +109,6 @@ void __am_timer_rtc(AM_TIMER_RTC_T *rtc){}
 
 static int record_width = 0, record_height = 0;
 void __am_gpu_init(){
-
     int i;
     int w = (record_width == 0) ? (io_read(AM_GPU_CONFIG).width) : record_width;
     int h = (record_height == 0) ? (io_read(AM_GPU_CONFIG).height) : record_height;
@@ -118,7 +117,7 @@ void __am_gpu_init(){
         pixels[i] = i;
     int fb_fp = open("/dev/fb", 0, 0);
     write(fb_fp, pixels, w * h * 4);
-    close(fb_fp);
+    printf("Hello VGA\n");
 }
 void __am_gpu_config(AM_GPU_CONFIG_T *cfg){
     cfg->present = true;
@@ -148,7 +147,6 @@ void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl){
         write(fb_fp, pixels, ctl->w * 4);
         pixels += ctl->w;
     }
-    close(fb_fp);
 }
 void __am_gpu_status(AM_GPU_STATUS_T *status){
     status->ready = true;
