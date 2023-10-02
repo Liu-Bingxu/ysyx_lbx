@@ -45,7 +45,7 @@ void audio_play(void *userdata, Uint8 *stream, int len){
     len = (len < my_fifo_len) ? len : my_fifo_len;
     uint8_t *new_sb_buf = malloc(len);
     if((sb_start+len-sbuf)>=CONFIG_SB_SIZE){
-        int temp_len = CONFIG_SB_SIZE - (uint32_t)(new_sb_buf - sbuf);
+        int temp_len = CONFIG_SB_SIZE - (uint32_t)(sb_start - sbuf);
         memcpy(new_sb_buf, sb_start, temp_len);
         memcpy(new_sb_buf + temp_len, sbuf, len - temp_len);
     }
@@ -76,6 +76,7 @@ static void call_of_sbuf(uint32_t offset, int len, bool is_write){
 void init_audio() {
     uint32_t space_size = sizeof(uint32_t) * nr_reg;
     audio_base = (uint32_t *)new_space(space_size);
+    memset(audio_base, 0, space_size);
 #ifdef CONFIG_HAS_PORT_IO
     add_pio_map("audio", CONFIG_AUDIO_CTL_PORT, audio_base, space_size, audio_io_handler);
 #else

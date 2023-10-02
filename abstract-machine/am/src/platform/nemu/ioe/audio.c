@@ -29,7 +29,7 @@ void __am_audio_init() {
 }
 
 void __am_audio_config(AM_AUDIO_CONFIG_T *cfg) {
-    cfg->present = false;
+    cfg->present = true;
     cfg->bufsize = sb_buf_size;
 }
 
@@ -54,9 +54,9 @@ void __am_audio_play(AM_AUDIO_PLAY_T *ctl) {
     //     sb_size = inl(AUDIO_SBUF_SIZE_ADDR);
     // }
     volatile uint32_t count = inl(AUDIO_COUNT_ADDR);
-    printf("the start addr is 0x%x, end addr is 0x%x\n", ctl->buf.start, ctl->buf.end);
-    long len;
-    void *start;
+    // printf("the start addr is 0x%x, end addr is 0x%x\n", ctl->buf.start, ctl->buf.end);
+    long len=0;
+    void *start=NULL;
     if (ctl->buf.end < ctl->buf.start){
         start = ctl->buf.end;
         len = ctl->buf.start - ctl->buf.end;
@@ -65,22 +65,26 @@ void __am_audio_play(AM_AUDIO_PLAY_T *ctl) {
         len = ctl->buf.end - ctl->buf.start;
         start = ctl->buf.start;
     }
+    // while (1){
+        // if ((len + count) <= sb_buf_size)break;
+        // count = inl(AUDIO_COUNT_ADDR);
+    // }
     while (count + len >= sb_buf_size){
-        uint32_t text = count;
+        // uint32_t text = count;
         count = inl(AUDIO_COUNT_ADDR);
-        if(text!=count)printf("I am %lu, target is %d\n", len, count);
+        // if(text!=count)printf("I am %lu, target is %d\n", len, count);
     }
     if (last_len + len > sb_buf_size){
         memcpy((void *)AUDIO_SBUF_ADDR + last_len, start, sb_buf_size - last_len);
         last_len = 0;
         start += sb_buf_size - last_len;
         len -= (sb_buf_size - last_len);
-        printf("Hello\n");
+        // printf("Hello\n");
     }
-    printf("Now last_len is %d\n", last_len);
+    // printf("Now last_len is %d\n", last_len);
     // assert(last_len >= len);
     memcpy((void *)AUDIO_SBUF_ADDR + last_len, start, len);
-    printf("Hello\n");
+    // printf("Hello\n");
     last_len += len;
     last_len %= sb_buf_size;
     // last_len = (last_len == len) ? sb_size : last_len - len;
