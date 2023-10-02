@@ -109,6 +109,7 @@ void __am_timer_rtc(AM_TIMER_RTC_T *rtc){}
 
 static int record_width = 0, record_height = 0;
 void __am_gpu_init(){
+
     int i;
     int w = (record_width == 0) ? (io_read(AM_GPU_CONFIG).width) : record_width;
     int h = (record_height == 0) ? (io_read(AM_GPU_CONFIG).height) : record_height;
@@ -140,7 +141,7 @@ void __am_gpu_config(AM_GPU_CONFIG_T *cfg){
 void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl){
     assert((ctl->x + ctl->w) <= (record_width==0)?(io_read(AM_GPU_CONFIG).width):record_width);
     assert((ctl->y + ctl->h) <= (record_height==0)?(io_read(AM_GPU_CONFIG).height):record_height);
-    const void *pixels = ctl->pixels;
+    const uint32_t *pixels = (uint32_t *)ctl->pixels;
     int fb_fp = open("/dev/fb", 0, 0);
     for (int i = 0; i < ctl->h; i++){
         lseek(fb_fp, (((ctl->y + i) * ctl->w * 4) + (ctl->x * 4)), SEEK_SET);
