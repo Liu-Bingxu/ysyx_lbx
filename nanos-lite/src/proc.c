@@ -26,7 +26,7 @@ void init_proc() {
 
     // load program here
 
-    naive_uload(NULL, "/bin/typing-game");
+    naive_uload(NULL, "/bin/coremark");
 }
 
 Context* schedule(Context *prev) {
