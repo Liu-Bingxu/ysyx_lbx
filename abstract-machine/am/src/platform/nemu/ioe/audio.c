@@ -57,14 +57,15 @@ void __am_audio_play(AM_AUDIO_PLAY_T *ctl) {
     // printf("the start addr is 0x%x, end addr is 0x%x\n", ctl->buf.start, ctl->buf.end);
     long len=0;
     void *start=NULL;
-    if (ctl->buf.end < ctl->buf.start){
-        start = ctl->buf.end;
-        len = ctl->buf.start - ctl->buf.end;
-    }
-    else{
+    assert(ctl->buf.end >= ctl->buf.start);
+    // if (ctl->buf.end < ctl->buf.start){
+    // start = ctl->buf.end;
+    // len = ctl->buf.start - ctl->buf.end;
+    // }
+    // else{
         len = ctl->buf.end - ctl->buf.start;
         start = ctl->buf.start;
-    }
+    // }
     // while (1){
         // if ((len + count) <= sb_buf_size)break;
         // count = inl(AUDIO_COUNT_ADDR);
