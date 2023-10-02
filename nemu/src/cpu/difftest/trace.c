@@ -127,7 +127,7 @@ void ftrce_text_retu(paddr_t pc){
     // printf("Hello World\n");
     Log_func(ANSI_FMT("%s",ANSI_FG_YELLOW), name);
     Log_func("]\n");
-    func--;
+    if(func>0)func--;
     return;
 }
 
@@ -160,12 +160,28 @@ void delete_symbol_list(){
     symbol_tab_list.head = NULL;
 }
 
+static char *elf_open[100] = {NULL};
+
 void init_ftrace(const char *ELF_FILE){
     if(ELF_FILE==NULL){
         Log(ANSI_FMT("No elf file", ANSI_FG_RED));
         return;
     }
-    
+
+    set_func(0);
+
+    for (int _i = 0; _i < 100;_i++){
+        if(elf_open[_i]==NULL){
+            elf_open[_i] = malloc(strlen(ELF_FILE) + 5);
+            assert(elf_open[_i]);
+            strcpy(elf_open[_i], ELF_FILE);
+            break;
+        }
+        if(strcmp(elf_open[_i],ELF_FILE)==0){
+            return;
+        }
+    }
+
     int a;
 
     //open file and get the ELF head
@@ -227,7 +243,7 @@ void init_ftrace(const char *ELF_FILE){
 
     fclose(elf_file);
 
-    //text list
+    // text list
     // symbol_node *now=symbol_tab_list.head;
     // for(int i=0;i<symbol_tab_list.node_num;i++){
     //     printf("FUNC: %s, Addr from "FMT_PADDR" to "FMT_PADDR"\n",now->name,now->first_addr,now->end_addr);

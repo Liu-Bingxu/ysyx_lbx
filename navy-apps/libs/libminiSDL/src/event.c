@@ -1,5 +1,6 @@
 #include <NDL.h>
 #include <SDL.h>
+#include "sdl-event.h"
 #include "assert.h"
 #include "string.h"
 #include "stdio.h"
@@ -10,6 +11,8 @@ static const char *keyname[] = {
   "NONE",
   _KEYS(keyname)
 };
+
+static uint8_t status[SDLK_PAGEDOWN + 1] = {0};
 
 int SDL_PushEvent(SDL_Event *ev) {
     assert(0);
@@ -22,8 +25,8 @@ int SDL_PollEvent(SDL_Event *event) {
         return 0;
     }
     char buf[64];
+    // printf("hello\n");
     if (NDL_PollEvent(buf, sizeof(buf))){
-        // printf("hello\n");
         if (buf[1] == 'u'){
             // printf("UP\n");
             event->type = SDL_KEYUP;
@@ -50,6 +53,15 @@ int SDL_PollEvent(SDL_Event *event) {
             if (strcmp((buf + 3), keyname[i]) == 0)
             {
                 event->key.keysym.sym = i;
+                if (event->type == SDL_KEYDOWN){
+                    status[i] = 1;
+                }
+                else if (event->type == SDL_KEYUP){
+                    status[i] = 0;
+                }
+                else{
+                    assert(0);
+                }
                 // printf("%s\n", buf);
                 return 1;
             }
@@ -64,6 +76,7 @@ int SDL_WaitEvent(SDL_Event *event) {
     }
     // assert(0);
     char buf[64];
+    // printf("hello\n");
     while(1){
         if (NDL_PollEvent(buf, sizeof(buf))){
             // printf("hello\n");
@@ -91,6 +104,15 @@ int SDL_WaitEvent(SDL_Event *event) {
                 // printf("%s and %s res is %d\n", buf + 3, keyname[i], strcmp(buf + 3, keyname[i]));
                 if (strcmp((buf + 3), keyname[i]) == 0){
                     event->key.keysym.sym = i;
+                    if (event->type == SDL_KEYDOWN){
+                        status[i] = 1;
+                    }
+                    else if (event->type == SDL_KEYUP){
+                        status[i] = 0;
+                    }
+                    else{
+                        assert(0);
+                    }
                     // printf("%s\n", buf);
                     return 1;
                 }
@@ -106,6 +128,22 @@ int SDL_PeepEvents(SDL_Event *ev, int numevents, int action, uint32_t mask) {
 }
 
 uint8_t* SDL_GetKeyState(int *numkeys) {
-    assert(0);
-    return NULL;
+    // assert(0);
+    // SDL_Event ev;
+    // int ret = SDL_PollEvent(&ev);
+    // if(ret==1){
+    //     if (ev.type == SDL_KEYDOWN){
+    //         status[ev.key.keysym.sym] = 1;
+    //     }
+    //     else if (ev.type == SDL_KEYUP){
+    //         status[ev.key.keysym.sym] = 0;
+    //     }
+    //     else{
+    //         assert(0);
+    //     }
+    // }
+    // else{
+    //     memset(status, '\0', sizeof(status));
+    // }
+    return status;
 }

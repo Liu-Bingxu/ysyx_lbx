@@ -17,6 +17,10 @@
 #include <cpu/cpu.h>
 #include <cpu/ifetch.h>
 #include <cpu/decode.h>
+#include "memory/paddr.h"
+#include "stdio.h"
+#include "stdlib.h"
+#include <cpu/difftest.h>
 
 #define R(i) gpr(i)
 #define Mr vaddr_read
@@ -27,6 +31,9 @@
 #define FTRACE_RETU(pc) IFDEF(CONFIG_FTRACE,ftrce_text_retu(pc))
 extern void ftrce_text_jump(paddr_t pc);
 extern void ftrce_text_retu(paddr_t pc);
+
+static int GPR1_name = MUXDEF(CONFIG_RVE, 15, 17);
+extern void init_ftrace(const char *ELF_FILE);
 // myself
 
 enum
@@ -79,6 +86,14 @@ static void decode_operand(Decode *s, int *rd, word_t *src1, word_t *src2, word_
         //myself
     }
 }
+//myself
+static char fsming_path[64];
+void init_fsming_path(){
+    char *nvay_path = getenv("NAVY_HOME");
+    assert(nvay_path);
+    sprintf(fsming_path, "%s/fsimg", nvay_path);
+}
+// myself
 
 static int decode_exec(Decode *s) {
     int rd = 0;
@@ -150,7 +165,7 @@ static int decode_exec(Decode *s) {
 
     INSTPAT("0011000 00010 00000 000 00000 11100 11", mret   , N, s->dnpc = cpu.mepc ;);
 
-    INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , N, s->dnpc=isa_raise_intr(11,s->pc););
+    INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , N, char _path[500]; if (gpr(GPR1_name) != -2) s->dnpc = isa_raise_intr(11, s->pc); else{sprintf(_path,"%s%s", fsming_path,(char *)guest_to_host(gpr(5)));difftest_skip_ref();IFDEF(CONFIG_FTRACE,init_ftrace(_path));});
     // myself
 
     INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak , N, NEMUTRAP(s->pc, R(10))); // R(10) is $a0

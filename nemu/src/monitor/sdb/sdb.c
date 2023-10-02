@@ -51,8 +51,8 @@ static char* rl_gets() {
 }
 
 static int cmd_c(char *args) {
-  cpu_exec(-1);
-  return 0;
+    cpu_exec(-1);
+    return 0;
 }
 
 
@@ -309,9 +309,14 @@ void sdb_set_batch_mode() {
 }
 
 void sdb_mainloop() {
-  if (is_batch_mode) {
-    cmd_c(NULL);
-    return;
+  if (is_batch_mode){
+      int cnt = 0;
+      if (nemu_state.state == NEMU_STOP){
+          cmd_c(NULL);
+          printf("Hello %d\n", cnt);
+          cnt++;
+      }
+      return;
   }
 
   for (char *str; (str = rl_gets()) != NULL; ) {

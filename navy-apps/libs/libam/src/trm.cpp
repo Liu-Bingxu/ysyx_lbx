@@ -1,4 +1,5 @@
 #include <am.h>
+#include "stdlib.h"
 
 Area heap;
 

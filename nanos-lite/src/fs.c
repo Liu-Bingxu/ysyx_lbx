@@ -71,6 +71,7 @@ int fs_read(int fd, void *buf, size_t count){
         return read_num;
     }
     size_t read_num=ramdisk_read(buf, file_table[fd].disk_offset + file_table[fd].open_offset, count);
+    assert(read_num == count);
     file_table[fd].open_offset += count;
     return read_num;
 }

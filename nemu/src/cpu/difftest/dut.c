@@ -29,12 +29,13 @@ void (*ref_difftest_raise_intr)(uint64_t NO) = NULL;
 extern void irangbuf_printf();
 
 static bool difftest_mode = true;
-static long size = 0;
 
 #ifdef CONFIG_DIFFTEST
 
 static bool is_skip_ref = false;
 static int skip_dut_nr_inst = 0;
+
+static long size = 0;
 
 // this is used to let ref skip instructions which
 // can not produce consistent behavior with NEMU

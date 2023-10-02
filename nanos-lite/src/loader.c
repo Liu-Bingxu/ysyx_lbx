@@ -31,17 +31,27 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
             assert(offset == phdr.p_offset);
             len = fs_read(fd, (void *)(phdr.p_vaddr), phdr.p_memsz);
             // len = ramdisk_read((void *)(phdr.p_vaddr), phdr.p_offset, phdr.p_memsz);
-            assert(len == phdr.p_memsz);
+            // assert(len == phdr.p_memsz);
             memset((void *)(phdr.p_vaddr + phdr.p_filesz), 0, phdr.p_memsz - phdr.p_filesz);
         }
     }
     //   TODO();
     return ehdr.e_entry;
 }
+#ifdef __riscv_e
+#define MYGPR0 "a5"
+#else
+#define MYGPR0 "a7"
+#endif
 
 void naive_uload(PCB *pcb, const char *filename) {
   uintptr_t entry = loader(pcb, filename);
   Log("Jump to entry = %p", entry);
-  ((void(*)())entry) ();
+  register intptr_t _gpr1 asm(MYGPR0) = -2;
+  register intptr_t _gpr2 asm("t0") = (intptr_t)filename;
+  asm volatile (
+        "ecall" : : "r"(_gpr2),"r"(_gpr1)
+    );
+  ((void (*)())entry)();
 }
 

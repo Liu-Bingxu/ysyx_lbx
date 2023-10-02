@@ -73,6 +73,7 @@
 #endif
 
 #include <stdint.h>
+#include "assert.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -127,35 +128,69 @@ typedef	__uint128_t fixedptud;
 
 /* Multiplies a fixedpt number with an integer, returns the result. */
 static inline fixedpt fixedpt_muli(fixedpt A, int B) {
-	return 0;
+    // assert(0);
+    return (A * B);
 }
 
 /* Divides a fixedpt number with an integer, returns the result. */
 static inline fixedpt fixedpt_divi(fixedpt A, int B) {
-	return 0;
+    // assert(0);
+    return (A / B);
 }
 
 /* Multiplies two fixedpt numbers, returns the result. */
 static inline fixedpt fixedpt_mul(fixedpt A, fixedpt B) {
-	return 0;
+    // assert(0);
+    return (((fixedptd)A * (fixedptd)B) >> 8);
 }
-
 
 /* Divides two fixedpt numbers, returns the result. */
 static inline fixedpt fixedpt_div(fixedpt A, fixedpt B) {
-	return 0;
+    // assert(0);
+    return (A / (B >> 8));
 }
 
 static inline fixedpt fixedpt_abs(fixedpt A) {
-	return 0;
+    // assert(0);
+    return (A >= 0) ? A : (-A);
 }
 
 static inline fixedpt fixedpt_floor(fixedpt A) {
-	return 0;
+    // assert(0);
+    if(fixedpt_fracpart(A)==0){
+        return A;
+    }
+    else if(A>0){
+        return (A - fixedpt_fracpart(A));
+    }
+    else if ((A & (((fixedptu)-1)-FIXEDPT_FMASK)) == (((fixedpt)1 << (FIXEDPT_BITS - 1)))){
+        return A;
+    }
+    else{
+        A = -A;
+        A = (A & (((fixedptu)-1) - FIXEDPT_FMASK));
+        A = A + FIXEDPT_ONE;
+        return (-A);
+    }
 }
 
+
 static inline fixedpt fixedpt_ceil(fixedpt A) {
-	return 0;
+    // assert(0);
+    if (fixedpt_fracpart(A) == 0){
+        return A;
+    }
+    else if (A < 0){
+        return (A - fixedpt_fracpart(A));
+    }
+    else if ((A & (((fixedptu)-1) - FIXEDPT_FMASK)) == ((fixedptu)((fixedpt)1 << (FIXEDPT_BITS - 1))-(fixedptu)FIXEDPT_ONE)){
+        return A;
+    }
+    else{
+        A = (A & (((fixedptu)-1) - FIXEDPT_FMASK));
+        A = A + FIXEDPT_ONE;
+        return A;
+    }
 }
 
 /*
