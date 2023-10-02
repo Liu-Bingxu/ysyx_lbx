@@ -63,6 +63,7 @@ static void audio_io_handler(uint32_t offset, int len, bool is_write) {
         s.freq = audio_base[0];
         s.channels = audio_base[1];
         s.samples = audio_base[2];
+        printf("the freq is %d, the channels is %d, samples is %d\n", audio_base[0], audio_base[1], audio_base[2]);
         SDL_OpenAudio(&s, NULL);
         SDL_PauseAudio(0);
     }
