@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include "stdio.h"
 
+static void ConvertPixelsARGB_ABGR(void *dst, void *src, int len);
+
 void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect) {
     // assert(0);
     assert(dst && src);
@@ -76,9 +78,11 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h){
     }
     uint32_t *buf = malloc(sizeof(uint32_t) * w * h);
     assert(buf);
-    for (int _i = 0; _i < h;_i++)
-        for (int _y = 0; _y < w;_y++)
-            buf[_i * w + _y] = s->format->palette->colors[s->pixels[_y + x + (_i + y) * s->w]].val;
+    // for (int _i = 0; _i < h;_i++)
+    //     for (int _y = 0; _y < w;_y++)
+    //         buf[_i * w + _y] = s->format->palette->colors[s->pixels[_y + x + (_i + y) * s->w]].val;
+    assert((w == s->w) && (h == s->h));
+    ConvertPixelsARGB_ABGR(buf, s->format->palette->colors, w * h);
     // printf("hello\n");
     NDL_DrawRect(buf, x, y, w, h);
     free(buf);
@@ -228,7 +232,7 @@ void SDL_SetPalette(SDL_Surface *s, int flags, SDL_Color *colors, int firstcolor
   }
 }
 
-static void x(void *dst, void *src, int len) {
+static void ConvertPixelsARGB_ABGR(void *dst, void *src, int len) {
   int i;
   uint8_t (*pdst)[4] = dst;
   uint8_t (*psrc)[4] = src;
