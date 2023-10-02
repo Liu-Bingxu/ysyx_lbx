@@ -125,6 +125,7 @@ void *memcpy(void *out, const void *in, size_t n) {
         (*dest) = (*src);
         dest++;
         src++;
+        assert(dest != (char *)0xa1210000);
     }
     return out;
     // word_t *dest = out;
