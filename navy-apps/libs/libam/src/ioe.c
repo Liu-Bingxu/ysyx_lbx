@@ -116,6 +116,7 @@ void __am_gpu_init(){
     for (i = 0; i < w * h; i++)
         pixels[i] = i;
     int fb_fp = open("/dev/fb", 0, 0);
+    printf("Hello VGA1\n");
     for (int i = 0; i < h;i++){
         lseek(fb_fp, (i * w * 4), SEEK_SET);
         write(fb_fp, pixels, w * 4);
