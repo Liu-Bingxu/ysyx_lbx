@@ -26,7 +26,7 @@ void init_proc() {
 
     // load program here
 
-    naive_uload(NULL, "/bin/dhrystone");
+    naive_uload(NULL, "/bin/microbench");
 }
 
 Context* schedule(Context *prev) {
