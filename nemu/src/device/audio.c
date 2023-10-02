@@ -49,6 +49,9 @@ void audio_play(void *userdata, Uint8 *stream, int len){
         memcpy(new_sb_buf, sb_start, temp_len);
         memcpy(new_sb_buf + temp_len, sbuf, len - temp_len);
     }
+    else{
+        memcpy(new_sb_buf, sb_start, len);
+    }
     SDL_MixAudio(stream, new_sb_buf, len, SDL_MIX_MAXVOLUME);
     sb_start += len;
     if((sb_start-sbuf)>CONFIG_SB_SIZE)
