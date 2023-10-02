@@ -117,6 +117,7 @@ void __am_gpu_init(){
         pixels[i] = i;
     int fb_fp = open("/dev/fb", 0, 0);
     for (int i = 0; i < h;i++){
+        lseek(fb_fp, (i * w * 4), SEEK_SET);
         write(fb_fp, pixels, w * 4);
         pixels += w;
     }
