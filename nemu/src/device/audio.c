@@ -37,6 +37,7 @@ static uint8_t *sb_end = NULL;
 static uint32_t sb_count = 0;
 
 void audio_play(void *userdata, Uint8 *stream, int len){
+    printf("paly\n");
     memset(stream, 0, len);
     int my_fifo_len = audio_base[5];
     if (my_fifo_len==0){
