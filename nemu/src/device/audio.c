@@ -41,7 +41,7 @@ void audio_play(void *userdata, Uint8 *stream, int len){
     memset(stream, 0, len);
     int my_fifo_len = audio_base[5];
     if (my_fifo_len==0){
-        printf("no data\n");
+        // printf("no data\n");
         return;
     }
     len = (len < my_fifo_len) ? len : my_fifo_len;
