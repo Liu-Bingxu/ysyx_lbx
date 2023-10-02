@@ -116,7 +116,10 @@ void __am_gpu_init(){
     for (i = 0; i < w * h; i++)
         pixels[i] = i;
     int fb_fp = open("/dev/fb", 0, 0);
-    write(fb_fp, pixels, w * h * 4);
+    for (int i = 0; i < h;i++){
+        write(fb_fp, pixels, w * 4);
+        pixels += w;
+    }
     printf("Hello VGA\n");
 }
 void __am_gpu_config(AM_GPU_CONFIG_T *cfg){
