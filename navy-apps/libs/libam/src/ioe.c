@@ -55,7 +55,8 @@ static void *lut[128] = {
 };
 
 bool ioe_init() {
-  return true;
+    __am_gpu_init();
+    return true;
 }
 
 void ioe_read (int reg, void *buf) {
@@ -118,7 +119,6 @@ void __am_gpu_init(){
     int fb_fp = open("/dev/fb", 0, 0);
     printf("Hello VGA1\n");
     for (int i = 0; i < h;i++){
-        lseek(fb_fp, (i * w * 4), SEEK_SET);
         write(fb_fp, pixels, w * 4);
         pixels += w;
     }
