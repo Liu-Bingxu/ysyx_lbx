@@ -12,7 +12,8 @@ static int vsnprintf_unsigned_long_long_num(char *out, unsigned long long OP_num
     do
     {
         int w = OP_num % div;
-        (*out) = (w + 0x30);
+        if(w<10)(*out) = (w + 0x30);
+        else (*out) = (w + 0x67);
         out++;
         res++;
         OP_num /= div;
