@@ -78,14 +78,19 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h){
     }
     uint32_t *buf = malloc(sizeof(uint32_t) * w * h);
     assert(buf);
+    uint32_t *buf2 = malloc(sizeof(uint32_t) * 256);
+    assert(buf2);
+    ConvertPixelsARGB_ABGR(buf2, s->format->palette->colors, 256);
     // for (int _i = 0; _i < h;_i++)
     //     for (int _y = 0; _y < w;_y++)
     //         buf[_i * w + _y] = s->format->palette->colors[s->pixels[_y + x + (_i + y) * s->w]].val;
-    assert((w == s->w) && (h == s->h));
-    ConvertPixelsARGB_ABGR(buf, s->format->palette->colors, w * h);
     // printf("hello\n");
+    for (int _i = 0; _i < h;_i++)
+        for (int _y = 0; _y < w;_y++)
+            buf[_i * w + _y] = buf2[s->pixels[_y + x + (_i + y) * s->w]];
     NDL_DrawRect(buf, x, y, w, h);
     free(buf);
+    free(buf2);
 }
 
 // APIs below are already implemented.
