@@ -76,6 +76,7 @@ void __am_audio_play(AM_AUDIO_PLAY_T *ctl) {
         // if(text!=count)printf("I am %lu, target is %d\n", len, count);
     }
     if (last_len + len > sb_buf_size){
+        printf("Hello\n");
         memcpy((void *)AUDIO_SBUF_ADDR + last_len, start, sb_buf_size - last_len);
         printf("Hello\n");
         last_len = 0;
