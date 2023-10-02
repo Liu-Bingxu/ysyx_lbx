@@ -122,10 +122,10 @@ void *memcpy(void *out, const void *in, size_t n) {
     char *dest = out;
     const char *src = in;
     for (int i=0; i < n; i++){
+        assert(dest != (char *)0xa1210000);
         (*dest) = (*src);
         dest++;
         src++;
-        assert(dest != (char *)0xa1210000);
     }
     return out;
     // word_t *dest = out;
