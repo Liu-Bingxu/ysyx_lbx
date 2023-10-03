@@ -15,9 +15,7 @@ void *buf = NULL;
 
 void sb_callback(void *userdata, Uint8 *stream, int len){
     static size_t nplay = 0;
-    printf("stream is %p\n", stream);
-    memcpy(stream, 0, len);
-    printf("%s %d,Hello\n", __func__, __LINE__);
+    memset(stream, 0, len);
     len = (red_size - nplay > len ? len : red_size - nplay);
     memcpy(stream, buf + nplay, len);
     nplay += len;
