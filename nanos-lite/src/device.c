@@ -69,7 +69,7 @@ size_t sb_write(const void *buf,size_t offset,size_t len){
 
 size_t sb_count_read(void *buf, size_t offset, size_t len){
     uint32_t *sbuf_count = (uint32_t *)buf;
-    (*sbuf_count) = io_read(AM_AUDIO_STATUS).count;
+    (*sbuf_count) = (0x10000-io_read(AM_AUDIO_STATUS).count);
     return 0;
 }
 
