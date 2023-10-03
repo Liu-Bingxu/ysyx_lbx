@@ -17,7 +17,7 @@ static int size = 0;
 
 int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained) {
     // assert(0);
-    assert(obtained == NULL);
+    // assert(obtained == NULL);
     assert(desired->callback != NULL);
     assert(desired->format == AUDIO_S16SYS);
     assert((desired->channels == 1) || (desired->channels == 2));
