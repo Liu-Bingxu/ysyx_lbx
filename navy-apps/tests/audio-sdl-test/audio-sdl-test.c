@@ -14,6 +14,7 @@ static size_t red_size = 0;
 void *buf = NULL;
 
 void sb_callback(void *userdata, Uint8 *stream, int len){
+    printf("%s %d,Hello\n", __func__, __LINE__);
     static size_t nplay = 0;
     memcpy(stream, 0, len);
     len = (red_size - nplay > len ? len : red_size - nplay);
@@ -55,7 +56,6 @@ int main(int argc , char* argv[]){
     while(1){
         SDL_Event ev;
         SDL_PollEvent(&ev);
-        printf("%s %d,Hello\n", __func__,__LINE__);
     }
 
     exit(0);
