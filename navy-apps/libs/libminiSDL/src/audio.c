@@ -77,10 +77,10 @@ void SDL_audio_help_callback(){
         return;
     }
     if((now - prev) < time_lag){
-        printf("Hello\n");
         return;
     }
     if(size > NDL_QueryAudio()){
+        printf("Hello\n");
         return;
     }
     prev = now;
