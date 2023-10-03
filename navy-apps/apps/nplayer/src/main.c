@@ -7,19 +7,22 @@
 #include <vorbis.h>
 #include <fixedptc.h>
 
-#define MUSIC_PATH "/share/music/little-star.ogg"
+#define MUSIC_PATH "/share/music/red.pcm"
 #define SAMPLES 4096
 #define FPS 10
 #define W 400
 #define H 100
 #define MAX_VOLUME 128
 
-stb_vorbis *v = NULL;
-stb_vorbis_info info = {};
+// stb_vorbis *v = NULL;
+// stb_vorbis_info info = {};
 SDL_Surface *screen = NULL;
 int is_end = 0;
-int16_t *stream_save = NULL;
+// int16_t *stream_save = NULL;
 int volume = MAX_VOLUME;
+
+size_t red_size = 0;
+void *buf = NULL;
 
 static void drawVerticalLine(int x, int y0, int y1, uint32_t color) {
   assert(y0 <= y1);
@@ -60,74 +63,104 @@ static void AdjustVolume(int16_t *stream, int samples) {
 }
 
 void FillAudio(void *userdata, uint8_t *stream, int len) {
-  int nbyte = 0;
-  int samples_per_channel = stb_vorbis_get_samples_short_interleaved(v,
-      info.channels, (int16_t *)stream, len / sizeof(int16_t));
-  if (samples_per_channel != 0) {
-    int samples = samples_per_channel * info.channels;
-    nbyte = samples * sizeof(int16_t);
-    AdjustVolume((int16_t *)stream, samples);
-  } else {
-    is_end = 1;
-  }
-  if (nbyte < len) memset(stream + nbyte, 0, len - nbyte);
-  memcpy(stream_save, stream, len);
+    static int last = 0;
+    memset(stream, 0, len);
+    if((last+len)>red_size){
+        memcpy(stream, buf + last, red_size - last);
+        last = 0;
+    }
+    else{
+        memcpy(stream, buf + last, len);
+    }
+    // int nbyte = 0;
+    //   int samples_per_channel = stb_vorbis_get_samples_short_interleaved(v,
+    //   info.channels, (int16_t *)stream, len / sizeof(int16_t));
+    //   if (samples_per_channel != 0) {
+    // int samples = samples_per_channel * info.channels;
+    // nbyte = samples * sizeof(int16_t);
+    // AdjustVolume((int16_t *)stream, samples);
+    //   } else {
+    // is_end = 1;
+    //   }
+    // if (nbyte < len)
+        // memset(stream + nbyte, 0, len - nbyte);
+    // memcpy(stream_save, stream, len);
 }
 
 int main(int argc, char *argv[]) {
-  SDL_Init(0);
-  screen = SDL_SetVideoMode(W, H, 32, SDL_HWSURFACE);
-  SDL_FillRect(screen, NULL, 0);
-  SDL_UpdateRect(screen, 0, 0, 0, 0);
+    SDL_Init(0);
+    screen = SDL_SetVideoMode(W, H, 32, SDL_HWSURFACE);
+    SDL_FillRect(screen, NULL, 0);
+    SDL_UpdateRect(screen, 0, 0, 0, 0);
+    //   printf("Hello\n");
 
-  FILE *fp = fopen(MUSIC_PATH, "r");
-  assert(fp);
-  fseek(fp, 0, SEEK_END);
-  size_t size = ftell(fp);
-  void *buf = malloc(size);
-  assert(size);
-  fseek(fp, 0, SEEK_SET);
-  int ret = fread(buf, size, 1, fp);
-  assert(ret == 1);
-  fclose(fp);
+    FILE *fp = fopen(MUSIC_PATH, "r");
+    assert(fp);
+    fseek(fp, 0, SEEK_END);
+    size_t size = ftell(fp);
+    red_size = size;
+    printf("the size is %d\n", red_size);
+    buf = malloc(size);
+    assert(buf);
+    fseek(fp, 0, SEEK_SET);
+    int ret = fread(buf, size, 1, fp);
+    assert(ret == 1);
+    fclose(fp);
+    printf("Hello\n");
 
-  int error;
-  v = stb_vorbis_open_memory(buf, size, &error, NULL);
-  assert(v);
-  info = stb_vorbis_get_info(v);
+    //   int error;
+    //   v = stb_vorbis_open_memory(buf, size, &error, NULL);
+    //   assert(v);
+    //   info = stb_vorbis_get_info(v);
 
-  SDL_AudioSpec spec;
-  spec.freq = info.sample_rate;
-  spec.channels = info.channels;
-  spec.samples = SAMPLES;
-  spec.format = AUDIO_S16SYS;
-  spec.userdata = NULL;
-  spec.callback = FillAudio;
-  SDL_OpenAudio(&spec, NULL);
+    SDL_AudioSpec spec;
+    //   spec.freq = info.sample_rate;
+    //   spec.channels = info.channels;
+    spec.freq = 44100;
+    spec.channels = 2;
+    spec.samples = SAMPLES;
+    spec.format = AUDIO_S16SYS;
+    spec.userdata = NULL;
+    spec.callback = FillAudio;
+    SDL_OpenAudio(&spec, NULL);
 
-  stream_save = malloc(SAMPLES * info.channels * sizeof(*stream_save));
-  assert(stream_save);
-  printf("Playing %s(freq = %d, channels = %d)...\n", MUSIC_PATH, info.sample_rate, info.channels);
-  SDL_PauseAudio(0);
+    // stream_save = malloc(SAMPLES * spec.channels * sizeof(*stream_save));
+    // assert(stream_save);
+    // printf("Playing %s(freq = %d, channels = %d)...\n", MUSIC_PATH, info.sample_rate, info.channels);
+    SDL_PauseAudio(0);
 
-  while (!is_end) {
-    SDL_Event ev;
-    while (SDL_PollEvent(&ev)) {
-      if (ev.type == SDL_KEYDOWN) {
-        switch (ev.key.keysym.sym) {
-          case SDLK_MINUS:  if (volume >= 8) volume -= 8; break;
-          case SDLK_EQUALS: if (volume <= MAX_VOLUME - 8) volume += 8; break;
-        }
-      }
+    // while (!is_end)
+    // {
+    // SDL_Event ev;
+    // while (SDL_PollEvent(&ev))
+    // {
+    // if (ev.type == SDL_KEYDOWN)
+    // {
+    // switch (ev.key.keysym.sym)
+    // {
+    // case SDLK_MINUS:
+    // if (volume >= 8)
+    // volume -= 8;
+    // break;
+    // case SDLK_EQUALS:
+    // if (volume <= MAX_VOLUME - 8)
+    // volume += 8;
+    // break;
+    // }
+    // }
+    // }
+    // SDL_Delay(1000 / FPS);
+    // visualize(stream_save, SAMPLES * info.channels);
+    //   }
+    while (1)
+    {
+        SDL_UpdateRect(screen, 0, 0, 0, 0);
     }
-    SDL_Delay(1000 / FPS);
-    visualize(stream_save, SAMPLES * info.channels);
-  }
 
   SDL_CloseAudio();
-  stb_vorbis_close(v);
+//   stb_vorbis_close(v);
   SDL_Quit();
-  free(stream_save);
+//   free(stream_save);
   free(buf);
 
   return 0;

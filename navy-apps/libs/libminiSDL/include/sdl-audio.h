@@ -11,6 +11,8 @@ typedef struct {
   void *userdata;
 } SDL_AudioSpec;
 
+
+
 #define AUDIO_U8 8
 #define AUDIO_S16 16
 #define AUDIO_S16SYS AUDIO_S16
@@ -25,5 +27,6 @@ void SDL_FreeWAV(uint8_t *audio_buf);
 void SDL_MixAudio(uint8_t *dst, uint8_t *src, uint32_t len, int volume);
 void SDL_LockAudio();
 void SDL_UnlockAudio();
+void SDL_audio_help_callback();
 
 #endif

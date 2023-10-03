@@ -26,7 +26,7 @@ void init_proc() {
 
     // load program here
 
-    naive_uload(NULL, "/bin/litenes");
+    naive_uload(NULL, "/bin/audio-sdl-test");
 }
 
 Context* schedule(Context *prev) {
