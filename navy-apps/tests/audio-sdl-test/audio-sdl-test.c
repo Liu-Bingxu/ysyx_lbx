@@ -23,7 +23,6 @@ void sb_callback(void *userdata, Uint8 *stream, int len){
     if(nplay>=red_size){
         nplay = 0;
     }
-    printf("%s,Hello\n",__func__);
 }
 
 int main(int argc , char* argv[]){
@@ -52,6 +51,7 @@ int main(int argc , char* argv[]){
     SDL_OpenAudio(&spec, NULL);
 
     SDL_PauseAudio(0);
+    printf("%s,Hello\n", __func__);
 
     while(1){
         SDL_Event ev;
