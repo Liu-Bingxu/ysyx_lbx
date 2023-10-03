@@ -29,7 +29,7 @@ int main(int argc , char* argv[]){
         int len = (audio_len - nplay > 4096 ? 4096 : audio_len - nplay);
         NDL_PlayAudio(buf + nplay, len);
         nplay += len;
-        printf("Already play %d/%d bytes of data\n", nplay, audio_len);
+        printf("paly %d, Already play %d/%d bytes of data\n", len,nplay, audio_len);
         if (nplay >= audio_len){
             nplay = 0;
         }
