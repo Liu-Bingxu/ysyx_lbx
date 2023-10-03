@@ -19,6 +19,7 @@ void sb_callback(void *userdata, Uint8 *stream, int len){
     len = (red_size - nplay > len ? len : red_size - nplay);
     memcpy(stream, buf + nplay, len);
     nplay += len;
+    printf("paly %d, Already play %d/%d bytes of data\n", len, nplay, red_size);
     if(nplay>=red_size){
         nplay = 0;
     }
