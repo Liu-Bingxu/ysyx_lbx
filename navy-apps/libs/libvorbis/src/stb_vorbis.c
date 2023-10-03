@@ -4700,7 +4700,6 @@ stb_vorbis * stb_vorbis_open_memory(const unsigned char *data, int len, int *err
          if (error) *error = VORBIS__no_error;
          return f;
       }
-      printf("error\n");
    }
    if (error) *error = p.error;
    vorbis_deinit(&p);

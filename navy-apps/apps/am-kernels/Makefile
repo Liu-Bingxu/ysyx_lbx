@@ -6,9 +6,11 @@ endif
 BENCHMARKS = coremark dhrystone microbench
 KERNELS    = typing-game litenes
 APP_PATH   = $(AM_KERNELS_PATH)/$(if $(findstring $(1), $(BENCHMARKS)),benchmarks,kernels)/$(1)
+# APP_PATH	= $(AM_KERNELS_PATH)/tests/am-tests
 
-ALL = $(BENCHMARKS) $(KERNELS)
+ALL ?= $(BENCHMARKS) $(KERNELS)
 ALL_PATH = $(foreach app,$(ALL),$(call APP_PATH,$(app)))
+# ALL_PATH = $(APP_PATH)
 
 ifeq ($(findstring $(MAKECMDGOALS),clean|clean-all|html),)
 libam:
