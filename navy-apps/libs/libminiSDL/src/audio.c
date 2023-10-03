@@ -76,6 +76,7 @@ void SDL_audio_help_callback(){
     if((is_playing==false)||((now-prev)<time_lag)){
         return;
     }
+    prev = now;
     uint8_t *sbuf = (uint8_t *)malloc(size);
     callback(userdata, sbuf, size);
     NDL_PlayAudio(sbuf, size);
