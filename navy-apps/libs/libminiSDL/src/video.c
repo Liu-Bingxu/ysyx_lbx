@@ -59,6 +59,7 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
 }
 
 void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h){
+    SDL_audio_help_callback();
     // printf("w is %d, h is %d\n",w,h);
     w = (w == 0) ? s->w : w;
     h = (h == 0) ? s->h : h;

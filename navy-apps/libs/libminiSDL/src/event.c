@@ -26,6 +26,7 @@ int SDL_PollEvent(SDL_Event *event) {
     }
     char buf[64];
     // printf("hello\n");
+    SDL_audio_help_callback();
     if (NDL_PollEvent(buf, sizeof(buf))){
         if (buf[1] == 'u'){
             // printf("UP\n");
@@ -145,5 +146,6 @@ uint8_t* SDL_GetKeyState(int *numkeys) {
     // else{
     //     memset(status, '\0', sizeof(status));
     // }
+    SDL_audio_help_callback();
     return status;
 }
