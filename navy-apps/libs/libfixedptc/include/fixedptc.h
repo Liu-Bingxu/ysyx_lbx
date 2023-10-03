@@ -151,7 +151,7 @@ static inline fixedpt fixedpt_div(fixedpt A, fixedpt B) {
 }
 
 static inline fixedpt fixedpt_abs(fixedpt A) {
-    assert(0);
+    // assert(0);
     return (A >= 0) ? A : (-A);
 }
 
