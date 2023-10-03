@@ -51,6 +51,7 @@ int main(int argc , char* argv[]){
     SDL_OpenAudio(&spec, NULL);
 
     SDL_PauseAudio(0);
+    printf("Hello\n");
 
     while(1){
         // int len = (audio_len - nplay > 4096 ? 4096 : audio_len - nplay);
@@ -62,7 +63,6 @@ int main(int argc , char* argv[]){
         // }
         SDL_Event ev;
         SDL_PollEvent(&ev);
-        printf("Hello\n");
     }
 
     exit(0);
