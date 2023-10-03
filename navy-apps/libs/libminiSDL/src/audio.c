@@ -27,7 +27,7 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained) {
     NDL_OpenAudio(desired->freq, desired->channels, desired->samples);
     size = desired->channels * desired->samples * desired->format / 8;
     time_lag = desired->samples / desired->freq * 1000;
-    printf("the freq is %d, the channels is %d, samples is %d\n", desired->freq, desired->channels, desired->samples);
+    printf("the freq is %d, the channels is %d, samples is %d, size is %d\n", desired->freq, desired->channels, desired->samples,size);
     return 0;
 }
 
