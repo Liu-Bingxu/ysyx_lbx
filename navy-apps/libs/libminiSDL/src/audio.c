@@ -102,14 +102,20 @@ SDL_AudioSpec *SDL_LoadWAV(const char *file, SDL_AudioSpec *spec, uint8_t **audi
     assert(wav.Fmtchunt.wBitsPerSample == 16);
     assert(memcmp(wav.Datachunk.ckID, "data", 4) == 0);
     printf("freq is %d, channels is %d\n", wav.Fmtchunt.nAvgBytesPerSec, wav.Fmtchunt.nChannels);
-    assert(spec == NULL);
-    assert(0);
-
-    return NULL;
+    assert(spec != NULL);
+    // assert(0);
+    spec->freq = wav.Fmtchunt.nAvgBytesPerSec;
+    spec->channels = wav.Fmtchunt.nChannels;
+    spec->samples = 1024;
+    spec->format = AUDIO_S16SYS;
+    (*audio_len) = wav.Datachunk.CK_size;
+    (*audio_buf) = malloc(wav.Datachunk.CK_size);
+    return spec;
 }
 
 void SDL_FreeWAV(uint8_t *audio_buf) {
     // assert(0);
+    free(audio_buf);
 }
 
 void SDL_LockAudio() {
