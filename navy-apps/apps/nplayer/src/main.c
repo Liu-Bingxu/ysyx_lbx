@@ -88,32 +88,33 @@ void FillAudio(void *userdata, uint8_t *stream, int len) {
 }
 
 int main(int argc, char *argv[]) {
-  SDL_Init(0);
-  screen = SDL_SetVideoMode(W, H, 32, SDL_HWSURFACE);
-  SDL_FillRect(screen, NULL, 0);
-  SDL_UpdateRect(screen, 0, 0, 0, 0);
-  printf("Hello\n");
+    SDL_Init(0);
+    screen = SDL_SetVideoMode(W, H, 32, SDL_HWSURFACE);
+    SDL_FillRect(screen, NULL, 0);
+    SDL_UpdateRect(screen, 0, 0, 0, 0);
+    //   printf("Hello\n");
 
-  FILE *fp = fopen(MUSIC_PATH, "r");
-  assert(fp);
-  fseek(fp, 0, SEEK_END);
-  size_t size = ftell(fp);
-  red_size = size;
-  buf = malloc(size);
-  assert(buf);
-  fseek(fp, 0, SEEK_SET);
-  int ret = fread(buf, size, 1, fp);
-  assert(ret == 1);
-  fclose(fp);
+    FILE *fp = fopen(MUSIC_PATH, "r");
+    assert(fp);
+    fseek(fp, 0, SEEK_END);
+    size_t size = ftell(fp);
+    red_size = size;
+    buf = malloc(size);
+    assert(buf);
+    fseek(fp, 0, SEEK_SET);
+    int ret = fread(buf, size, 1, fp);
+    assert(ret == 1);
+    fclose(fp);
+    printf("Hello\n");
 
-//   int error;
-//   v = stb_vorbis_open_memory(buf, size, &error, NULL);
-//   assert(v);
-//   info = stb_vorbis_get_info(v);
+    //   int error;
+    //   v = stb_vorbis_open_memory(buf, size, &error, NULL);
+    //   assert(v);
+    //   info = stb_vorbis_get_info(v);
 
     SDL_AudioSpec spec;
-//   spec.freq = info.sample_rate;
-//   spec.channels = info.channels;
+    //   spec.freq = info.sample_rate;
+    //   spec.channels = info.channels;
     spec.freq = 44100;
     spec.channels = 2;
     spec.samples = SAMPLES;
@@ -129,28 +130,29 @@ int main(int argc, char *argv[]) {
 
     // while (!is_end)
     // {
-        // SDL_Event ev;
-        // while (SDL_PollEvent(&ev))
-        // {
-            // if (ev.type == SDL_KEYDOWN)
-            // {
-                // switch (ev.key.keysym.sym)
-                // {
-                // case SDLK_MINUS:
-                    // if (volume >= 8)
-                        // volume -= 8;
-                    // break;
-                // case SDLK_EQUALS:
-                    // if (volume <= MAX_VOLUME - 8)
-                        // volume += 8;
-                    // break;
-                // }
-            // }
-        // }
-        // SDL_Delay(1000 / FPS);
-        // visualize(stream_save, SAMPLES * info.channels);
-//   }
-    while(1){
+    // SDL_Event ev;
+    // while (SDL_PollEvent(&ev))
+    // {
+    // if (ev.type == SDL_KEYDOWN)
+    // {
+    // switch (ev.key.keysym.sym)
+    // {
+    // case SDLK_MINUS:
+    // if (volume >= 8)
+    // volume -= 8;
+    // break;
+    // case SDLK_EQUALS:
+    // if (volume <= MAX_VOLUME - 8)
+    // volume += 8;
+    // break;
+    // }
+    // }
+    // }
+    // SDL_Delay(1000 / FPS);
+    // visualize(stream_save, SAMPLES * info.channels);
+    //   }
+    while (1)
+    {
         SDL_UpdateRect(screen, 0, 0, 0, 0);
     }
 
