@@ -17,13 +17,13 @@ void sb_callback(void *userdata, Uint8 *stream, int len){
     static size_t nplay = 0;
     memcpy(stream, 0, len);
     len = (red_size - nplay > len ? len : red_size - nplay);
+    printf("%s %d,Hello\n", __func__, __LINE__);
     memcpy(stream, buf + nplay, len);
     nplay += len;
     printf("paly %d, Already play %d/%d bytes of data\n", len, nplay, red_size);
     if(nplay>=red_size){
         nplay = 0;
     }
-    printf("%s %d,Hello\n", __func__, __LINE__);
 }
 
 int main(int argc , char* argv[]){
