@@ -69,7 +69,6 @@ void SDL_UnlockAudio() {
 
 void SDL_audio_help_callback(){
     static uint32_t prev = 0;
-    printf("Hello\n");
     if (prev == 0){
         prev = SDL_GetTicks();
     }
@@ -77,6 +76,7 @@ void SDL_audio_help_callback(){
     if ((is_playing == false) || ((now - prev) < time_lag) || (size > NDL_QueryAudio())){
         return;
     }
+    printf("Hello\n");
     prev = now;
     uint8_t *sbuf = (uint8_t *)malloc(size);
     callback(userdata, sbuf, size);
