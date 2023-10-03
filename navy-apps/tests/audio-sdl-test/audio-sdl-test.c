@@ -23,7 +23,7 @@ void sb_callback(void *userdata, Uint8 *stream, int len){
     if(nplay>=red_size){
         nplay = 0;
     }
-    printf("Hello\n");
+    printf("%s,Hello\n",__FUNC__);
 }
 
 int main(int argc , char* argv[]){
