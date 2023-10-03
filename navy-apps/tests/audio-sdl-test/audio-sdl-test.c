@@ -51,11 +51,11 @@ int main(int argc , char* argv[]){
     SDL_OpenAudio(&spec, NULL);
 
     SDL_PauseAudio(0);
-    printf("%s,Hello\n", __func__);
 
     while(1){
         SDL_Event ev;
         SDL_PollEvent(&ev);
+        printf("%s %d,Hello\n", __func__,__LINE__);
     }
 
     exit(0);
