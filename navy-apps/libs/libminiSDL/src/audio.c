@@ -73,10 +73,16 @@ void SDL_audio_help_callback(){
         prev = SDL_GetTicks();
     }
     uint32_t now = SDL_GetTicks();
-    if ((is_playing == false) || ((now - prev) < time_lag) || (size > NDL_QueryAudio())){
+    if (is_playing == false){
+        printf("Hello\n");
         return;
     }
-    printf("Hello\n");
+    if((now - prev) < time_lag){
+        return;
+    }
+    if(size > NDL_QueryAudio()){
+        return;
+    }
     prev = now;
     uint8_t *sbuf = (uint8_t *)malloc(size);
     callback(userdata, sbuf, size);
