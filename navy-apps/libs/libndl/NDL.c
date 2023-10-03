@@ -106,7 +106,7 @@ void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
 }
 
 void NDL_OpenAudio(int freq, int channels, int samples) {
-    int sb_init_fp = open("/dev/fbctl", 0, 0);
+    int sb_init_fp = open("/dev/sbctl", 0, 0);
     uint32_t *sbuf = (uint32_t *)malloc(sizeof(uint32_t) * 3);
     (*sbuf) = freq;
     (*(sbuf + 1)) = channels;
