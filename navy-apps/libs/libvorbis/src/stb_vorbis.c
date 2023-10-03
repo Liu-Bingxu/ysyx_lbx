@@ -4685,10 +4685,7 @@ stb_vorbis * stb_vorbis_open_filename(const char *filename, int *error, const st
 stb_vorbis * stb_vorbis_open_memory(const unsigned char *data, int len, int *error, const stb_vorbis_alloc *alloc)
 {
    stb_vorbis *f, p;
-   if (data == NULL) {
-       printf("error1\n");
-       return NULL;
-   }
+   if (data == NULL) return NULL;
    vorbis_init(&p, alloc);
    p.stream = (uint8 *) data;
    p.stream_end = (uint8 *) data + len;
@@ -4703,10 +4700,10 @@ stb_vorbis * stb_vorbis_open_memory(const unsigned char *data, int len, int *err
          if (error) *error = VORBIS__no_error;
          return f;
       }
+      printf("error\n");
    }
    if (error) *error = p.error;
    vorbis_deinit(&p);
-   printf("error2\n");
    return NULL;
 }
 
