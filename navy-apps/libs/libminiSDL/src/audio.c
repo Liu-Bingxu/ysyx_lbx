@@ -102,7 +102,9 @@ SDL_AudioSpec *SDL_LoadWAV(const char *file, SDL_AudioSpec *spec, uint8_t **audi
     assert(wav.Fmtchunt.wBitsPerSample == 16);
     assert(memcmp(wav.Datachunk.ckID, "data", 4) == 0);
     printf("freq is %d, channels is %d\n", wav.Fmtchunt.nAvgBytesPerSec, wav.Fmtchunt.nChannels);
+    assert(spec == NULL);
     assert(0);
+
     return NULL;
 }
 
