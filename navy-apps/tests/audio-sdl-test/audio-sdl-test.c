@@ -62,6 +62,7 @@ int main(int argc , char* argv[]){
         // }
         SDL_Event ev;
         SDL_PollEvent(&ev);
+        printf("Hello\n");
     }
 
     exit(0);
