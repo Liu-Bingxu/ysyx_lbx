@@ -69,7 +69,8 @@ void SDL_UnlockAudio() {
 
 void SDL_audio_help_callback(){
     static uint32_t prev = 0;
-    if(prev==0){
+    printf("Hello\n");
+    if (prev == 0){
         prev = SDL_GetTicks();
     }
     uint32_t now = SDL_GetTicks();
