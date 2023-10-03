@@ -1,6 +1,8 @@
 #include <NDL.h>
 #include <SDL.h>
 #include "assert.h"
+#include "string.h"
+#include "stdint.h"
 
 static void *buf = NULL;
 static long len = 0;
@@ -14,6 +16,40 @@ static bool is_playing = false;
 
 static int time_lag = 0;
 static int size = 0;
+
+#define __attribute__unpacked__ __attribute__((packed))
+
+typedef struct RIFFChunk
+{
+    char RIFF[4];
+    uint32_t CK_size;
+    char wav_ID[4];
+} __attribute__unpacked__ RIFFChunk;
+
+typedef struct StandardPCMFmtChunk
+{
+    char ckID[4];
+    uint32_t ckSize;
+    uint16_t wFormatTag;
+    uint16_t nChannels;
+    uint32_t nSamplesPerSec;
+    uint32_t nAvgBytesPerSec;
+    uint16_t nBlockAlign;
+    uint16_t wBitsPerSample;
+} __attribute__unpacked__ StandardPCMFmtChunk;
+
+typedef struct DATAChunk
+{
+    char ckID[4];
+    uint32_t CK_size;
+} __attribute__unpacked__ DATAChunk;
+
+typedef struct WAV
+{
+    RIFFChunk Riffchunk;
+    StandardPCMFmtChunk Fmtchunt;
+    DATAChunk Datachunk;
+} __attribute__unpacked__ WAV;
 
 int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained) {
     // assert(0);
@@ -53,7 +89,20 @@ void SDL_MixAudio(uint8_t *dst, uint8_t *src, uint32_t len, int volume) {
 SDL_AudioSpec *SDL_LoadWAV(const char *file, SDL_AudioSpec *spec, uint8_t **audio_buf, uint32_t *audio_len) {
     // assert(0);
     FILE *wav_fp = fopen(file, "rb");
-    
+    assert(wav_fp);
+    WAV wav;
+    int ret = fread(&wav, sizeof(WAV), 1, wav_fp);
+    assert(ret == 1);
+    assert(memcmp(wav.Riffchunk.RIFF, "RIFF", 4) == 0);
+    assert(memcmp(wav.Riffchunk.wav_ID, "WAVE", 4) == 0);
+    assert(memcmp(wav.Fmtchunt.ckID, "fmt ", 4) == 0);
+    assert(memcmp(wav.Datachunk.ckID, "data", 4) == 0);
+    assert((wav.Fmtchunt.nChannels == 1) || (wav.Fmtchunt.nChannels == 2));
+    assert(wav.Fmtchunt.wFormatTag == 1);
+    assert(wav.Fmtchunt.wBitsPerSample == 16);
+    assert(memcmp(wav.Datachunk.ckID, "data", 4) == 0);
+    printf("freq is %d\n", wav.Fmtchunt.nAvgBytesPerSec);
+    assert(0);
     return NULL;
 }
 
