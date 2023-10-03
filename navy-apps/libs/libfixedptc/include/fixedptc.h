@@ -176,7 +176,7 @@ static inline fixedpt fixedpt_floor(fixedpt A) {
 
 
 static inline fixedpt fixedpt_ceil(fixedpt A) {
-    // assert(0);
+    assert(0);
     if (fixedpt_fracpart(A) == 0){
         return A;
     }
