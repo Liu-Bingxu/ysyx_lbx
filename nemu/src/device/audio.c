@@ -75,6 +75,7 @@ static void audio_io_handler(uint32_t offset, int len, bool is_write) {
 }
 
 static void call_of_sbuf(uint32_t offset, int len, bool is_write){
+    printf("data get\n");
     sb_end = (sbuf + ((offset + len) % CONFIG_SB_SIZE));
     audio_base[5] = (sb_end >= sb_start) ? (sb_end - sb_start ) : (CONFIG_SB_SIZE + sb_end - sb_start );
 }
