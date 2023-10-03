@@ -21,7 +21,7 @@ int is_end = 0;
 // int16_t *stream_save = NULL;
 int volume = MAX_VOLUME;
 
-int red_size = 0;
+size_t red_size = 0;
 void *buf = NULL;
 
 static void drawVerticalLine(int x, int y0, int y1, uint32_t color) {
@@ -99,6 +99,7 @@ int main(int argc, char *argv[]) {
     fseek(fp, 0, SEEK_END);
     size_t size = ftell(fp);
     red_size = size;
+    printf("the size is %d\n", red_size);
     buf = malloc(size);
     assert(buf);
     fseek(fp, 0, SEEK_SET);
