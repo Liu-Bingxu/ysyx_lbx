@@ -125,7 +125,7 @@ int NDL_PlayAudio(void *buf, int len) {
 }
 
 int NDL_QueryAudio() {
-    int sb_count_fp = ("/dev/sbctl", 0, 0);
+    int sb_count_fp = open("/dev/sbctl", 0, 0);
     uint32_t count = -1;
     read(sb_count_fp, &count, 0);
     return count;
