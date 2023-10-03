@@ -26,7 +26,7 @@ void init_proc() {
 
     // load program here
 
-    naive_uload(NULL, "/bin/audio-test");
+    naive_uload(NULL, "/bin/cpp-test");
 }
 
 Context* schedule(Context *prev) {
