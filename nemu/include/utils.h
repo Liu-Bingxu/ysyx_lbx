@@ -108,7 +108,7 @@ uint64_t get_now_time();
 #define Log_func(...)            \
     do                           \
     {                            \
-        printf(__VA_ARGS__);     \
+        /* printf(__VA_ARGS__); */     \
         log_FTRACE(__VA_ARGS__); \
     } while (0)
 
