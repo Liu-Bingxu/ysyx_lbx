@@ -81,7 +81,7 @@ void SDL_audio_help_callback(){
     }
     int count = NDL_QueryAudio();
     if (size > count){
-        printf("Hello,%d\n",count);
+        // printf("Hello,%d\n",count);
         return;
     }
     prev = now;
