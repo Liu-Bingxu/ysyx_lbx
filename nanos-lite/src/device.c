@@ -60,8 +60,9 @@ size_t fb_write(const void *buf, size_t offset, size_t len) {
 
 size_t sb_write(const void *buf,size_t offset,size_t len){
     Area sbuf;
-    sbuf.start = buf;
-    sbuf.end = (buf + len);
+    void *fifo = (void *)buf;
+    sbuf.start = fifo;
+    sbuf.end = (fifo + len);
     io_write(AM_AUDIO_PLAY, sbuf);
     return 0;
 }
