@@ -89,7 +89,7 @@ void SDL_MixAudio(uint8_t *dst, uint8_t *src, uint32_t len, int volume) {
     int16_t *source = (int16_t *)src;
     len /= 2;
     for (int i = 0; i < len;i++){
-        (*dest) = ((*dest) / shift) + ((*source) / shift);
+        (*dest) = (*dest) + ((*source) / shift);
         dest++;
         source++;
     }
