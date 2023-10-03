@@ -83,7 +83,16 @@ void SDL_PauseAudio(int pause_on) {
 }
 
 void SDL_MixAudio(uint8_t *dst, uint8_t *src, uint32_t len, int volume) {
-    assert(0);
+    // assert(0);
+    int shift = SDL_MIX_MAXVOLUME / volume;
+    int16_t *dest = (int16_t *)dst;
+    int16_t *source = (int16_t *)src;
+    len /= 2;
+    for (int i = 0; i < len;i++){
+        (*dest) += ((*source) >> shift);
+        dest++;
+        source++;
+    }
 }
 
 SDL_AudioSpec *SDL_LoadWAV(const char *file, SDL_AudioSpec *spec, uint8_t **audio_buf, uint32_t *audio_len) {
