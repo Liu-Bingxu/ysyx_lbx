@@ -14,7 +14,6 @@ static size_t red_size = 0;
 void *buf = NULL;
 
 void sb_callback(void *userdata, Uint8 *stream, int len){
-    printf("%s %d,Hello\n", __func__, __LINE__);
     static size_t nplay = 0;
     memcpy(stream, 0, len);
     len = (red_size - nplay > len ? len : red_size - nplay);
@@ -24,6 +23,7 @@ void sb_callback(void *userdata, Uint8 *stream, int len){
     if(nplay>=red_size){
         nplay = 0;
     }
+    printf("%s %d,Hello\n", __func__, __LINE__);
 }
 
 int main(int argc , char* argv[]){
