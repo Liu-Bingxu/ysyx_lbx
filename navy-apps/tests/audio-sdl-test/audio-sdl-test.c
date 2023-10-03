@@ -49,9 +49,9 @@ int main(int argc , char* argv[]){
     spec.userdata = NULL;
     spec.callback = sb_callback;
     SDL_OpenAudio(&spec, NULL);
-    printf("Hello\n");
 
     SDL_PauseAudio(0);
+    printf("Hello\n");
 
     while(1){
         // int len = (audio_len - nplay > 4096 ? 4096 : audio_len - nplay);
