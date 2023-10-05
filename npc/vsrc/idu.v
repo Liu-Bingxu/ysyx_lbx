@@ -9,6 +9,8 @@ module idu#(parameter DATA_LEN=32) (
     output [4 :0]           rs1,
     output [4 :0]           rs2,
     output [4 :0]           rd,
+    output [11:0]           CSR_addr,
+    output [DATA_LEN-1:0]   CSR_operand,
     output [DATA_LEN-1:0]   operand1,   
     output [DATA_LEN-1:0]   operand2, 
     output [DATA_LEN-1:0]   operand3,   
@@ -18,19 +20,23 @@ module idu#(parameter DATA_LEN=32) (
     output                  jump_without,
     output [3:0]            store_sign,
     output                  ebreak,
+    output                  ecall,
+    output                  CSR_ren,
+    output                  CSR_wen,
     output                  dest_wen,
     output                  op
 );
 
 localparam FILLER_LEN = 20 + $clog2(DATA_LEN);
+localparam CSR_FILLER_LEN = DATA_LEN-5;
 
-wire [31:0] imm;
-wire [31:0] imm_I,imm_J,imm_U,imm_B,imm_S;
+wire [DATA_LEN-1:0] imm;
+wire [DATA_LEN-1:0] imm_I,imm_J,imm_U,imm_B,imm_S,CSR_imm;
 
 wire [6:0] funct7;
 wire [2:0] funct3;
 
-wire I_flag,J_flag,U_flag,B_flag,S_flag,R_flag;
+wire I_flag,J_flag,U_flag,B_flag,S_flag,R_flag,CSR_flag;
 wire load_flag,arith_flag;
 
 wire lui,auipc;
@@ -79,13 +85,15 @@ assign imm_S = {{20{inst[31]}},inst[31:25],inst[11:7]};
 assign imm_B = {{20{inst[31]}},inst[7],inst[30:25],inst[11:8],1'b0};
 assign imm_U = {inst[31:12],12'h0};
 assign imm_J = {{12{inst[31]}},inst[19:12],inst[20],inst[30:21],1'b0};
+assign CSR_imm = {{CSR_FILLER_LEN{1'b0}},rs1};
 // 
-assign R_flag = (inst[6:0]==7'b0110011)?1'b1:1'b0;
-assign S_flag = (inst[6:0]==7'b0100011)?1'b1:1'b0;
-assign I_flag = (load_flag|arith_flag|jalr);
-assign B_flag = (inst[6:0]==7'b1100011)?1'b1:1'b0;
-assign U_flag = (lui|auipc);
-assign J_flag = jal;
+assign R_flag   = (inst[6:0]==7'b0110011)?1'b1:1'b0;
+assign S_flag   = (inst[6:0]==7'b0100011)?1'b1:1'b0;
+assign I_flag   = (load_flag|arith_flag|jalr);
+assign B_flag   = (inst[6:0]==7'b1100011)?1'b1:1'b0;
+assign U_flag   = (lui|auipc);
+assign J_flag   = jal;
+assign CSR_flag = ((inst[6:0]==7'b1110011)&(~ebreak)&(~ecall))?1'b1:1'b0;
 
 assign imm = (I_flag)?imm_I:(
     (U_flag)?imm_U:(
@@ -141,6 +149,7 @@ assign sb       =   (S_flag&(funct3==3'b000))?1'b1:1'b0;
 assign sh       =   (S_flag&(funct3==3'b001))?1'b1:1'b0;
 assign sw       =   (S_flag&(funct3==3'b010))?1'b1:1'b0;
 
+assign ecall    =   (inst       ==  32'h00000073) ? 1'b1 : 1'b0;
 assign ebreak   =   (inst       ==  32'h00100073) ? 1'b1 : 1'b0;
 
 assign operand1 = ((auipc)?PC:((J_flag|jalr|lui)?32'h0:src1));
@@ -180,5 +189,15 @@ assign control_sign = {is_word,is_half,is_byte,is_load,is_bgeu,is_bge,is_bne,is_
 //                         is_beq,is_bne,is_bge,is_bgeu,is_load,is_byte,is_half,is_word};
 
 assign store_sign = {sw,sh,sb,S_flag};
+
+assign CSR_operand = (inst[14])?CSR_imm:src1;
+assign CSR_addr = inst[31:20];
+wire csrrw_with_rd0;
+assign csrrw_with_rd0 = ((rd==0)&(inst[13:12]==2'b01));
+assign CSR_ren = ( ( ~csrrw_with_rd0 ) & CSR_flag );
+wire csrr_with_rs0,csrr_with_imm0;
+assign csrr_with_rs0 = ((rs1==0)&(inst[13:12]!=2'b01)&(~inst[13]));
+assign csrr_with_imm0 = ((CSR_imm==0)&(inst[13:12]!=2'b01)&(inst[13]));
+assign CSR_wen = ( ( ~ ( csrr_with_imm0 | csrr_with_rs0 ) ) & CSR_flag );
 
 endmodule //idu

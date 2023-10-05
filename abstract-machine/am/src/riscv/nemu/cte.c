@@ -43,8 +43,23 @@ bool cte_init(Context*(*handler)(Event, Context*)) {
   return true;
 }
 
+#if __riscv_xlen == 64
+#define RST_STATUS 0xa0001800
+#else
+#define RST_STATUS 0x1800
+#endif
+
 Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
-  return NULL;
+    Context *context = (Context *)(kstack.end - sizeof(Context));
+    context->gpr[2] = (uintptr_t)context;
+    for (int i = 0; i < NR_REGS;i++){
+        if(i==2)continue;
+        context->gpr[i] = 0;
+    }
+    context->mcause = 11;
+    context->mstatus = RST_STATUS;
+    context->mepc = (uintptr_t)entry;
+    return context;
 }
 
 void yield() {

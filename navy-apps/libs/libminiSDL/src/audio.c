@@ -145,6 +145,13 @@ void SDL_UnlockAudio() {
 }
 
 void SDL_audio_help_callback(){
+    static bool is_recall = false;
+    if(is_recall==true){
+        return;
+    }
+    else{
+        is_recall = true;
+    }
     static uint32_t prev = 0;
     if (prev == 0){
         prev = SDL_GetTicks();
@@ -166,4 +173,5 @@ void SDL_audio_help_callback(){
     callback(userdata, sbuf, size);
     NDL_PlayAudio(sbuf, size);
     free(sbuf);
+    is_recall = false;
 }
