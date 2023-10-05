@@ -51,9 +51,7 @@ bool cte_init(Context*(*handler)(Event, Context*)) {
 
 Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
     Context *context = (Context *)(kstack.end - sizeof(Context));
-    context->gpr[2] = (uintptr_t)context;
     for (int i = 0; i < NR_REGS;i++){
-        if(i==2)continue;
         context->gpr[i] = 0;
     }
     context->mcause = 11;
