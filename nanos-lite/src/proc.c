@@ -22,13 +22,17 @@ void hello_fun(void *arg) {
 void context_kload(PCB *pcb, void *entry, void *arg){
     pcb->cp = kcontext((Area){.start = pcb, .end = (pcb + 1)}, entry, arg);
 }
-void context_uload(PCB *pcb,void *filename){
+void context_uload(PCB *pcb, const char *filename, char *const argv[], char *const envp[]){
     naive_uload(pcb, filename);
+    Area ustack = heap;
+    pcb->cp->GPRx = (uintptr_t)ustack.end;
+
+    // pcb->cp->GPR2=
 }
 
 void init_proc() {
     context_kload(&pcb[0], hello_fun, "It is 1");
-    context_uload(&pcb[1], "/bin/pal");
+    context_uload(&pcb[1], "/bin/pal",NULL,NULL);
     switch_boot_pcb();
 
     Log("Initializing processes...");
