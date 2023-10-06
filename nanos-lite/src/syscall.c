@@ -23,14 +23,6 @@ int sys_read(int fd,void *buf,size_t count){
 }
 
 int sys_write(int fd,const void *buf,size_t count){
-    const char *buff = (const char *)buf;
-    if ((fd == 1) || (fd == 2)){
-        for (int i = 0; i < count;i++){
-            putch(*buff);
-            buff++;
-        }
-        return count;
-    }
     return fs_write(fd, buf, count);
 }
 
@@ -109,7 +101,7 @@ void do_syscall(Context *c) {
         break;
     case SYS_write:
         c->GPRx = sys_write(a[1], (void *)a[2], a[3]);
-        printf("Hello\n");
+        // printf("Hello\n");
         // Log("syscall the %s with %d %d %d return the %d", sys_call_name[a[0]], a[1], a[2], a[3], c->GPRx);
         break;
     case SYS_lseek:
