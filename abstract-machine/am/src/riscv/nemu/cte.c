@@ -63,7 +63,7 @@ Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
     for (int i = 0; i < NR_REGS; i++){
         context->gpr[i] = 0;
     }
-    context->GPR1 = (uintptr_t)arg;
+    context->GPR2 = (uintptr_t)arg;
     context->mcause = 0;
     context->mstatus = RST_STATUS;
     context->mepc = (uintptr_t)entry;
