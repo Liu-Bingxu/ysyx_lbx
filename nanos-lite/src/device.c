@@ -18,7 +18,7 @@ size_t serial_write(const void *buf, size_t offset, size_t len) {
     yield();
     const char *char_buf = (const char *)buf;
     for (int i = 0; i < len; i++){
-        putch(*char_buf);
+        // putch(*char_buf);
         char_buf++;
     }
     return len;
