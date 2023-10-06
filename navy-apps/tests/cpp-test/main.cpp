@@ -13,15 +13,15 @@ int main(int argc,char *argv[],char *envp[]) {
     printf("%s,%d: Hello world!\n", __func__, __LINE__);
     while (1){
         for (int i = 0; i < argc; i++){
-            fprintf(stdout,"arg %d is %s\n", i, argv[i]);
+            printf("arg %d is %s\n", i, argv[i]);
         }
         for (int i = 0; envp[i] != NULL;i++){
-            fprintf(stdout,"env %d is %s\n", i, envp[i]);
+            printf("env %d is %s\n", i, envp[i]);
         }
-        // char buf[64];
-        // if (NDL_PollEvent(buf, sizeof(buf))){
-        //     printf("receive event: %s\n", buf);
-        // }
+        char buf[64];
+        if (NDL_PollEvent(buf, sizeof(buf))){
+            printf("receive event: %s\n", buf);
+        }
     }
     return 0;
 }
