@@ -18,10 +18,10 @@ int main(int argc,char *argv[],char *envp[]) {
         for (int i = 0; envp[i] != NULL;i++){
             printf("env %d is %s\n", i, envp[i]);
         }
-        char buf[64];
-        if (NDL_PollEvent(buf, sizeof(buf))){
-            printf("receive event: %s\n", buf);
-        }
+        // char buf[64];
+        // if (NDL_PollEvent(buf, sizeof(buf))){
+        //     printf("receive event: %s\n", buf);
+        // }
     }
     return 0;
 }
