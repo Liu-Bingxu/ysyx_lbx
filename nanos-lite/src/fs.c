@@ -84,6 +84,7 @@ int fs_read(int fd, void *buf, size_t count){
 }
 
 int fs_write(int fd, const void *buf, size_t count){
+    printf("Hello\n");
     if (((file_table[fd].size - file_table[fd].open_offset) < count) && (file_table[fd].size!=0))
         count = file_table[fd].size - file_table[fd].open_offset;
     if (file_table[fd].write != NULL){
