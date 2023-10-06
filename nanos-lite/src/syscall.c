@@ -109,6 +109,7 @@ void do_syscall(Context *c) {
         break;
     case SYS_write:
         c->GPRx = sys_write(a[1], (void *)a[2], a[3]);
+        Log("syscall the %s with %d %d %d return the %d", sys_call_name[a[0]], a[1], a[2], a[3], c->GPRx);
         break;
     case SYS_lseek:
         c->GPRx = sys_lseek(a[1], a[2], a[3]);
