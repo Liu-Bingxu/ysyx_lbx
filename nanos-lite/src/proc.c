@@ -27,32 +27,39 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
     Area ustack = heap;
     pcb->cp->GPRx = (uintptr_t)ustack.end;
     uintptr_t argc = 0, envc = 0;
-    for (int i = 0; argv[i] != NULL; i++){
-        argc++;
+    if(argv!=NULL){
+        for (int i = 0; argv[i] != NULL; i++){
+            argc++;
+        }
     }
-    printf("Hello\n");
-    for (int i = 0; envp[i] != NULL; i++){
-        envc++;
+    if(envp!=NULL){
+        for (int i = 0; envp[i] != NULL; i++){
+            envc++;
+        }
     }
     char *args = (char *)(ustack.start + (argc + envc + 13) * sizeof(uintptr_t));
     uintptr_t *arg = (uintptr_t *)ustack.start;
     (*arg) = argc;
     arg++;
-    for (int i = 0; argv[i] != NULL; i++){
-        int len = strlen(argv[i]);
-        memcpy(args, argv[i], len + 1);
-        (*arg) = (uintptr_t)args;
-        arg++;
-        args += (len + 1);
+    if(argv!=NULL){
+        for (int i = 0; argv[i] != NULL; i++){
+            int len = strlen(argv[i]);
+            memcpy(args, argv[i], len + 1);
+            (*arg) = (uintptr_t)args;
+            arg++;
+            args += (len + 1);
+        }
     }
     (*arg) = (uintptr_t)NULL;
     arg++;
-    for (int i = 0; envp[i] != NULL; i++){
-        int len = strlen(envp[i]);
-        memcpy(args, envp[i], len + 1);
-        (*arg) = (uintptr_t)args;
-        arg++;
-        args += (len + 1);
+    if(envp!=NULL){
+        for (int i = 0; envp[i] != NULL; i++){
+            int len = strlen(envp[i]);
+            memcpy(args, envp[i], len + 1);
+            (*arg) = (uintptr_t)args;
+            arg++;
+            args += (len + 1);
+        }
     }
     (*arg) = (uintptr_t)NULL;
     arg++;
