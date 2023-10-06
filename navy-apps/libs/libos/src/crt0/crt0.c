@@ -8,8 +8,8 @@ void call_main(uintptr_t *args) {
     char *empty[] = {NULL};
     uintptr_t argc = (*args);
     args++;
-    char *argv[] = (char **)args;
-    char *envp[] = (((char **)args) + argc + 1);
+    char **argv = (char **)args;
+    char **envp = (((char **)args) + argc + 1);
     // environ = empty;
     environ = envp;
     __libc_init_array();
