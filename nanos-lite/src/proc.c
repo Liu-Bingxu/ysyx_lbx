@@ -27,10 +27,10 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
     Area ustack = heap;
     pcb->cp->GPRx = (uintptr_t)ustack.end;
     uintptr_t argc = 0, envc = 0;
-    printf("Hello\n");
     for (int i = 0; argv[i] != NULL; i++){
         argc++;
     }
+    printf("Hello\n");
     for (int i = 0; envp[i] != NULL; i++){
         envc++;
     }
@@ -60,8 +60,9 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
 }
 
 void init_proc() {
+    char *argv[] = {"NULL"};
     context_kload(&pcb[0], hello_fun, "It is 1");
-    context_uload(&pcb[1], "/bin/pal",NULL,NULL);
+    context_uload(&pcb[1], "/bin/pal",argv,NULL);
     switch_boot_pcb();
 
     Log("Initializing processes...");
