@@ -24,7 +24,11 @@ void context_kload(PCB *pcb, void *entry, void *arg){
 }
 void context_uload(PCB *pcb, const char *filename, char *const argv[], char *const envp[]){
     naive_uload(pcb, filename);
-    Area ustack = heap;
+    void *stack = new_page(8);
+    Area ustack = {
+        .start = stack,
+        .end = (stack + 32 * 4096),
+    };
     pcb->cp->GPRx = (uintptr_t)ustack.end;
     uintptr_t argc = 1, envc = 0;
     if(argv!=NULL){
