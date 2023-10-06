@@ -52,6 +52,8 @@ void naive_uload(PCB *pcb, const char *filename) {
   asm volatile (
         "ecall" : : "r"(_gpr2),"r"(_gpr1)
     );
-  ((void (*)())entry)();
+  pcb->cp = ucontext(NULL, (Area){.start = pcb, .end = (pcb + 1)}, (void *)entry);
+  pcb->cp->GPRx = (uintptr_t)heap.end;
+  //   ((void (*)())entry)();
 }
 
