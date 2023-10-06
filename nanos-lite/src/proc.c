@@ -72,7 +72,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
     (*arg) = (uintptr_t)NULL;
     arg++;
     pcb->cp->GPR2 = (uintptr_t)ustack.start;
-    assert(0);
+    // assert(0);
 }
 
 void init_proc() {
