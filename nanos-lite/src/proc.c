@@ -33,6 +33,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
     for (int i = 0; envp[i] != NULL; i++){
         envc++;
     }
+    printf("Hello\n");
     char *args = (char *)(ustack.start + (argc + envc + 13) * sizeof(uintptr_t));
     uintptr_t *arg = (uintptr_t *)ustack.start;
     (*arg) = argc;
