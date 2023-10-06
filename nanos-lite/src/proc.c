@@ -45,6 +45,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
         for (int i = 0; argv[i] != NULL; i++){
             int len = strlen(argv[i]);
             memcpy(args, argv[i], len + 1);
+            printf("argv %d is %s\n", i, argv[i]);
             (*arg) = (uintptr_t)args;
             arg++;
             args += (len + 1);
@@ -56,6 +57,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
         for (int i = 0; envp[i] != NULL; i++){
             int len = strlen(envp[i]);
             memcpy(args, envp[i], len + 1);
+            printf("envp %d is %s\n", i, envp[i]);
             (*arg) = (uintptr_t)args;
             arg++;
             args += (len + 1);
@@ -64,6 +66,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
     (*arg) = (uintptr_t)NULL;
     arg++;
     pcb->cp->GPR2 = (uintptr_t)ustack.start;
+    assert(0);
 }
 
 void init_proc() {
