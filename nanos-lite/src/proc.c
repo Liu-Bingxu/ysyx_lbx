@@ -43,7 +43,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
     arg++;
     int len = strlen(filename);
     memcpy(args, filename, len + 1);
-    printf("argv 0 is %s\n", filename);
+    // printf("argv 0 is %s\n", filename);
     (*arg) = (uintptr_t)args;
     arg++;
     args += (len + 1);
@@ -51,7 +51,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
         for (int i = 0; argv[i] != NULL; i++){
             len = strlen(argv[i]);
             memcpy(args, argv[i], len + 1);
-            printf("argv %d is %s\n", i+1, argv[i]);
+            // printf("argv %d is %s\n", i+1, argv[i]);
             (*arg) = (uintptr_t)args;
             arg++;
             args += (len + 1);
@@ -63,7 +63,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
         for (int i = 0; envp[i] != NULL; i++){
             len = strlen(envp[i]);
             memcpy(args, envp[i], len + 1);
-            printf("envp %d is %s\n", i, envp[i]);
+            // printf("envp %d is %s\n", i, envp[i]);
             (*arg) = (uintptr_t)args;
             arg++;
             args += (len + 1);
