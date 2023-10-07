@@ -40,8 +40,9 @@ static void sh_handle_cmd(char *cmd) {
     }
     char *filename = strtok(cmd, " ");
     // char *const argv = strtok(NULL, " ");
-    char **argv = (char **)malloc(sizeof(char *) * 10);
-    assert(argv);
+    // char **argv = (char **)malloc(sizeof(char *) * 10);
+    char *argv[20]={NULL};
+    // assert(argv);
     int _cnt = 1;
     argv[0] = filename;
     while (1){
@@ -50,10 +51,11 @@ static void sh_handle_cmd(char *cmd) {
             argv[_cnt] = val;
         }
         else{
-            char **_argv = (char **)realloc((void *)argv, sizeof(argv) + sizeof(char *) * 1);
-            free(argv);
-            argv = _argv;
-            argv[_cnt] = val;
+            // char **_argv = (char **)realloc((void *)argv, sizeof(argv) + sizeof(char *) * 1);
+            // free(argv);
+            // argv = _argv;
+            // argv[_cnt] = val;
+            break;
         }
         _cnt++;
         if(val==NULL){
