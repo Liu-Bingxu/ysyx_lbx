@@ -42,7 +42,8 @@ static void sh_handle_cmd(char *cmd) {
     // char *const argv = strtok(NULL, " ");
     char **argv = (char **)malloc(sizeof(char *) * 10);
     assert(argv);
-    int _cnt = 0;
+    int _cnt = 1;
+    argv[0] = filename;
     while (1){
         char *val = strtok(NULL, " ");
         if (_cnt < (sizeof(argv) / sizeof(char *))){
@@ -60,7 +61,7 @@ static void sh_handle_cmd(char *cmd) {
         }
     }
     // char *env[] = {NULL};
-    execvp(cmd,argv);
+    execvp(filename,argv);
     // execl("/bin/pal","/bin/pal","--skip",NULL);
 }
 
