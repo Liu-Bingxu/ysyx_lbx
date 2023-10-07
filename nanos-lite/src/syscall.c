@@ -59,7 +59,9 @@ int sys_execve(const char *fname, char * const argv[], char *const envp[]){
     for(int i=0;argv[i]!=NULL;i++){
         printf("argv %d is %s\n", i, argv[i]);
     }
-    context_uload(current, fname, argv+1, NULL);
+    int res=context_uload(current, fname, argv+1, NULL);
+    if(res<0)
+        return -2;
     switch_boot_pcb();
     yield();
     return 0;

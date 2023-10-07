@@ -63,7 +63,7 @@ int fs_open(const char *path,int flag,word_t mode){
             return i;
         }
     }
-    // return -1;
+    return -1;
     Log("the path file %s is zero", path);
     assert(0);
 }

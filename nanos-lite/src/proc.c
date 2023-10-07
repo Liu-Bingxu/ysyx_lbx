@@ -23,8 +23,10 @@ void hello_fun(void *arg) {
 void context_kload(PCB *pcb, void *entry, void *arg){
     pcb->cp = kcontext((Area){.start = pcb, .end = (pcb + 1)}, entry, arg);
 }
-void context_uload(PCB *pcb, const char *filename, char *const argv[], char *const envp[]){
-    naive_uload(pcb, filename);
+int context_uload(PCB *pcb, const char *filename, char *const argv[], char *const envp[]){
+    int res=naive_uload(pcb, filename);
+    if(res<0)
+        return -1;
     void *stack = new_page(8);
     Area ustack = {
         .start = stack,
@@ -81,6 +83,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
     printf("envp finish\n");
     pcb->cp->GPR2 = (uintptr_t)ustack.start;
     printf("Hello\n");
+    return 0;
     // assert(0);
 }
 

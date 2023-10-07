@@ -12,6 +12,8 @@
 
 static uintptr_t loader(PCB *pcb, const char *filename) {
     int fd = fs_open(filename, 0, 0);
+    if(fd==-1)
+        return -2;
     assert(fd > 0);
     int offset = fs_lseek(fd, 0, SEEK_SET);
     assert(offset == 0);
@@ -44,14 +46,17 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
 #define MYGPR0 "a7"
 #endif
 
-void naive_uload(PCB *pcb, const char *filename) {
+int naive_uload(PCB *pcb, const char *filename) {
   uintptr_t entry = loader(pcb, filename);
+  if(entry==-2)
+      return -2;
   Log("Jump to entry = %p", entry);
   register intptr_t _gpr1 asm(MYGPR0) = -2;
   register intptr_t _gpr2 asm("t0") = (intptr_t)filename;
   asm volatile(
       "ecall" : : "r"(_gpr2), "r"(_gpr1));
   pcb->cp = ucontext(NULL, (Area){.start = pcb, .end = (pcb + 1)}, (void *)entry);
+  return 0;
   //   ((void (*)())entry)();
 }
 
