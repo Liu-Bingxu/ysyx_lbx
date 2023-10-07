@@ -39,28 +39,29 @@ static void sh_handle_cmd(char *cmd) {
         return;
     }
     char *filename = strtok(cmd, " ");
-    char **argv = (char **)malloc(sizeof(char *) * 10);
-    assert(argv);
-    int _cnt = 0;
-    while (1){
-        char *val = strtok(NULL, " ");
-        if (_cnt < (sizeof(argv) / sizeof(char *))){
-            argv[_cnt] = val;
-        }
-        else{
-            char **_argv = (char **)realloc((void *)argv, sizeof(argv) + sizeof(char *) * 1);
-            free(argv);
-            argv = _argv;
-            argv[_cnt] = val;
-        }
-        _cnt++;
-        if(val==NULL){
-            break;
-        }
-    }
-    char *env[] = {NULL};
-    // execve(cmd, argv,env);
-    execl("/bin/pal","/bin/pal","--skip",NULL);
+    char *argv = strtok(NULL, " ");
+    // char **argv = (char **)malloc(sizeof(char *) * 10);
+    // assert(argv);
+    // int _cnt = 0;
+    // while (1){
+    //     char *val = strtok(NULL, " ");
+    //     if (_cnt < (sizeof(argv) / sizeof(char *))){
+    //         argv[_cnt] = val;
+    //     }
+    //     else{
+    //         char **_argv = (char **)realloc((void *)argv, sizeof(argv) + sizeof(char *) * 1);
+    //         free(argv);
+    //         argv = _argv;
+    //         argv[_cnt] = val;
+    //     }
+    //     _cnt++;
+    //     if(val==NULL){
+    //         break;
+    //     }
+    // }
+    // char *env[] = {NULL};
+    execl(cmd,cmd,argv,NULL);
+    // execl("/bin/pal","/bin/pal","--skip",NULL);
 }
 
 void builtin_sh_run() {
