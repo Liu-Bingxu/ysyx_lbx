@@ -3,9 +3,13 @@
 #include "syscall.h"
 #include "proc.h"
 
+extern PCB *current;
+extern void switch_boot_pcb();
+
 int sys_exit(int code){
     // halt(code);
-    naive_uload(NULL, "/bin/menu");
+    // naive_uload(NULL, "/bin/menu");
+
     return 0;
 }
 
@@ -50,7 +54,9 @@ int sys_gettimeofday(struct timeval *tv,void *tz){
 
 int sys_execve(const char *fname, char * const argv[], char *const envp[]){
     // naive_uload(NULL, fname);
-    
+    context_uload(current, fname, argv, envp);
+    switch_boot_pcb();
+    yield();
     return 0;
 }
 
