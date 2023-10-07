@@ -38,7 +38,28 @@ static void sh_handle_cmd(char *cmd) {
         }
         return;
     }
-    execvp(cmd, NULL);
+    char *filename = strtok(cmd, " ");
+    char **argv = (char **)malloc(sizeof(char *) * 10);
+    assert(argv);
+    int _cnt = 0;
+    while (1){
+        char *val = strtok(NULL, " ");
+        if (_cnt < (sizeof(argv) / sizeof(char *))){
+            argv[_cnt] = val;
+        }
+        else{
+            char **_argv = (char **)realloc((void *)argv, sizeof(argv) + sizeof(char *) * 1);
+            free(argv);
+            argv = _argv;
+            argv[_cnt] = val;
+        }
+        _cnt++;
+        if(val==NULL){
+            break;
+        }
+    }
+    char *env[] = {NULL};
+    execve(cmd, argv,env);
 }
 
 void builtin_sh_run() {
