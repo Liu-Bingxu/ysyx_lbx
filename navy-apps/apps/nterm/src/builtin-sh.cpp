@@ -60,7 +60,7 @@ static void sh_handle_cmd(char *cmd) {
     //     }
     // }
     // char *env[] = {NULL};
-    execl(cmd,cmd,argv,NULL);
+    execle(cmd,cmd,argv,NULL);
     // execl("/bin/pal","/bin/pal","--skip",NULL);
 }
 
