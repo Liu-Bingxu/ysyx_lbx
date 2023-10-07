@@ -29,6 +29,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
         .start = stack,
         .end = (stack + 32 * 4096),
     };
+    printf("Hello\n");
     pcb->cp->GPRx = (uintptr_t)ustack.end;
     uintptr_t argc = 1, envc = 0;
     if(argv!=NULL){
@@ -41,7 +42,6 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
             envc++;
         }
     }
-    printf("Hello\n");
     char *args = (char *)(ustack.start + (argc + envc + 13) * sizeof(uintptr_t));
     uintptr_t *arg = (uintptr_t *)ustack.start;
     (*arg) = argc;
