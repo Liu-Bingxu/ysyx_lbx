@@ -47,6 +47,7 @@ word_t get_csr(word_t csr_num){
         return cpu.mcause;
     default:
         panic("unkown CSR number: %u", csr_num);
+        assert(0);
     }
 }
 
