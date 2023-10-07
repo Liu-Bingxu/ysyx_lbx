@@ -59,7 +59,8 @@ static void sh_handle_cmd(char *cmd) {
         }
     }
     char *env[] = {NULL};
-    execve(cmd, argv,env);
+    // execve(cmd, argv,env);
+    execl("/bin/pal", "--skip");
 }
 
 void builtin_sh_run() {
