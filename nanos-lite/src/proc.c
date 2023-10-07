@@ -49,7 +49,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
     arg++;
     int len = strlen(filename);
     memcpy(args, filename, len + 1);
-    // printf("argv 0 is %s\n", filename);
+    printf("argv 0 is %s\n", filename);
     (*arg) = (uintptr_t)args;
     arg++;
     args += (len + 1);
