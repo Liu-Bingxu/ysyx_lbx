@@ -53,6 +53,7 @@ void naive_uload(PCB *pcb, const char *filename) {
         "ecall" : : "r"(_gpr2),"r"(_gpr1)
     );
   pcb->cp = ucontext(NULL, (Area){.start = pcb, .end = (pcb + 1)}, (void *)entry);
+  printf("Hello\n");
   //   ((void (*)())entry)();
 }
 
