@@ -51,7 +51,7 @@ void naive_uload(PCB *pcb, const char *filename) {
   register intptr_t _gpr2 asm("t0") = (intptr_t)filename;
   asm volatile(
       "ecall" : : "r"(_gpr2), "r"(_gpr1));
-  printf("Hello\n");
+//   printf("Hello\n");
   pcb->cp = ucontext(NULL, (Area){.start = pcb, .end = (pcb + 1)}, (void *)entry);
   //   ((void (*)())entry)();
 }
