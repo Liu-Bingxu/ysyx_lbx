@@ -63,6 +63,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
             args += (len + 1);
         }
     }
+    printf("argv finish\n");
     (*arg) = (uintptr_t)NULL;
     arg++;
     if(envp!=NULL){
@@ -77,6 +78,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
     }
     (*arg) = (uintptr_t)NULL;
     arg++;
+    printf("envp finish\n");
     pcb->cp->GPR2 = (uintptr_t)ustack.start;
     printf("Hello\n");
     // assert(0);
