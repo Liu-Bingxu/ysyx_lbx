@@ -88,19 +88,19 @@ int context_uload(PCB *pcb, const char *filename, char *const argv[], char *cons
 }
 
 void init_proc() {
-    // char *argv[] = {"0","--skip","Hello World","byebye",NULL};
-    // char *envp[] = {"PATH=/bin",NULL};
-    // context_kload(&pcb[0], hello_fun, "It is 1");
-    // context_uload(&pcb[1], "/bin/nterm", NULL, envp);
-    // switch_boot_pcb();
+    char *argv[] = {"0","--skip","Hello World","byebye",NULL};
+    char *envp[] = {"PATH=/bin",NULL};
+    context_kload(&pcb[0], hello_fun, "It is 1");
+    context_uload(&pcb[1], "/bin/nterm", NULL, envp);
+    switch_boot_pcb();
 
     Log("Initializing processes...");
 
     // load program here
 
-    // yield();
+    yield();
 
-    naive_uload(NULL, "/bin/dummy");
+    naive_uload(NULL, "/bin/file-test");
 }
 
 Context* schedule(Context *prev) {

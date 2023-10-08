@@ -51,12 +51,12 @@ int naive_uload(PCB *pcb, const char *filename) {
   if(entry==-2)
       return -2;
   Log("Jump to entry = %p", entry);
-//   register intptr_t _gpr1 asm(MYGPR0) = -2;
-//   register intptr_t _gpr2 asm("t0") = (intptr_t)filename;
-//   asm volatile(
-    //   "ecall" : : "r"(_gpr2), "r"(_gpr1));
-//   pcb->cp = ucontext(NULL, (Area){.start = pcb, .end = (pcb + 1)}, (void *)entry);
-//   return 0;
-    ((void (*)())entry)();
-    return 0;
+  register intptr_t _gpr1 asm(MYGPR0) = -2;
+  register intptr_t _gpr2 asm("t0") = (intptr_t)filename;
+  asm volatile(
+      "ecall" : : "r"(_gpr2), "r"(_gpr1));
+  pcb->cp = ucontext(NULL, (Area){.start = pcb, .end = (pcb + 1)}, (void *)entry);
+  return 0;
+    // ((void (*)())entry)();
+    // return 0;
 }

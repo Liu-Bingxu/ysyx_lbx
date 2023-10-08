@@ -7,7 +7,7 @@ extern PCB *current;
 extern void switch_boot_pcb();
 
 int sys_exit(int code){
-    halt(code);
+    // halt(code);
     // naive_uload(NULL, "/bin/menu");
     context_uload(current, "/bin/nterm", NULL,NULL);
     switch_boot_pcb();
@@ -138,4 +138,6 @@ void do_syscall(Context *c) {
     }
     // Log("syscall the %s with %d %d %d return the %d", sys_call_name[a[0]], a[1], a[2], a[3], c->GPRx);
 }
+
+
 

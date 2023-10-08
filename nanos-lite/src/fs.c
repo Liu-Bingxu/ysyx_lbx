@@ -148,13 +148,13 @@ long my_atoi(const char *args)
 }
 
 void init_fs() {
-    // int fb_info_fp = fs_open("/proc/dispinfo", 0, 0);
-    // char buf[64];
-    // fs_read(fb_info_fp, buf, sizeof(buf));
-    // long width = my_atoi(buf + 6);
-    // long height = my_atoi(buf + 17);
-    // int fb_fp = fs_open("/dev/fb", 0, 0);
+    int fb_info_fp = fs_open("/proc/dispinfo", 0, 0);
+    char buf[64];
+    fs_read(fb_info_fp, buf, sizeof(buf));
+    long width = my_atoi(buf + 6);
+    long height = my_atoi(buf + 17);
+    int fb_fp = fs_open("/dev/fb", 0, 0);
     // Log("the width is %ld, the height is %ld", width, height);
-    // file_table[fb_fp].size = width * height * 8;
+    file_table[fb_fp].size = width * height * 8;
     // TODO: initialize the size of /dev/fb
 }
