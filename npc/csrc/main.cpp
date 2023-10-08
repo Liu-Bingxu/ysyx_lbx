@@ -191,9 +191,9 @@ static void execute(uint64_t n)
         paddr_t dnpc = top->rootp->top__DOT__PC_out;
         exec_once(p, pc);
         g_nr_guest_inst++;
-        if((g_nr_guest_inst%1000)==0){
-            log_write(1, "now program runing %d inst, PC is" FMT_WORD "\n", g_nr_guest_inst,get_gpr(32));
-        }
+        // if((g_nr_guest_inst%1000)==0){
+            // log_write(1, "now program runing %d inst, PC is" FMT_WORD "\n", g_nr_guest_inst,get_gpr(32));
+        // }
         trace_and_difftest(p, pc, dnpc);
         if (npc_state.state != NPC_RUNNING)
             break;

@@ -8,7 +8,10 @@
 typedef struct{
     word_t *GPR[32];
     word_t *pc;
-    word_t mtvec, mstatus, mcause, mepc;
+    word_t *mtvec;
+    word_t *mstatus;
+    word_t *mcause;
+    word_t *mepc;
 } REGS;
 
 // extern REGS reg;

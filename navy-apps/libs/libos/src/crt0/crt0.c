@@ -12,6 +12,7 @@ void call_main(uintptr_t *args) {
     char **envp = (((char **)args) + argc + 1);
     // environ = empty;
     environ = envp;
+    // printf("Hello\n");
     __libc_init_array();
     exit(main(argc, argv, envp));
     // assert(0);

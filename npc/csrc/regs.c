@@ -59,11 +59,11 @@ void isa_reg_display(void)
 {
     bool text = true;
     for (int i = 0; i < 32; i++)
-        printf("%-8s : %-12u(" FMT_WORD ")\n", regs[i], get_gpr(i), get_gpr(i));
+        printf("%-7s : %-12u(" FMT_WORD ")\n", regs[i], get_gpr(i), get_gpr(i));
     printf("pc      : %-12u(" FMT_WORD ")\n", get_gpr(32), get_gpr(32));
     printf("mepc    : %-12u(" FMT_WORD ")\n", isa_reg_str2val("mepc", &text), isa_reg_str2val("mepc", &text));
     printf("mtvec   : %-12u(" FMT_WORD ")\n", isa_reg_str2val("mtvec", &text), isa_reg_str2val("mtvec", &text));
-    printf("mcause  : %-12u(" FMT_WORD ")\n", isa_reg_str2val("mcause", &text), sa_reg_str2val("mcause", &text));
+    printf("mcause  : %-12u(" FMT_WORD ")\n", isa_reg_str2val("mcause", &text), isa_reg_str2val("mcause", &text));
     printf("mstatus : %-12u(" FMT_WORD ")\n", isa_reg_str2val("mstatus", &text), isa_reg_str2val("mstatus", &text));
 }
 
@@ -71,7 +71,7 @@ void isa_ref_reg_display(CPU_state *ref)
 {
     bool text = true;
     for (int i = 0; i < 32; i++)
-        printf("%-8s : %-12u(" FMT_WORD ")\n", regs[i], ref->gpr[i], ref->gpr[i]);
+        printf("%-7s : %-12u(" FMT_WORD ")\n", regs[i], ref->gpr[i], ref->gpr[i]);
     printf("pc      : %-12u(" FMT_WORD ")\n", ref->pc,ref->pc);
     printf("mepc    : %-12u(" FMT_WORD ")\n", ref->mepc,ref->mepc);
     printf("mtvec   : %-12u(" FMT_WORD ")\n", ref->mtvec,ref->mtvec);
@@ -83,57 +83,44 @@ bool isa_difftest_checkregs(CPU_state *ref,paddr_t pc){
     word_t val;
     pmem_read(pc, &val);
     bool text = true;
+    bool this_text = true;
     // for (int i = 0; i < 32; i++)
     //     printf("%-4s : %-12u(" FMT_WORD ")\n", regs[i], ref->gpr[i], ref->gpr[i]);
     // printf("pc   : %-12u(" FMT_WORD ")\n", ref->pc,ref->pc);
     for (int i = 0; i < MUXDEF(CONFIG_RVE, 16, 32); i++){
         if (ref->gpr[i] != get_gpr(i)){
-            printf("error inst: "
-                   "\n" FMT_PADDR ": " FMT_WORD"\n",
-                   pc, val);
-            isa_ref_reg_display(ref);
-            return false;
+            printf("The %s diff\n",regs[i]);
+            this_text=false;
         }
     }
     if (ref->pc != get_gpr(32)){
-        printf("error inst: "
-               "\n" FMT_PADDR ": " FMT_WORD"\n",
-               pc, val);
-        isa_ref_reg_display(ref);
-        return false;
+        printf("The pc diff\n");
+        this_text=false;
     }
     if (ref->mcause != isa_reg_str2val("mcause",&text)){
+        printf("The mcause diff\n");
+        this_text=false;
+    }
+    if (ref->mepc != isa_reg_str2val("mepc",&text)){
+        printf("The mepc diff\n");
+        this_text=false;
+    }
+    if (ref->mstatus != isa_reg_str2val("mstatus",&text)){
+        printf("The mstatus diff\n");
+        this_text=false;
+    }
+    if (ref->mtvec != isa_reg_str2val("mtvec",&text)){
+        printf("The mtvec diff\n");
+        this_text=false;
+    }
+    if(this_text==false){
         printf("error inst: "
                "\n" FMT_PADDR ": " FMT_WORD "\n",
                pc, val);
         isa_ref_reg_display(ref);
-        return false;
+        printf("-------------------------------------------------------------------------\n");
     }
-    if (ref->mepc != isa_reg_str2val("mepc",&text))
-    {
-        printf("error inst: "
-               "\n" FMT_PADDR ": " FMT_WORD "\n",
-               pc, val);
-        isa_ref_reg_display(ref);
-        return false;
-    }
-    if (ref->mstatus != isa_reg_str2val("mstatus",&text))
-    {
-        printf("error inst: "
-               "\n" FMT_PADDR ": " FMT_WORD "\n",
-               pc, val);
-        isa_ref_reg_display(ref);
-        return false;
-    }
-    if (ref->mtvec != isa_reg_str2val("mtvec",&text))
-    {
-        printf("error inst: "
-               "\n" FMT_PADDR ": " FMT_WORD "\n",
-               pc, val);
-        isa_ref_reg_display(ref);
-        return false;
-    }
-    return true;
+    return this_text;
 }
 
 void init_ref(CPU_state *cpu){
