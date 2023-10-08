@@ -52,6 +52,10 @@ __EXPORT void difftest_regcpy(void *dut, bool direction) {
             cpu.gpr[i] = dut_regs->gpr[i];
         }
         cpu.pc = dut_regs->pc;
+        cpu.mepc = dut_regs->mepc;
+        cpu.mtvec = dut_regs->mtvec;
+        cpu.mstatus = dut_regs->mstatus;
+        cpu.mcause = dut_regs->mcause;
     }
     else if (direction == DIFFTEST_TO_DUT)
     {
@@ -60,6 +64,10 @@ __EXPORT void difftest_regcpy(void *dut, bool direction) {
             dut_regs->gpr[i] = cpu.gpr[i];
         }
         dut_regs->pc = cpu.pc;
+        dut_regs->mepc = cpu.mepc;
+        dut_regs->mtvec = cpu.mtvec;
+        dut_regs->mstatus = cpu.mstatus;
+        dut_regs->mcause = cpu.mcause;
     }
     else{
         assert(0);

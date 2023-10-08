@@ -53,6 +53,7 @@ static inline bool difftest_check_reg(const char *name, vaddr_t pc, word_t ref, 
 typedef struct{
     word_t gpr[32];
     word_t pc;
+    word_t mtvec, mstatus, mcause, mepc;
 }CPU_state;
 
 enum { DIFFTEST_TO_DUT, DIFFTEST_TO_REF };
