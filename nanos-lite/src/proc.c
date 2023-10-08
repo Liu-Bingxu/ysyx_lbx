@@ -100,7 +100,7 @@ void init_proc() {
 
     // yield();
 
-    naive_uload(NULL, "/bin/cpp-test");
+    naive_uload(NULL, "/bin/dummy");
 }
 
 Context* schedule(Context *prev) {

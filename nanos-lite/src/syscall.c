@@ -7,7 +7,7 @@ extern PCB *current;
 extern void switch_boot_pcb();
 
 int sys_exit(int code){
-    // halt(code);
+    halt(code);
     // naive_uload(NULL, "/bin/menu");
     context_uload(current, "/bin/nterm", NULL,NULL);
     switch_boot_pcb();
