@@ -167,13 +167,13 @@ $(CLEAN_ALL):
 
 ### Build fsimg and ramdisk for Nanos-lite
 APPS = busybox nterm
-TESTS = 
+TESTS = cpp-test dummy exec-test file-test hello
 
 fsimg: $(addprefix apps/, $(APPS)) $(addprefix tests/, $(TESTS))
 	-for t in $^; do $(MAKE) -s -C $(NAVY_HOME)/$$t install; done
 
 RAMDISK = build/ramdisk.img
-RAMDISK_H = build/ramdisk.h
+RAMDISK_H = build/ramdisk.h 
 $(RAMDISK): fsimg
 	$(eval FSIMG_FILES := $(shell find -L ./fsimg -type f))
 	@mkdir -p $(@D)
