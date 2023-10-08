@@ -20,13 +20,24 @@
 
 __EXPORT void difftest_memcpy(paddr_t addr, void *buf, size_t n, bool direction) {
     if (direction == DIFFTEST_TO_REF){
-        for (int i = 0; i < n;i++){
+        for (int i = 0; i < n/4;i++){
             uint32_t _data;
             _data = (*((uint32_t *)buf));
             paddr_write(addr, 4, _data);
             addr += 4;
             buf += 4;
         }
+        if((n%4)!=0){
+            uint32_t _data;
+            if ((n % 4) == 1)
+                _data = (uint32_t)(*((uint8_t *)buf));
+            else if((n%4)==2)
+                _data = (uint32_t)(*((uint16_t *)buf));
+            else
+                assert(0);
+            paddr_write(addr, n % 4, _data);
+        }
+        // memcpy()
     }
     // else {
     //     assert(0);
