@@ -18,6 +18,7 @@ Context* __am_irq_handle(Context *c) {
             ev.event=EVENT_YIELD;
             if(c->GPR1!=-1)
                 ev.event = EVENT_SYSCALL;
+            c->mepc += 4;
             break;
         default:
             ev.event = EVENT_ERROR;
@@ -43,8 +44,30 @@ bool cte_init(Context*(*handler)(Event, Context*)) {
   return true;
 }
 
+#if __riscv_xlen == 64
+#define RST_STATUS 0xa0001800
+#define XLEN 8
+#else
+#define RST_STATUS 0x1800
+#define XLEN 4
+#endif
+
+#ifndef __riscv_e
+#define NR_REGS 32
+#else
+#define NR_REGS 16
+#endif
+
 Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
-  return NULL;
+    Context *context = (Context *)(kstack.end - (NR_REGS + 3 + 1) * XLEN);
+    for (int i = 0; i < NR_REGS; i++){
+        context->gpr[i] = 0;
+    }
+    context->GPR2 = (uintptr_t)arg;
+    context->mcause = 0;
+    context->mstatus = RST_STATUS;
+    context->mepc = (uintptr_t)entry;
+    return context;
 }
 
 void yield() {

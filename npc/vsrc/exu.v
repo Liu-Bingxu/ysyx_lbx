@@ -3,15 +3,21 @@ module exu#(parameter DATA_LEN=32) (
     input  [DATA_LEN-1:0]   operand2,    
     input  [DATA_LEN-1:0]   operand3,
     input  [DATA_LEN-1:0]   operand4,  
+    input  [DATA_LEN-1:0]   mepc,
+    input  [DATA_LEN-1:0]   mtvec,
     input                   op,
+    input   [2:0]           csr_sign,
     input                   inst_jump_flag,
     input                   jump_without,
     input  [17:0]           Control_signal,
     input  [DATA_LEN-1:0]   pre_data,
     output [DATA_LEN-1:0]   addr_load,
+    output                  unusual_flag,
     output                  Jump_flag,
     output [DATA_LEN-1:0]   dest_data,
-    output [DATA_LEN-1:0]   Jump_PC
+    output [DATA_LEN-1:0]   Jump_PC,
+    output [DATA_LEN-1:0]   csr_wdata,
+    output [DATA_LEN-1:0]   cause
 );
 
 // outports wire
@@ -52,6 +58,12 @@ wire blt;
 wire bge;
 wire bltu;
 wire bgeu;
+
+wire ret,csr_rw_flag,ecall;
+
+assign csr_rw_flag = csr_sign[0];
+assign ret         = csr_sign[1];
+assign ecall       = csr_sign[2];
 
 assign is_or    = Control_signal[0];
 assign is_xor   = Control_signal[1];
@@ -110,11 +122,12 @@ add_without_Cin #(DATA_LEN)PCadd(
 
 assign addr_load = res_alu;
 
-assign res1 = (is_load)?data:res_alu;
+assign res1 = ((csr_rw_flag)?res2:((is_load)?data:res_alu));
 
 assign dest_data = res1;
 
-assign Jump_PC = res2;
+assign Jump_PC = (unusual_flag)?mtvec:((ret)?mepc:((csr_rw_flag)?res_alu:res2));
+assign csr_wdata = Jump_PC;
 
 assign beq  = is_beq&out_eq;
 assign bne  = is_bne&out_neq;
@@ -122,7 +135,12 @@ assign blt  = is_blt&out_lt;
 assign bge  = is_bge&out_ge;
 assign bltu = is_bltu&out_ltu;
 assign bgeu = is_bgeu&out_geu;
-assign Jump_flag = ((inst_jump_flag&((beq|bne|blt|bltu|bge|bgeu)))|jump_without);
+assign Jump_flag = ((inst_jump_flag&((beq|bne|blt|bltu|bge|bgeu)))|jump_without|ret|unusual_flag);
+
+//短期
+assign unusual_flag = ecall;
+assign cause = 11;
+//短期
 
 endmodule //exu
 

@@ -9,6 +9,12 @@ module ifu#(parameter DATA_LEN=32) (
     output [DATA_LEN-1:0]   PC_D,
     output [DATA_LEN-1:0]   PC_now,
     output [DATA_LEN-1:0]   inst_fetch
+
+    // input                   rvalid,
+    // output                  rready,
+    // input                   awready,      
+    // output                  awvalid,        
+
 );
 
 reg  [DATA_LEN-1:0] PC;

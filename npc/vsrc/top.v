@@ -38,6 +38,10 @@ wire                	inst_jump_flag;
 wire                    jump_without;
 wire                	ebreak;
 wire                	op;
+wire [11:0]         	CSR_addr;
+wire [2:0]          	csr_sign;
+wire                	CSR_ren;
+wire                	CSR_wen;
 
 wire [DATA_LEN-1:0] 	PC_S;
 wire [DATA_LEN-1:0] 	PC_D;
@@ -50,6 +54,13 @@ wire [DATA_LEN-1:0] 	dest_data;
 wire [DATA_LEN-1:0] 	Jump_PC;
 wire [DATA_LEN-1:0] 	addr_load;
 wire [DATA_LEN-1:0]     pre_data;
+wire [DATA_LEN-1:0]     csr_wdata;
+wire [DATA_LEN-1:0]     cause;
+wire                	unusual_flag;
+
+wire [DATA_LEN-1:0] 	csr_rdata;
+wire [DATA_LEN-1:0] 	mepc;
+wire [DATA_LEN-1:0] 	mtvec;
 
 assign PC_out = PC_D;
 
@@ -65,9 +76,27 @@ regs #(DATA_LEN)u_regs(
     .src2      	( src2       )
 );
 
+csr #(DATA_LEN)u_csr(
+    .clk          	( sys_clk       ),
+    .rst_n        	( rst_n         ),
+    .wen          	( CSR_wen       ),
+    .ren          	( CSR_ren       ),
+    .unusual_flag 	( unusual_flag  ),
+    .addr         	( CSR_addr      ),
+    .wdata        	( csr_wdata     ),
+    .PC           	( PC_now        ),
+    .cause        	( cause         ),
+    .rdata        	( csr_rdata     ),
+    .mepc           ( mepc          ),
+    .mtvec          ( mtvec         )
+);
+
+
+
 idu #(DATA_LEN)u_idu(
     // .clk      	( sys_clk           ),
     // .rst_n    	( rst_n             ),
+    .unusual_flag   ( unusual_flag      ),
     .inst     	    ( inst_fetch        ),
     .src1     	    ( src1              ),
     .src2     	    ( src2              ),
@@ -76,15 +105,20 @@ idu #(DATA_LEN)u_idu(
     .rs1      	    ( rs1               ),
     .rs2      	    ( rs2               ),
     .rd       	    ( rd                ),
+    .csr_rdata      ( csr_rdata         ),
+    .CSR_addr       ( CSR_addr          ),
     .operand1 	    ( operand1          ),
     .operand2 	    ( operand2          ),
     .operand3       ( operand3          ),
     .operand4       ( operand4          ),
     .control_sign   ( control_sign      ),
+    .csr_sign       ( csr_sign          ),
     .inst_jump_flag ( inst_jump_flag    ),
     .jump_without   ( jump_without      ),
     .store_sign     ( store_sign        ),
     .ebreak         ( ebreak            ),
+    .CSR_ren        ( CSR_ren           ),
+    .CSR_wen        ( CSR_wen           ),
     .dest_wen       ( dest_wen          ),
     .op             ( op                )
 );
@@ -106,15 +140,21 @@ exu #(DATA_LEN)u_exu(
     .operand2  	        ( operand2          ),
     .operand3       	( operand3          ),
     .operand4       	( operand4          ),
+    .mepc           	( mepc              ),
+    .mtvec          	( mtvec             ),
     .op             	( op                ),
+    .csr_sign       	( csr_sign          ),
     .inst_jump_flag 	( inst_jump_flag    ),
     .jump_without       ( jump_without      ),
     .Jump_flag 	        ( Jump_flag         ),
     .addr_load      	( addr_load         ),
     .Control_signal 	( control_sign      ),
     .pre_data       	( pre_data          ),
+    .unusual_flag   	( unusual_flag      ),
     .dest_data 	        ( dest_data         ),
-    .Jump_PC   	        ( Jump_PC           )
+    .Jump_PC   	        ( Jump_PC           ),
+    .csr_wdata          ( csr_wdata         ),
+    .cause              ( cause             )
 );
 
 monitor u_monitor(

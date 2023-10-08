@@ -131,7 +131,7 @@ static void exec_once(char *p,paddr_t pc){
     p += space_len;
     
     disassemble(p, p + 128 - p,pc, (uint8_t *)&val, ilen);
-    printf("%s\n", p);
+    // printf("%s\n", p);
 #endif
     // pmem_read(top->PC_out, &top->inst_in);
     // printf("%d\n", g_nr_guest_inst);
@@ -173,7 +173,7 @@ static void cpu_check_watchpoint()
 
 static void trace_and_difftest(const char *buf,paddr_t pc, paddr_t dnpc) {
 #ifdef CONFIG_ITRACE_COND
-    if (ITRACE_COND) { log_write("%s\n", buf); }
+    // if (ITRACE_COND) { log_write(1,"%s\n", buf); }
 #endif
     // if (g_print_step) { IFDEF(CONFIG_ITRACE, printf("%s\n", buf));}
     IFDEF(CONFIG_ITRACE, irangbuf_write(buf));
@@ -191,6 +191,9 @@ static void execute(uint64_t n)
         paddr_t dnpc = top->rootp->top__DOT__PC_out;
         exec_once(p, pc);
         g_nr_guest_inst++;
+        if((g_nr_guest_inst%1000)==0){
+            log_write(1, "now program runing %d inst, PC is" FMT_WORD "\n", g_nr_guest_inst,get_gpr(32));
+        }
         trace_and_difftest(p, pc, dnpc);
         if (npc_state.state != NPC_RUNNING)
             break;

@@ -69,6 +69,27 @@ void __am_switch(Context *c) {
 void map(AddrSpace *as, void *va, void *pa, int prot) {
 }
 
+#if __riscv_xlen == 64
+#define RST_STATUS 0xa0001800
+#define XLEN 8
+#else
+#define RST_STATUS 0x1800
+#define XLEN 4
+#endif
+
+#ifndef __riscv_e
+#define NR_REGS 32
+#else
+#define NR_REGS 16
+#endif
+
 Context *ucontext(AddrSpace *as, Area kstack, void *entry) {
-  return NULL;
+    Context *context = (Context *)(kstack.end - (NR_REGS + 3 + 1) * XLEN);
+    for (int i = 0; i < NR_REGS; i++){
+        context->gpr[i] = 0;
+    }
+    context->mcause = 0;
+    context->mstatus = RST_STATUS;
+    context->mepc = (uintptr_t)entry;
+    return context;
 }

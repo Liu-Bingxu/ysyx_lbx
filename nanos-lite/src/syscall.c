@@ -3,9 +3,15 @@
 #include "syscall.h"
 #include "proc.h"
 
+extern PCB *current;
+extern void switch_boot_pcb();
+
 int sys_exit(int code){
     // halt(code);
-    naive_uload(NULL, "/bin/menu");
+    // naive_uload(NULL, "/bin/menu");
+    context_uload(current, "/bin/nterm", NULL,NULL);
+    switch_boot_pcb();
+    yield();
     return 0;
 }
 
@@ -23,14 +29,6 @@ int sys_read(int fd,void *buf,size_t count){
 }
 
 int sys_write(int fd,const void *buf,size_t count){
-    const char *buff = (const char *)buf;
-    if ((fd == 1) || (fd == 2)){
-        for (int i = 0; i < count;i++){
-            putch(*buff);
-            buff++;
-        }
-        return count;
-    }
     return fs_write(fd, buf, count);
 }
 
@@ -57,7 +55,15 @@ int sys_gettimeofday(struct timeval *tv,void *tz){
 }
 
 int sys_execve(const char *fname, char * const argv[], char *const envp[]){
-    naive_uload(NULL, fname);
+    // naive_uload(NULL, fname);
+    for(int i=0;argv[i]!=NULL;i++){
+        printf("argv %d is %s\n", i, argv[i]);
+    }
+    int res=context_uload(current, fname, argv+1, NULL);
+    if(res<0)
+        return -2;
+    switch_boot_pcb();
+    yield();
     return 0;
 }
 
@@ -109,6 +115,8 @@ void do_syscall(Context *c) {
         break;
     case SYS_write:
         c->GPRx = sys_write(a[1], (void *)a[2], a[3]);
+        // printf("Hello\n");
+        // Log("syscall the %s with %d %d %d return the %d", sys_call_name[a[0]], a[1], a[2], a[3], c->GPRx);
         break;
     case SYS_lseek:
         c->GPRx = sys_lseek(a[1], a[2], a[3]);
@@ -128,7 +136,8 @@ void do_syscall(Context *c) {
     default:
         panic("Unhandled syscall ID = %d", a[0]);
     }
-    c->mepc += 4;
     // Log("syscall the %s with %d %d %d return the %d", sys_call_name[a[0]], a[1], a[2], a[3], c->GPRx);
 }
+
+
 
