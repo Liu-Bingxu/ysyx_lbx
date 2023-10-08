@@ -9,7 +9,9 @@ module csr #(parameter DATA_LEN=32)(
     input   [DATA_LEN-1:0]  wdata,
     input   [DATA_LEN-1:0]  PC,
     input   [DATA_LEN-1:0]  cause,
-    output  [DATA_LEN-1:0]  rdata
+    output  [DATA_LEN-1:0]  rdata,
+    output  [DATA_LEN-1:0]  mepc,
+    output  [DATA_LEN-1:0]  mtvec
 );
 
 localparam MSTATUS_ADDR = 12'h300;
@@ -17,23 +19,25 @@ localparam MCAUSE_ADDR  = 12'h342;
 localparam MTVEC_ADDR   = 12'h305;
 localparam MEPC_ADDR    = 12'h341;
 
-`ifdef RISCV32
+// `ifdef RISCV32
 localparam MSTATUS_RST_DATA = 32'h1800;
-`else 
-localparam MSTATUS_RST_DATA = 64'ha0001800;
-`endif
+// `else 
+// localparam MSTATUS_RST_DATA = 64'ha0001800;
+// `endif
 
 reg [DATA_LEN-1:0]  rdata_reg;
 
-wire [DATA_LEN-1:0] mstatus,mtvec,mepc,mcause;
+wire [DATA_LEN-1:0] mstatus,mcause;
 wire [DATA_LEN-1:0] mstatus_wdata,mtvec_wdata,mepc_wdata,mcause_wdata;
 
+wire nomal_wen;
 wire mstatus_wen,mtvec_wen,mepc_wen,mcause_wen;
 
-assign mstatus_wen  = ((addr==MSTATUS_ADDR  )&wen);
-assign mtvec_wen    = ((addr==MTVEC_ADDR    )&wen);
-assign mcause_wen   = (((addr==MCAUSE_ADDR  )&wen)|unusual_flag);
-assign mepc_wen     = (((addr==MEPC_ADDR    )&wen)|unusual_flag);
+assign nomal_wen    = (wen&(~unusual_flag));
+assign mstatus_wen  = ((addr==MSTATUS_ADDR )&nomal_wen);
+assign mtvec_wen    = ((addr==MTVEC_ADDR   )&nomal_wen);
+assign mcause_wen   = (((addr==MCAUSE_ADDR  )&wen)| unusual_flag );
+assign mepc_wen     = (((addr==MEPC_ADDR    )&wen)| unusual_flag );
 
 assign mstatus_wdata    = wdata;
 assign mtvec_wdata      = wdata;
