@@ -1,10 +1,17 @@
+`include "./define.v"
 module idu#(parameter DATA_LEN=32) (
-    // input                   clk,
-    // input                   rst_n,
+    input                   clk,
+    input                   rst_n,
     input                   unusual_flag,
-    input  [31:0]           inst,
-    input  [DATA_LEN-1:0]   PC_S,
+    // input  [DATA_LEN-1:0]   PC_S,
+//interface with ifu
+    input  [31:0]           inst_in,
     input  [DATA_LEN-1:0]   PC,
+    input                   inst_valid,
+    output                  inst_ready,
+//interface with exu
+    output                  decode_valid,
+    input                   decode_ready,
     input  [DATA_LEN-1:0]   src1,
     input  [DATA_LEN-1:0]   src2,
     input  [DATA_LEN-1:0]   csr_rdata,
@@ -16,20 +23,41 @@ module idu#(parameter DATA_LEN=32) (
     output [DATA_LEN-1:0]   operand2, 
     output [DATA_LEN-1:0]   operand3,   
     output [DATA_LEN-1:0]   operand4,
-    output [17:0]           control_sign, 
+    output [15:0]           control_sign, 
     output [2:0]            csr_sign,
     output                  inst_jump_flag,
     output                  jump_without,
+    output [4:0]            load_sign,
     output [3:0]            store_sign,
     output                  ebreak,
+    output                  op,
+//interfaace with the register module 
     output                  CSR_ren,
     output                  CSR_wen,
-    output                  dest_wen,
-    output                  op
+    output                  dest_wen
 );
 
 localparam FILLER_LEN = 20 + $clog2(DATA_LEN);
 localparam CSR_FILLER_LEN = DATA_LEN-5;
+
+reg [31:0]  inst;
+reg         inst_valid_reg;
+always @(posedge clk or negedge rst_n) begin
+    if(!rst_n)begin
+        inst<=`NOP;
+    end
+    else if(inst_valid&inst_ready)begin
+        inst<=inst_in;
+    end
+end
+always @(posedge clk or negedge rst_n) begin
+    if(!rst_n)begin
+        inst_valid_reg<=1'b0;
+    end
+    else begin
+        inst_valid_reg<=inst_valid;
+    end
+end
 
 wire [DATA_LEN-1:0] imm;
 wire [DATA_LEN-1:0] imm_I,imm_J,imm_U,imm_B,imm_S,CSR_imm;
@@ -72,6 +100,7 @@ wire is_shift;
 wire is_byte;
 wire is_half;
 wire is_word;
+wire is_store;
 wire is_load;
 wire is_beq;
 wire is_bne;
@@ -167,12 +196,12 @@ assign csrrwi   =   (CSR_flag&(funct3==3'b101))?1'b1:1'b0;
 assign csrrsi   =   (CSR_flag&(funct3==3'b110))?1'b1:1'b0;
 assign csrrci   =   (CSR_flag&(funct3==3'b111))?1'b1:1'b0;
 
-assign mret     =   (inst       ==  32'h30200073) ? 1'b1 : 1'b0;
-assign ecall    =   (inst       ==  32'h00000073) ? 1'b1 : 1'b0;
-assign ebreak   =   (inst       ==  32'h00100073) ? 1'b1 : 1'b0;
+assign mret     =   (inst ==  32'h30200073) ? 1'b1 : 1'b0;
+assign ecall    =   (inst ==  32'h00000073) ? 1'b1 : 1'b0;
+assign ebreak   =   (inst ==  32'h00100073) ? 1'b1 : 1'b0;
 
-assign operand1 = ((csr_rw_flag)?CSR_operand1:((auipc)?PC:((J_flag|jalr|lui)?32'h0:src1)));
-assign operand2 = ((csr_rw_flag)?CSR_operand2:((jalr|jal)?PC_S:((B_flag|R_flag)?src2:imm)));
+assign operand1 = ((csr_rw_flag)?CSR_operand1:((auipc|jalr|jal)?PC:((J_flag|jalr|lui)?32'h0:src1)));
+assign operand2 = ((csr_rw_flag)?CSR_operand2:((jalr|jal)?4:((B_flag|R_flag)?src2:imm)));
 assign op       = (B_flag|is_cmp|sub);
 
 assign operand3 = (csr_rw_flag==1'b1)?csr_rdata:((jalr)?src1:PC);
@@ -181,13 +210,14 @@ assign operand4 = (csr_rw_flag==1'b1)?0:(imm);
 assign inst_jump_flag = (B_flag);
 assign jump_without   = (jal|jalr);
 
-assign dest_wen = (!(B_flag|S_flag|(CSR_flag&(~CSR_ren))|unusual_flag|ebreak));
+assign dest_wen = ((!(B_flag|S_flag|(CSR_flag&(~CSR_ren))|unusual_flag|ebreak|mret))&inst_valid_reg);
 
 assign is_or    = OR    |   ori |   csrrc   |   csrrci  |   csrrs   |   csrrsi;
 assign is_xor   = XOR   |   xori;
 assign is_and   = AND   |   andi;
 assign is_cmp   = slt|slti|sltiu|sltu;
 assign is_unsign= sltiu|sltu|lbu|lhu;
+assign is_store = S_flag;
 assign is_load  = load_flag;
 assign is_beq   = beq;
 assign is_bne   = bne;
@@ -202,11 +232,11 @@ assign is_shift = sll|slli|srl|srli|sra|srai;
 assign LR       = sll|slli;
 assign AL       = inst[30];
 
-assign control_sign = {is_word,is_half,is_byte,is_load,is_bgeu,is_bge,is_bne,is_beq,is_bltu,is_blt,
+assign control_sign = {is_store,is_load,is_bgeu,is_bge,is_bne,is_beq,is_bltu,is_blt,
                         is_cmp,is_unsign,is_shift,AL,LR,is_and,is_xor,is_or};          
 // assign control_sign = {is_or,is_xor,is_and,LR,AL,is_shift,is_unsign,is_cmp,is_blt,is_bltu,
 //                         is_beq,is_bne,is_bge,is_bgeu,is_load,is_byte,is_half,is_word};
-
+assign  load_sign = {is_word,is_half,is_byte,is_unsign,is_load};
 assign store_sign = {sw,sh,sb,S_flag};
 
 assign CSR_operand1 = (inst[14])?CSR_imm:src1;
@@ -215,11 +245,74 @@ assign csr_rw_flag = (csrrc|csrrci|csrrw|csrrwi|csrrs|csrrsi);
 assign CSR_addr = inst[31:20];
 wire csrrw_with_rd0;
 assign csrrw_with_rd0 = ((csrrw|csrrwi)&(rd==0));
-assign CSR_ren = ( ( ~csrrw_with_rd0 ) & csr_rw_flag);
+assign CSR_ren = (( ( ~csrrw_with_rd0 | unusual_flag ) & csr_rw_flag)&inst_valid_reg);
 wire csrr_with_rs0,csrr_with_imm0;
 assign csrr_with_rs0 = ((rs1==0)&(csrrc|csrrs));
 assign csrr_with_imm0 = ((CSR_imm==0)&(csrrci|csrrsi));
-assign CSR_wen = ( ( ~ ( csrr_with_imm0 | csrr_with_rs0 ) ) & csr_rw_flag );
+assign CSR_wen = (( ( ~ ( csrr_with_imm0 | csrr_with_rs0 | unusual_flag ) ) & csr_rw_flag )&inst_valid_reg);
 assign csr_sign = {ecall,mret,csr_rw_flag};
 
+//temp because the idu decode but not need one cycle 
+assign inst_ready   = decode_ready;
+assign decode_valid = inst_valid;
+
 endmodule //idu
+//the channel 1 is to GPR, channel 2 is to jump_pc
+// U:
+// LUI: 	0 	    +	    imm
+// AUPIC:	PC	    +       imm
+// J:
+// JAL：	PC	    + 	    4		    PC	        +	imm
+// I:
+// JALR:	PC	    +	    4		    SRC1	    +	imm
+// LB:	    SRC1	+	    imm
+// LH:	    SRC1	+	    imm
+// LW:	    SRC1	+	    imm
+// LBU:	    SRC1	+	    imm
+// LHU:	    SRC1	+	    imm
+// ADDI:	SRC1	+	    imm
+// SLTI:	SRC1	-	    imm
+// SLTIU:	SRC1	-	    imm
+// XORI:	SRC1	^	    imm
+// ORI:	    SRC1	|	    imm
+// ANDI:	SRC1	&	    imm
+// SLLI:	SRC1	no_op	imm
+// SRLI:	SRC1	no_op	imm
+// SRAI:	SRC1	no_op	imm
+// B:    
+// BEQ:	    SRC1	-	    SRC2		PC	        +	imm
+// BNE:	    SRC1	-	    SRC2		PC	        +	imm
+// BLT:	    SRC1	-	    SRC2		PC	        +	imm
+// BGE:	    SRC1	-	    SRC2		PC	        +	imm
+// BLTU:	SRC1	-	    SRC2		PC	        +	imm
+// BGEU:	SRC1	-	    SRC2		PC	        +	imm
+// S:
+// SB:	    SRC1	+	    imm
+// SH:	    SRC1	+	    imm
+// SW:	    SRC1	+	    imm
+// R:   
+// ADD:	    SRC1	+	    SRC2
+// SUB:	    SRC1	-	    SRC2
+// SLL:	    SRC1	no_op	SRC2
+// SLT:	    SRC1	-	    SRC2
+// SLTU:	SRC1	-	    SRC2
+// XOR: 	SRC1	^	    SRC2
+// SRL: 	SRC1	no_op	SRC2
+// SRA: 	SRC1	no_op	SRC2
+// OR:	    SRC1	|	    SRC2
+// AND: 	SRC1	&	    SRC2
+
+//the channel 1 is write CSR, channel 2 is to read CSR 
+// CSR:
+// CSRRW	SRC1	+	    0		    CSR_RDATA	+	0
+// CSRRS	SRC1	|	    CSR_RDATA	CSR_RDATA	+	0
+// CSRRC	SRC1	|	    ~CSR_RDATA	CSR_RDATA	+	0
+// CSRRWI	CSR_imm	+	    0		    CSR_RDATA	+	0
+// CSRRSI	CSR_imm	|	    CSR_RDATA	CSR_RDATA	+	0
+// CSRRCI	CSR_imm	|	    ~CSR_RDATA	CSR_RDATA	+	0
+
+//if unusual happen, Don't use the channels shutdown the wen and ren 
+//if unusual return, Don't use the ALU but use the channel 2 to jump back and shutdown the wen and ren  
+// unusual
+// ECALL
+// ret	

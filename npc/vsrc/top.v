@@ -44,7 +44,7 @@ wire                	CSR_ren;
 wire                	CSR_wen;
 
 wire [DATA_LEN-1:0] 	PC_S;
-wire [DATA_LEN-1:0] 	PC_D;
+// wire [DATA_LEN-1:0] 	PC_D;
 wire [DATA_LEN-1:0] 	PC_now;
 wire [DATA_LEN-1:0] 	inst_fetch;
 
@@ -62,7 +62,7 @@ wire [DATA_LEN-1:0] 	csr_rdata;
 wire [DATA_LEN-1:0] 	mepc;
 wire [DATA_LEN-1:0] 	mtvec;
 
-assign PC_out = PC_D;
+assign PC_out = PC_now;
 
 regs #(DATA_LEN)u_regs(
     .clk       	( sys_clk    ),
@@ -130,7 +130,7 @@ ifu #(DATA_LEN)u_ifu(
     .Jump_PC    	( Jump_PC     ),
     .inst_in    	( inst_in     ),
     .PC_S       	( PC_S        ),
-    .PC_D       	( PC_D        ),
+    // .PC_D       	( PC_D        ),
     .PC_now     	( PC_now      ),
     .inst_fetch 	( inst_fetch  )
 );

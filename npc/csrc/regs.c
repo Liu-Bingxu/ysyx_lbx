@@ -129,7 +129,7 @@ void init_ref(CPU_state *cpu){
     {
         cpu->gpr[i] = get_gpr(i);
     }
-    cpu->pc = get_gpr(32);
+    cpu->pc = 0x80000000;
     cpu->mepc=isa_reg_str2val("mepc", &text);
     cpu->mtvec=isa_reg_str2val("mtvec", &text);
     cpu->mcause=isa_reg_str2val("mcause", &text);

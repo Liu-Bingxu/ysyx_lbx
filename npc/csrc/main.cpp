@@ -97,10 +97,10 @@ void sim_rst(){
     step_and_dump_wave();
     top->sys_clk = !top->sys_clk;
     step_and_dump_wave();
-    top->sys_clk = !top->sys_clk;
-    step_and_dump_wave();
-    top->sys_clk = !top->sys_clk;
-    step_and_dump_wave();
+    // top->sys_clk = !top->sys_clk;
+    // step_and_dump_wave();
+    // top->sys_clk = !top->sys_clk;
+    // step_and_dump_wave();
 }
 
 void halt(int code,int pc){
@@ -187,17 +187,18 @@ static void execute(uint64_t n)
     for (; n > 0; n--)
     {
         char *p = (char *)malloc(128);
-        paddr_t pc = get_gpr(32);
-        paddr_t dnpc = top->rootp->top__DOT__PC_out;
+        // paddr_t pc = get_gpr(32);
+        paddr_t pc = top->rootp->top__DOT__u_ifu__DOT__PC;
         exec_once(p, pc);
         g_nr_guest_inst++;
+        paddr_t dnpc = top->rootp->top__DOT__u_ifu__DOT__PC;
         // if((g_nr_guest_inst%1000)==0){
             // log_write(1, "now program runing %d inst, PC is" FMT_WORD "\n", g_nr_guest_inst,get_gpr(32));
         // }
         trace_and_difftest(p, pc, dnpc);
         if (npc_state.state != NPC_RUNNING)
             break;
-        IFDEF(CONFIG_DEVICE, device_update());
+        // IFDEF(CONFIG_DEVICE, device_update());
     }
 }
 

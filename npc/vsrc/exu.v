@@ -1,21 +1,32 @@
 module exu#(parameter DATA_LEN=32) (
+    // input                   clk,
+    // input                   rst_n,
+//interface with idu    
+    input                   decode_valid,
+    output                  decode_ready,
     input  [DATA_LEN-1:0]   operand1,
     input  [DATA_LEN-1:0]   operand2,    
     input  [DATA_LEN-1:0]   operand3,
-    input  [DATA_LEN-1:0]   operand4,  
-    input  [DATA_LEN-1:0]   mepc,
-    input  [DATA_LEN-1:0]   mtvec,
+    input  [DATA_LEN-1:0]   operand4,
     input                   op,
     input   [2:0]           csr_sign,
     input                   inst_jump_flag,
     input                   jump_without,
-    input  [17:0]           Control_signal,
-    input  [DATA_LEN-1:0]   pre_data,
+    input  [15:0]           Control_signal,
+//interface with LSU
+    // input  [DATA_LEN-1:0]   pre_data,
     output [DATA_LEN-1:0]   addr_load,
+    input                   ls_valid,
+    output                  ls_ready,
+    input  [DATA_LEN-1:0]   load_data,
     output                  unusual_flag,
+
     output                  Jump_flag,
-    output [DATA_LEN-1:0]   dest_data,
     output [DATA_LEN-1:0]   Jump_PC,
+    output [DATA_LEN-1:0]   dest_data,
+//get the csr: mepc, mtvec 
+    input  [DATA_LEN-1:0]   mepc,
+    input  [DATA_LEN-1:0]   mtvec,
     output [DATA_LEN-1:0]   csr_wdata,
     output [DATA_LEN-1:0]   cause
 );
@@ -29,7 +40,7 @@ wire                    out_lt;
 wire                    out_ltu;
 wire                	out_neq;
 wire                	out_geu;
-wire [DATA_LEN-1:0] 	data;
+// wire [DATA_LEN-1:0] 	data;
 wire [DATA_LEN-1:0] 	res_alu;
 
 wire LR;
@@ -40,10 +51,11 @@ wire is_and;
 wire is_cmp;
 wire is_sign;
 wire is_shift;
-wire is_byte;
-wire is_half;
-wire is_word;
+// wire is_byte;
+// wire is_half;
+// wire is_word;
 wire is_load;
+wire is_store;
 
 wire is_beq;
 wire is_bne;
@@ -80,9 +92,10 @@ assign is_bne   = Control_signal[11];
 assign is_bge   = Control_signal[12];
 assign is_bgeu  = Control_signal[13];
 assign is_load  = Control_signal[14];
-assign is_byte  = Control_signal[15];
-assign is_half  = Control_signal[16];
-assign is_word  = Control_signal[17];
+assign is_store = Control_signal[15];
+// assign is_byte  = Control_signal[15];
+// assign is_half  = Control_signal[16];
+// assign is_word  = Control_signal[17];
 
 alu #(DATA_LEN)u_alu(
     .NUM_A    	( operand1      ),
@@ -105,14 +118,14 @@ alu #(DATA_LEN)u_alu(
     .res      	( res_alu       )
 );
 
-memory_load_rv32 #(DATA_LEN)u_memory_load_rv32(
-    .pre_data 	( pre_data  ),
-    .is_byte  	( is_byte   ),
-    .is_half  	( is_half   ),
-    .is_word    ( is_word   ),
-    .is_sign  	( is_sign   ),
-    .data     	( data      )
-);
+// memory_load_rv32 #(DATA_LEN)u_memory_load_rv32(
+//     .pre_data 	( pre_data  ),
+//     .is_byte  	( is_byte   ),
+//     .is_half  	( is_half   ),
+//     .is_word    ( is_word   ),
+//     .is_sign  	( is_sign   ),
+//     .data     	( data      )
+// );
 
 add_without_Cin #(DATA_LEN)PCadd(
     .OP_A 	( operand3  ),
@@ -122,7 +135,7 @@ add_without_Cin #(DATA_LEN)PCadd(
 
 assign addr_load = res_alu;
 
-assign res1 = ((csr_rw_flag)?res2:((is_load)?data:res_alu));
+assign res1 = ((csr_rw_flag)?res2:((is_load)?load_data:res_alu));
 
 assign dest_data = res1;
 
@@ -140,6 +153,9 @@ assign Jump_flag = ((inst_jump_flag&((beq|bne|blt|bltu|bge|bgeu)))|jump_without|
 //短期
 assign unusual_flag = ecall;
 assign cause = 11;
+
+assign decode_ready     = ls_valid|(~(is_load|is_store));
+assign ls_ready   = 1'b1|decode_valid;
 //短期
 
 endmodule //exu
