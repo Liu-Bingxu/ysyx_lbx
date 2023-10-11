@@ -89,23 +89,23 @@ int context_uload(PCB *pcb, const char *filename, char *const argv[], char *cons
 
 void init_proc() {
     // char *argv[] = {"0","--skip","Hello World","byebye",NULL};
-    // char *envp[] = {"PATH=/bin",NULL};
-    // context_kload(&pcb[0], hello_fun, "It is 1");
-    // context_uload(&pcb[1], "/bin/nterm", NULL, envp);
-    // switch_boot_pcb();
+    char *envp[] = {"PATH=/bin",NULL};
+    context_kload(&pcb[0], hello_fun, "It is 1");
+    context_uload(&pcb[1], "/bin/audio-adl-test", NULL, envp);
+    switch_boot_pcb();
 
     Log("Initializing processes...");
 
     // load program here
 
-    // yield();
+    yield();
 
     naive_uload(NULL, "/bin/audio-sdl-test");
 }
 
 Context* schedule(Context *prev) {
     current->cp = prev;
-    current = (current == &pcb[0] ? &pcb[1] : &pcb[0]);
-    // current = &pcb[1];
+    // current = (current == &pcb[0] ? &pcb[1] : &pcb[0]);
+    current = &pcb[1];
     return current->cp;
 }
