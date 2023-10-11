@@ -91,7 +91,7 @@ void init_proc() {
     // char *argv[] = {"0","--skip","Hello World","byebye",NULL};
     char *envp[] = {"PATH=/bin",NULL};
     context_kload(&pcb[0], hello_fun, "It is 1");
-    context_uload(&pcb[1], "/bin/audio-sdl-test", NULL, envp);
+    context_uload(&pcb[1], "/bin/pal", NULL, envp);
     switch_boot_pcb();
 
     Log("Initializing processes...");
@@ -105,7 +105,7 @@ void init_proc() {
 
 Context* schedule(Context *prev) {
     current->cp = prev;
-    // current = (current == &pcb[0] ? &pcb[1] : &pcb[0]);
-    current = &pcb[1];
+    current = (current == &pcb[0] ? &pcb[1] : &pcb[0]);
+    // current = &pcb[1];
     return current->cp;
 }

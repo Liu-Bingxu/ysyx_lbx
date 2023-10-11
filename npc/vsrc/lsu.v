@@ -18,7 +18,8 @@ module lsu #(parameter DATA_LEN=32,DATA_BIT_NUM=4)(
     //the write data channel
     output                      wvalid,
     input                       wready,
-    output [DATA_BIT_NUM-1:0]   wstrb,
+    output [DATA_BIT_NUM-1:0]   wstrob,
+    output [DATA_LEN-1:0]       wdata,
     input  [DATA_LEN-1:0]       store_data,
     //the write resp channel
     input                       bvalid,
@@ -174,39 +175,145 @@ assign is_store_word    = store_sign[3];
 wire [1:0] store_mask;
 assign store_mask = store_addr[1:0];
 //get wstrb by control sign 
-reg [3:0] byte_wstrb,half_wstrb,word_wstrb;
+reg [3:0] byte_wstrob,half_wstrob,word_wstrob;
 always @(*) begin
     case (store_mask)
-        2'b00: byte_wstrb=4'b0001;
-        2'b01: byte_wstrb=4'b0010;
-        2'b10: byte_wstrb=4'b0100;
-        2'b11: byte_wstrb=4'b1000;
-        default: byte_wstrb=4'b0000;
+        2'b00: byte_wstrob=4'b0001;
+        2'b01: byte_wstrob=4'b0010;
+        2'b10: byte_wstrob=4'b0100;
+        2'b11: byte_wstrob=4'b1000;
+        default: byte_wstrob=4'b0000;
     endcase
 end
 always @(*) begin
     case (store_mask)
-        2'b00: half_wstrb=4'b0011;
-        2'b10: half_wstrb=4'b1100;
-        default: half_wstrb=4'b0000;
+        2'b00: half_wstrob=4'b0011;
+        2'b10: half_wstrob=4'b1100;
+        default: half_wstrob=4'b0000;
     endcase
 end
 always @(*) begin
     case (store_mask)
-        2'b00: word_wstrb=4'b1111;
-        default: word_wstrb=4'b0000;
+        2'b00: word_wstrob=4'b1111;
+        default: word_wstrob=4'b0000;
     endcase
 end
-assign wstrb = (is_store_byte)?byte_wstrb:((is_store_half)?half_wstrb:((is_store_word)?word_wstrb:4'b0000));
+assign wstrob = (is_store_byte)?byte_wstrob:((is_store_half)?half_wstrob:((is_store_word)?word_wstrob:{DATA_BIT_NUM{1'b0}}));
 
 //AXI store FSM 
 localparam AXI_STORE_IDLE                   = 0;
 localparam AXI_STORE_WITE_AEREADY_WREADY    = 1;
 localparam AXI_STORE_WAIT_AWREADY           = 2;
 localparam AXI_STORE_WAIT_WREADY            = 3;
+localparam AXI_STORE_WAIT_BVALID            = 4;
+localparam AXI_STORE_WAIT_LS_READY          = 5;
+reg store_valid_reg;
+reg awvalid_reg;
+reg wvalid_reg;
+reg [2:0] axi_store_fsm;
+always @(posedge clk or negedge rst_n) begin
+    if(!rst_n)begin
+        store_valid_reg<=1'b0;
+        awvalid_reg<=1'b0;
+        wvalid_reg<=1'b0;
+        axi_store_fsm<=AXI_STORE_IDLE;
+    end
+    else begin
+        case (axi_store_fsm)
+            AXI_STORE_IDLE:begin
+                if(is_store)begin
+                    awvalid_reg<=1'b1;
+                    wvalid_reg<=1'b1;
+                    axi_store_fsm<=AXI_STORE_WITE_AEREADY_WREADY;
+                end
+            end 
+            AXI_STORE_WITE_AEREADY_WREADY:begin
+                if(awready&wready&bvalid&bready&(bresp==3'b000))begin
+                    awvalid_reg<=1'b0;
+                    wvalid_reg<=1'b0;
+                    store_valid_reg<=1'b1;
+                    axi_store_fsm<=AXI_STORE_WAIT_LS_READY;
+                end
+                else if(awready&wready&bvalid&bready&(bresp!=3'b000))begin
+                    awvalid_reg<=1'b0;
+                    wvalid_reg<=1'b0;
+                    axi_store_fsm<=AXI_STORE_IDLE;
+                end
+                else if(awready&wready)begin
+                    awvalid_reg<=1'b0;
+                    wvalid_reg<=1'b0;
+                    axi_store_fsm<=AXI_STORE_WAIT_BVALID;
+                end
+                else if(awready)begin
+                    awvalid_reg<=1'b0;
+                    axi_store_fsm<=AXI_STORE_WAIT_WREADY;
+                end
+                else if(wready)begin
+                    wvalid_reg<=1'b0;
+                    axi_store_fsm<=AXI_STORE_WAIT_AWREADY;
+                end
+            end
+            AXI_STORE_WAIT_AWREADY:begin
+                if(awready&bvalid&bready&(bresp==3'b000))begin
+                    awvalid_reg<=1'b0;
+                    store_valid_reg<=1'b1;
+                    axi_store_fsm<=AXI_STORE_WAIT_LS_READY;
+                end
+                else if(awready&bvalid&bready&(bresp!=3'b000))begin
+                    awvalid_reg<=1'b0;
+                    axi_store_fsm<=AXI_STORE_IDLE;
+                end
+                else if(awready)begin
+                    awvalid_reg<=1'b0;
+                    axi_store_fsm<=AXI_STORE_WAIT_BVALID;
+                end
+            end
+            AXI_STORE_WAIT_WREADY:begin
+                if(wready&bvalid&bready&(bresp==3'b000))begin
+                    wvalid_reg<=1'b0;
+                    store_valid_reg<=1'b1;
+                    axi_store_fsm<=AXI_STORE_WAIT_LS_READY;
+                end
+                else if(wready&bvalid&bready&(bresp!=3'b000))begin
+                    wvalid_reg<=1'b0;
+                    axi_store_fsm<=AXI_STORE_IDLE;
+                end
+                else if(wready)begin
+                    wvalid_reg<=1'b0;
+                    axi_store_fsm<=AXI_STORE_WAIT_BVALID;
+                end
+            end
+            AXI_STORE_WAIT_BVALID:begin
+                if(bvalid&bready&(bresp==3'b000))begin
+                    store_valid_reg<=1'b1;
+                    axi_store_fsm<=AXI_STORE_WAIT_LS_READY;
+                end
+                else if(bvalid&bready&(bresp!=3'b000))begin
+                    axi_store_fsm<=AXI_STORE_IDLE;
+                end
+            end
+            AXI_STORE_WAIT_LS_READY:begin
+                if(ls_ready)begin
+                    store_valid_reg<=1'b0;
+                    axi_store_fsm<=AXI_STORE_IDLE;
+                end
+            end
+            default: begin
+                store_valid_reg<=1'b0;
+                awvalid_reg<=1'b0;
+                wvalid_reg<=1'b0;
+                axi_store_fsm<=AXI_STORE_IDLE;
+            end
+        endcase
+    end
+end
+assign awvalid  = awvalid_reg;
+assign waddr    = store_addr;
+assign wvalid   = wvalid_reg;
+assign wdata    = store_data;
+assign bready   = 1'b1;
 
-
-
-assign bready = 1'b1;
+//last
+assign ls_valid = load_vaild_reg|store_valid_reg;
 
 endmodule //lsu
