@@ -100,7 +100,7 @@ void init_proc() {
 
     // yield();
 
-    naive_uload(NULL, "/bin/audio-adl-test");
+    naive_uload(NULL, "/bin/audio-sdl-test");
 }
 
 Context* schedule(Context *prev) {
