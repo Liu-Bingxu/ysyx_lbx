@@ -14,6 +14,9 @@ using namespace std;
 
 #define MAX_INST_TO_PRINT 10
 
+#define PC_now top->rootp->
+#define npc_ifu_status top->rootp->top__DOT__u_ifu__DOT__IFU_FSM_STATUS
+
 VerilatedContext* contextp = NULL;
 VerilatedVcdC* tfp = NULL;
 
@@ -95,12 +98,14 @@ void sim_rst(){
     step_and_dump_wave();
     top->sys_clk = !top->sys_clk;
     step_and_dump_wave();
-    top->sys_clk = !top->sys_clk;
-    step_and_dump_wave();
-    top->sys_clk = !top->sys_clk;
-    step_and_dump_wave();
-    top->sys_clk = !top->sys_clk;
-    step_and_dump_wave();
+    while(npc_ifu_status==0){
+        top->sys_clk = !top->sys_clk;
+        step_and_dump_wave();
+    }
+    // top->sys_clk = !top->sys_clk;
+    // step_and_dump_wave();
+    // top->sys_clk = !top->sys_clk;
+    // step_and_dump_wave();
 }
 
 void halt(int code,int pc){
@@ -113,6 +118,7 @@ void halt(int code,int pc){
 static void exec_once(char *p,paddr_t pc){
     // printf("H\n");
 #ifdef CONFIG_ITRACE
+    char *inst_asm = p;
     p += snprintf(p, 128, FMT_WORD ":", (pc));
     int ilen = 4;
     int i;
@@ -131,16 +137,24 @@ static void exec_once(char *p,paddr_t pc){
     p += space_len;
     
     disassemble(p, p + 128 - p,pc, (uint8_t *)&val, ilen);
-    // printf("%s\n", p);
+    // printf("%s\n", inst_asm);
 #endif
     // pmem_read(top->PC_out, &top->inst_in);
     // printf("%d\n", g_nr_guest_inst);
-    top->sys_clk = !top->sys_clk;
-    step_and_dump_wave();
+    // top->sys_clk = !top->sys_clk;
+    // step_and_dump_wave();
     // printf("%d\n", g_nr_guest_inst);
     // pmem_read(top->PC_out, &top->inst_in);
-    top->sys_clk = !top->sys_clk;
-    step_and_dump_wave();
+    // top->sys_clk = !top->sys_clk;
+    // step_and_dump_wave();
+    while(npc_ifu_status!=3){
+        top->sys_clk = !top->sys_clk;
+        step_and_dump_wave();
+    }
+    while(npc_ifu_status!=1){
+        top->sys_clk = !top->sys_clk;
+        step_and_dump_wave();
+    }
 // #ifdef CONFIG_ITRACE
     // p += snprintf(p, 128, FMT_WORD ":", (pc));
     // int ilen = 4;
@@ -187,17 +201,18 @@ static void execute(uint64_t n)
     for (; n > 0; n--)
     {
         char *p = (char *)malloc(128);
-        paddr_t pc = get_gpr(32);
-        paddr_t dnpc = top->rootp->top__DOT__PC_out;
+        // paddr_t pc = get_gpr(32);
+        paddr_t pc = top->rootp->top__DOT__u_ifu__DOT__PC_to_sram_reg;
         exec_once(p, pc);
         g_nr_guest_inst++;
-        if((g_nr_guest_inst%1000)==0){
-            log_write(1, "now program runing %d inst, PC is" FMT_WORD "\n", g_nr_guest_inst,get_gpr(32));
-        }
+        paddr_t dnpc = top->rootp->top__DOT__u_ifu__DOT__PC_to_sram_reg;
+        // if((g_nr_guest_inst%1000)==0){
+            // log_write(1, "now program runing %d inst, PC is" FMT_WORD "\n", g_nr_guest_inst,get_gpr(32));
+        // }
         trace_and_difftest(p, pc, dnpc);
         if (npc_state.state != NPC_RUNNING)
             break;
-        IFDEF(CONFIG_DEVICE, device_update());
+        // IFDEF(CONFIG_DEVICE, device_update());
     }
 }
 

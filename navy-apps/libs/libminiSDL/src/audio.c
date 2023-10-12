@@ -158,13 +158,16 @@ void SDL_audio_help_callback(){
     }
     uint32_t now = SDL_GetTicks();
     if (is_playing == false){
+        printf("sdl-audio return by not open\n");
         return;
     }
     if((now - prev) < time_lag){
+        printf("sdl-audio return by time\n");
         return;
     }
     int count = NDL_QueryAudio();
     if (size > count){
+        printf("sdl-audio return by not enough space\n");
         // printf("Hello,%d\n",count);
         return;
     }

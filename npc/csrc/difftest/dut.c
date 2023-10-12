@@ -129,6 +129,7 @@ void difftest_step(paddr_t pc, paddr_t npc) {
   if (is_skip_ref) {
     // to skip the checking of an instruction, just copy the reg state to reference design
     init_ref(&cpu);
+    // isa_ref_reg_display(&cpu);
     ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
     is_skip_ref = false;
     return;

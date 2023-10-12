@@ -5,6 +5,7 @@ module csr #(parameter DATA_LEN=32)(
     input                   wen,
     input                   ren,
     input                   unusual_flag,
+    input                   inst_valid,
     input   [11:0]          addr,
     input   [DATA_LEN-1:0]  wdata,
     input   [DATA_LEN-1:0]  PC,
@@ -34,10 +35,10 @@ wire nomal_wen;
 wire mstatus_wen,mtvec_wen,mepc_wen,mcause_wen;
 
 assign nomal_wen    = (wen&(~unusual_flag));
-assign mstatus_wen  = ((addr==MSTATUS_ADDR )&nomal_wen);
-assign mtvec_wen    = ((addr==MTVEC_ADDR   )&nomal_wen);
-assign mcause_wen   = (((addr==MCAUSE_ADDR  )&wen)| unusual_flag );
-assign mepc_wen     = (((addr==MEPC_ADDR    )&wen)| unusual_flag );
+assign mstatus_wen  = ((addr==MSTATUS_ADDR )&nomal_wen)&inst_valid;
+assign mtvec_wen    = ((addr==MTVEC_ADDR   )&nomal_wen)&inst_valid;
+assign mcause_wen   = (((addr==MCAUSE_ADDR  )&wen)| unusual_flag )&inst_valid;
+assign mepc_wen     = (((addr==MEPC_ADDR    )&wen)| unusual_flag )&inst_valid;
 
 assign mstatus_wdata    = wdata;
 assign mtvec_wdata      = wdata;
