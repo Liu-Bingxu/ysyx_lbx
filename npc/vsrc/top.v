@@ -116,6 +116,7 @@ csr #(DATA_LEN)u_csr(
     .wen          	( CSR_wen       ),
     .ren          	( CSR_ren       ),
     .unusual_flag 	( unusual_flag  ),
+    .inst_valid     ( inst_valid    ),
     .addr         	( CSR_addr      ),
     .wdata        	( csr_wdata     ),
     .PC           	( PC_now        ),
@@ -182,8 +183,8 @@ ifu #(DATA_LEN)u_ifu(
 );
 
 exu #(DATA_LEN)u_exu(
-    .clk                ( sys_clk           ),
-    .rst_n              ( rst_n             ),
+    // .clk                ( sys_clk           ),
+    // .rst_n              ( rst_n             ),
     .decode_valid   	( decode_valid      ),
     .decode_ready   	( decode_ready      ),
     .operand1  	        ( operand1          ),
