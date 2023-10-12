@@ -2,6 +2,7 @@
 #include "difftest.h"
 #include "utils.h"
 #include "time.h"
+#include "sys/time.h"
 
 static word_t timer_reg[2];
 
@@ -52,8 +53,15 @@ void get_rtc(){
 void get_uptime(){
     difftest_skip_ref();
     static uint64_t open_time=0;
-    if(open_time==0)open_time=get_time();
-    uint64_t now = get_time();
+    if(open_time==0){
+        struct timeval now;
+        gettimeofday(&now, NULL);
+        open_time = now.tv_sec * 1000000 + now.tv_usec;
+    }
+    struct timeval _now;
+    gettimeofday(&_now, NULL);
+    uint64_t now = _now.tv_sec * 1000000 + _now.tv_usec;
+    // uint64_t now = get_time();
     (*((uint64_t *)timer_reg)) = (now-open_time);
 }
 
