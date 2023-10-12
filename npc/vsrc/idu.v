@@ -6,7 +6,7 @@ module idu#(parameter DATA_LEN=32) (
     // input  [DATA_LEN-1:0]   PC_S,
 //interface with ifu
     input  [31:0]           inst_in,
-    input  [DATA_LEN-1:0]   PC,
+    input  [DATA_LEN-1:0]   PC_now,
     input                   inst_valid,
     output                  inst_ready,
 //interface with exu
@@ -42,20 +42,26 @@ localparam CSR_FILLER_LEN = DATA_LEN-5;
 
 reg [31:0]  inst;
 reg         inst_valid_reg;
+reg [DATA_LEN-1:0]  PC;
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n)begin
         inst<=`NOP;
+        PC<=`RST_PC;
     end
     else if(inst_valid&inst_ready)begin
         inst<=inst_in;
+        PC<=PC_now;
     end
 end
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n)begin
         inst_valid_reg<=1'b0;
     end
-    else begin
+    else if(inst_valid&inst_ready)begin
         inst_valid_reg<=inst_valid;
+    end
+    else begin
+        inst_valid_reg<=1'b0;
     end
 end
 

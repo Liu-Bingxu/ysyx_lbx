@@ -131,7 +131,7 @@ static void exec_once(char *p,paddr_t pc){
     p += space_len;
     
     disassemble(p, p + 128 - p,pc, (uint8_t *)&val, ilen);
-    // printf("%s\n", p);
+    printf("%s\n", p);
 #endif
     // pmem_read(top->PC_out, &top->inst_in);
     // printf("%d\n", g_nr_guest_inst);
