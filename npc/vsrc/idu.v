@@ -216,7 +216,7 @@ assign operand4 = (csr_rw_flag==1'b1)?0:(imm);
 assign inst_jump_flag = (B_flag);
 assign jump_without   = (jal|jalr);
 
-assign dest_wen = ((!(B_flag|S_flag|(CSR_flag&(~CSR_ren))|unusual_flag|mret|is_load))&inst_valid&inst_ready);
+assign dest_wen = ((!(B_flag|S_flag|(CSR_flag&(~CSR_ren))|unusual_flag|ebreak|mret|is_load))&inst_valid&inst_ready);
 
 assign is_or    = OR    |   ori |   csrrc   |   csrrci  |   csrrs   |   csrrsi;
 assign is_xor   = XOR   |   xori;
