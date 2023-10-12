@@ -97,6 +97,7 @@ always @(posedge clk or negedge rst_n) begin
                 repeat({24'h0,ifu_lfsr})begin
                     @(posedge clk);
                 end
+                ifu_lfsr<={(ifu_lfsr[4]^ifu_lfsr[3]^ifu_lfsr[2]^ifu_lfsr[0]),ifu_lfsr[7:1]};
                 arvalid_reg<=1'b1;
                 // rready_reg<=1'b1;
                 PC_to_sram_reg <= (Jump_flag) ? Jump_PC : PC;
@@ -158,6 +159,7 @@ always @(posedge clk or negedge rst_n) begin
                     repeat({24'h0,ifu_lfsr})begin
                         @(posedge clk);
                     end
+                    ifu_lfsr<={(ifu_lfsr[4]^ifu_lfsr[3]^ifu_lfsr[2]^ifu_lfsr[0]),ifu_lfsr[7:1]};
                     IFU_FSM_STATUS<=AXI_WITE_ARREADY;
                     arvalid_reg<=1'b1;
                     // rready_reg<=1'b1;
