@@ -20,5 +20,6 @@ word_t get_gpr(int i);
 word_t isa_reg_str2val(const char *name, bool *test);
 void isa_reg_display(void);
 bool isa_difftest_checkregs(CPU_state *ref,paddr_t pc);
+void isa_ref_reg_display(CPU_state *ref);
 
 #endif
