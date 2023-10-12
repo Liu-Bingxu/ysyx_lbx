@@ -1,6 +1,6 @@
 module exu#(parameter DATA_LEN=32) (
-    // input                   clk,
-    // input                   rst_n,
+    input                   clk,
+    input                   rst_n,
 //interface with idu    
     input                   decode_valid,
     output                  decode_ready,
@@ -154,7 +154,22 @@ assign Jump_flag = ((inst_jump_flag&((beq|bne|blt|bltu|bge|bgeu)))|jump_without|
 assign unusual_flag = ecall;
 assign cause = 11;
 
-assign decode_ready     = ls_valid|(~(is_load|is_store));
+reg one_cylestop;
+always @(posedge clk or negedge rst_n) begin
+    if(!rst_n)begin
+        one_cylestop<=1'b0;
+    end
+    else begin
+        if(decode_valid)begin
+            one_cylestop<=1'b1;
+        end
+        else begin
+            one_cylestop<=1'b0;
+        end
+    end
+end
+
+assign decode_ready     = ls_valid|(~(is_load|is_store))&one_cylestop;
 assign ls_ready   = 1'b1|decode_valid;
 //短期
 

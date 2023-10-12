@@ -1,12 +1,12 @@
 `include "./define.v"
 module idu#(parameter DATA_LEN=32) (
-    input                   clk,
-    input                   rst_n,
+    // input                   clk,
+    // input                   rst_n,
     input                   unusual_flag,
     // input  [DATA_LEN-1:0]   PC_S,
 //interface with ifu
-    input  [31:0]           inst_in,
-    input  [DATA_LEN-1:0]   PC_now,
+    input  [31:0]           inst,
+    input  [DATA_LEN-1:0]   PC,
     input                   inst_valid,
     output                  inst_ready,
 //interface with exu
@@ -40,30 +40,30 @@ module idu#(parameter DATA_LEN=32) (
 localparam FILLER_LEN = 20 + $clog2(DATA_LEN);
 localparam CSR_FILLER_LEN = DATA_LEN-5;
 
-reg [31:0]  inst;
-reg         inst_valid_reg;
-reg [DATA_LEN-1:0]  PC;
-always @(posedge clk or negedge rst_n) begin
-    if(!rst_n)begin
-        inst<=`NOP;
-        PC<=`RST_PC;
-    end
-    else if(inst_valid&inst_ready)begin
-        inst<=inst_in;
-        PC<=PC_now;
-    end
-end
-always @(posedge clk or negedge rst_n) begin
-    if(!rst_n)begin
-        inst_valid_reg<=1'b0;
-    end
-    else if(inst_valid&inst_ready)begin
-        inst_valid_reg<=inst_valid;
-    end
-    else begin
-        inst_valid_reg<=1'b0;
-    end
-end
+// reg [31:0]  inst;
+// reg         inst_valid_reg;
+// reg [DATA_LEN-1:0]  PC;
+// always @(posedge clk or negedge rst_n) begin
+//     if(!rst_n)begin
+//         inst<=`NOP;
+//         PC<=`RST_PC;
+//     end
+//     else if(inst_valid&inst_ready)begin
+//         inst<=inst_in;
+//         PC<=PC_now;
+//     end
+// end
+// always @(posedge clk or negedge rst_n) begin
+//     if(!rst_n)begin
+//         inst_valid_reg<=1'b0;
+//     end
+//     else if(inst_valid)begin
+//         inst_valid_reg<=1'b1;
+//     end
+//     else begin
+//         inst_valid_reg<=1'b0;
+//     end
+// end
 
 wire [DATA_LEN-1:0] imm;
 wire [DATA_LEN-1:0] imm_I,imm_J,imm_U,imm_B,imm_S,CSR_imm;
@@ -216,15 +216,15 @@ assign operand4 = (csr_rw_flag==1'b1)?0:(imm);
 assign inst_jump_flag = (B_flag);
 assign jump_without   = (jal|jalr);
 
-assign dest_wen = ((!(B_flag|S_flag|(CSR_flag&(~CSR_ren))|unusual_flag|ebreak|mret))&inst_valid_reg);
+assign dest_wen = ((!(B_flag|S_flag|(CSR_flag&(~CSR_ren))|unusual_flag|ebreak|mret|is_load))&inst_valid&inst_ready);
 
 assign is_or    = OR    |   ori |   csrrc   |   csrrci  |   csrrs   |   csrrsi;
 assign is_xor   = XOR   |   xori;
 assign is_and   = AND   |   andi;
 assign is_cmp   = slt|slti|sltiu|sltu;
 assign is_unsign= sltiu|sltu|lbu|lhu;
-assign is_store = S_flag;
-assign is_load  = load_flag;
+assign is_store = S_flag&inst_valid;
+assign is_load  = load_flag&inst_valid;
 assign is_beq   = beq;
 assign is_bne   = bne;
 assign is_blt   = blt;
@@ -243,7 +243,7 @@ assign control_sign = {is_store,is_load,is_bgeu,is_bge,is_bne,is_beq,is_bltu,is_
 // assign control_sign = {is_or,is_xor,is_and,LR,AL,is_shift,is_unsign,is_cmp,is_blt,is_bltu,
 //                         is_beq,is_bne,is_bge,is_bgeu,is_load,is_byte,is_half,is_word};
 assign  load_sign = {is_word,is_half,is_byte,is_unsign,is_load};
-assign store_sign = {sw,sh,sb,S_flag};
+assign store_sign = {sw,sh,sb,is_store};
 
 assign CSR_operand1 = (inst[14])?CSR_imm:src1;
 assign CSR_operand2 = (inst[13:12]==2'b01)?0:((inst[13:12]==2'b10)?csr_rdata:(~csr_rdata));
@@ -251,11 +251,11 @@ assign csr_rw_flag = (csrrc|csrrci|csrrw|csrrwi|csrrs|csrrsi);
 assign CSR_addr = inst[31:20];
 wire csrrw_with_rd0;
 assign csrrw_with_rd0 = ((csrrw|csrrwi)&(rd==0));
-assign CSR_ren = (( ( ~csrrw_with_rd0 | unusual_flag ) & csr_rw_flag)&inst_valid_reg);
+assign CSR_ren = (( ( ~csrrw_with_rd0 | unusual_flag ) & csr_rw_flag)&inst_valid&inst_ready);
 wire csrr_with_rs0,csrr_with_imm0;
 assign csrr_with_rs0 = ((rs1==0)&(csrrc|csrrs));
 assign csrr_with_imm0 = ((CSR_imm==0)&(csrrci|csrrsi));
-assign CSR_wen = (( ( ~ ( csrr_with_imm0 | csrr_with_rs0 | unusual_flag ) ) & csr_rw_flag )&inst_valid_reg);
+assign CSR_wen = (( ( ~ ( csrr_with_imm0 | csrr_with_rs0 | unusual_flag ) ) & csr_rw_flag )&inst_valid&inst_ready);
 assign csr_sign = {ecall,mret,csr_rw_flag};
 
 //temp because the idu decode but not need one cycle 

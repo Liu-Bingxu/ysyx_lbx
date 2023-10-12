@@ -14,7 +14,7 @@ void init_gpr(Vtop *top){
     for (int i = 0; i < 32;i++){
         reg.GPR[i] = (&(top->rootp->top__DOT__u_regs__DOT__riscv_reg[i]));
     }
-    reg.pc = (&top->rootp->top__DOT__u_ifu__DOT__PC);
+    reg.pc = (&top->rootp->top__DOT__u_ifu__DOT__PC_to_sram_reg);
     reg.mcause = (&top->rootp->top__DOT__u_csr__DOT__MCAUSE__DOT__data_out_reg);
     reg.mepc = (&top->rootp->top__DOT__u_csr__DOT__MEPC__DOT__data_out_reg);
     reg.mstatus = (&top->rootp->top__DOT__u_csr__DOT__MSTATUS__DOT__data_out_reg);

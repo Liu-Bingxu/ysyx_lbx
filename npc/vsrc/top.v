@@ -127,14 +127,14 @@ csr #(DATA_LEN)u_csr(
 
 
 idu #(DATA_LEN)u_idu(
-    .clk      	    ( sys_clk           ),
-    .rst_n    	    ( rst_n             ),
+    // .clk      	    ( sys_clk           ),
+    // .rst_n    	    ( rst_n             ),
     .unusual_flag   ( unusual_flag      ),
-    .inst_in  	    ( inst_fetch        ),
+    .inst    	    ( inst_fetch        ),
     .src1     	    ( src1              ),
     .src2     	    ( src2              ),
     // .PC             ( PC_S              ),
-    .PC_now         ( PC_now            ),
+    .PC             ( PC_now            ),
     .inst_valid     ( inst_valid        ),
     .inst_ready     ( inst_ready        ),
     .decode_valid   ( decode_valid      ),
@@ -182,6 +182,8 @@ ifu #(DATA_LEN)u_ifu(
 );
 
 exu #(DATA_LEN)u_exu(
+    .clk                ( sys_clk           ),
+    .rst_n              ( rst_n             ),
     .decode_valid   	( decode_valid      ),
     .decode_ready   	( decode_ready      ),
     .operand1  	        ( operand1          ),

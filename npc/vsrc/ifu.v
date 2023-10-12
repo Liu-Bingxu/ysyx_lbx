@@ -100,7 +100,7 @@ always @(posedge clk or negedge rst_n) begin
                     // rready_reg<=1'b0;
                     arvalid_reg<=1'b0;
                     PC<=PC_S;
-                    PC_now_reg<=PC;
+                    PC_now_reg<=PC_to_sram;
                 end
                 //if sram get read addr and send data at one time & this read false
                 //sram will reback the false and exu will get the mtvec to jump_pc
@@ -115,7 +115,7 @@ always @(posedge clk or negedge rst_n) begin
                     IFU_FSM_STATUS<=AXI_WITE_RVALID;
                     arvalid_reg<=1'b0;
                     PC<=PC_S;
-                    PC_now_reg<=PC;
+                    PC_now_reg<=PC_to_sram;
                 end
             end
         //wait the read data is valid
