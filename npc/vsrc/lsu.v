@@ -98,7 +98,7 @@ reg load_vaild_reg;
 reg load_wen_reg;
 reg [1:0]   axi_load_fsm;
 //test
-reg [7:0] lsu_load_lfsr; 
+// reg [7:0] lsu_load_lfsr; 
 //test
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n)begin
@@ -106,16 +106,16 @@ always @(posedge clk or negedge rst_n) begin
         load_vaild_reg<=1'b0;
         load_wen_reg<=1'b0;
         axi_load_fsm<=AXI_LOAD_IDLE;
-        lsu_load_lfsr<=1;
+        // lsu_load_lfsr<=1;
     end
     else begin
         case (axi_load_fsm)
             AXI_LOAD_IDLE: begin
                 if(is_load)begin
-                    repeat({24'h0,lsu_load_lfsr})begin
-                        @(posedge clk);
-                    end
-                    lsu_load_lfsr<={(lsu_load_lfsr[4]^lsu_load_lfsr[3]^lsu_load_lfsr[2]^lsu_load_lfsr[0]),lsu_load_lfsr[7:1]};
+                    // repeat({24'h0,lsu_load_lfsr})begin
+                        // @(posedge clk);
+                    // end
+                    // lsu_load_lfsr<={(lsu_load_lfsr[4]^lsu_load_lfsr[3]^lsu_load_lfsr[2]^lsu_load_lfsr[0]),lsu_load_lfsr[7:1]};
                     arvalid_reg<=1'b1;
                     axi_load_fsm<=AXI_LOAD_WAIT_ARREADY;
                 end
@@ -220,7 +220,7 @@ reg awvalid_reg;
 reg wvalid_reg;
 reg [2:0] axi_store_fsm;
 //test
-reg [7:0] lsu_store_lfsr; 
+// reg [7:0] lsu_store_lfsr; 
 //test
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n)begin
@@ -228,15 +228,16 @@ always @(posedge clk or negedge rst_n) begin
         awvalid_reg<=1'b0;
         wvalid_reg<=1'b0;
         axi_store_fsm<=AXI_STORE_IDLE;
+        // lsu_store_lfsr<=1;
     end
     else begin
         case (axi_store_fsm)
             AXI_STORE_IDLE:begin
                 if(is_store)begin
-                    repeat({24'h0,lsu_store_lfsr})begin
-                        @(posedge clk);
-                    end
-                    lsu_store_lfsr<={(lsu_store_lfsr[4]^lsu_store_lfsr[3]^lsu_store_lfsr[2]^lsu_store_lfsr[0]),lsu_store_lfsr[7:1]};
+                    // repeat({24'h0,lsu_store_lfsr})begin
+                        // @(posedge clk);
+                    // end
+                    // lsu_store_lfsr<={(lsu_store_lfsr[4]^lsu_store_lfsr[3]^lsu_store_lfsr[2]^lsu_store_lfsr[0]),lsu_store_lfsr[7:1]};
                     awvalid_reg<=1'b1;
                     wvalid_reg<=1'b1;
                     axi_store_fsm<=AXI_STORE_WITE_AEREADY_WREADY;

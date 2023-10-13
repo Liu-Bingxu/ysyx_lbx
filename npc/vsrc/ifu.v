@@ -57,7 +57,7 @@ assign PC_S = (PC_to_sram + 32'h4);
 // assign PC_to_sram = (Jump_flag) ? Jump_PC : PC;
 
 //test
-reg [7:0] ifu_lfsr;
+// reg [7:0] ifu_lfsr;
 //trst
 
 always @(posedge clk or negedge rst_n) begin
@@ -71,11 +71,7 @@ always @(posedge clk or negedge rst_n) begin
         PC_now_reg<=`RST_PC;
         PC_to_sram_reg<=`RST_PC;
         IFU_FSM_STATUS<=AXI_IDLE;
-
-
-        ifu_lfsr<=1;
-
-
+        // ifu_lfsr<=1;
     end
     else begin
         case (IFU_FSM_STATUS)
@@ -94,10 +90,10 @@ always @(posedge clk or negedge rst_n) begin
                 //     inst_valid_reg<=1'b0;
                 // end
                 IFU_FSM_STATUS<=AXI_WITE_ARREADY;
-                repeat({24'h0,ifu_lfsr})begin
-                    @(posedge clk);
-                end
-                ifu_lfsr<={(ifu_lfsr[4]^ifu_lfsr[3]^ifu_lfsr[2]^ifu_lfsr[0]),ifu_lfsr[7:1]};
+                // repeat({24'h0,ifu_lfsr})begin
+                    // @(posedge clk);
+                // end
+                // ifu_lfsr<={(ifu_lfsr[4]^ifu_lfsr[3]^ifu_lfsr[2]^ifu_lfsr[0]),ifu_lfsr[7:1]};
                 arvalid_reg<=1'b1;
                 // rready_reg<=1'b1;
                 PC_to_sram_reg <= (Jump_flag) ? Jump_PC : PC;
@@ -156,10 +152,10 @@ always @(posedge clk or negedge rst_n) begin
                 //else kepp wait
                 if(inst_ready)begin
                     inst_valid_reg<=1'b0;
-                    repeat({24'h0,ifu_lfsr})begin
-                        @(posedge clk);
-                    end
-                    ifu_lfsr<={(ifu_lfsr[4]^ifu_lfsr[3]^ifu_lfsr[2]^ifu_lfsr[0]),ifu_lfsr[7:1]};
+                    // repeat({24'h0,ifu_lfsr})begin
+                        // @(posedge clk);
+                    // end
+                    // ifu_lfsr<={(ifu_lfsr[4]^ifu_lfsr[3]^ifu_lfsr[2]^ifu_lfsr[0]),ifu_lfsr[7:1]};
                     IFU_FSM_STATUS<=AXI_WITE_ARREADY;
                     arvalid_reg<=1'b1;
                     // rready_reg<=1'b1;
