@@ -1,7 +1,6 @@
 module top#(parameter DATA_LEN=32) (
     input                   sys_clk,
-    input                   sys_rst_n,
-    output                  unuse
+    input                   sys_rst_n
     // input  [DATA_LEN-1:0]   inst_in,
     // output [DATA_LEN-1:0]   PC_out
 );
@@ -95,6 +94,25 @@ wire                        lsu_wready;
 wire                        lsu_bvalid;
 wire                        lsu_arready;
 wire                        lsu_rvalid;
+
+localparam DATA_STROB_LEN = DATA_LEN/8;
+wire                 	    sram_arvalid;
+wire                        sram_arready;
+wire [DATA_LEN-1:0]  	    sram_raddr;
+wire                        sram_rvalid;
+wire                 	    sram_rready;
+wire [2:0]                  sram_rresp;
+wire [DATA_LEN-1:0]         sram_rdata;
+wire                 	    sram_awvalid;
+wire                        sram_awready;
+wire [DATA_LEN-1:0]  	    sram_waddr;
+wire                 	    sram_wvalid;
+wire                        sram_wready;
+wire [DATA_STROB_LEN-1:0] 	sram_wstrob;
+wire [DATA_LEN-1:0]  	    sram_wdata;
+wire                        sram_bvalid;
+wire                 	    sram_bready;
+wire [2:0]                  sram_bresp;
 
 // assign PC_out = PC_now;
 
@@ -257,52 +275,119 @@ monitor u_monitor(
     .ebreak     	( ebreak            )
 );
 
-localparam DATA_STROB_LEN = DATA_LEN/8;
-wire ifu_awready,ifu_wready,ifu_bvalid;
-wire [2:0]  ifu_bresp;
-assign unuse = ifu_awready&ifu_wready&ifu_bvalid&(ifu_bresp==3'b000);
-sram #(DATA_LEN,DATA_STROB_LEN,DATA_LEN)ifu_sram(
-    .clk     	( sys_clk                   ),
-    .rst_n   	( rst_n                     ),
-    .awvalid 	( 1'b0                      ),
-    .awready 	( ifu_awready               ),
-    .waddr   	( {DATA_LEN{1'b0}}          ),
-    .wvalid  	( 1'b0                      ),
-    .wready  	( ifu_wready                ),
-    .wdata   	( {DATA_LEN{1'b0}}          ),
-    .wstrob  	( {DATA_STROB_LEN{1'b0}}    ),
-    .bvalid  	( ifu_bvalid                ),
-    .bready  	( 1'b0                      ),
-    .bresp   	( ifu_bresp                 ),
-    .arvalid 	( ifu_arvalid               ),
-    .arready 	( ifu_arready               ),
-    .raddr   	( PC_to_sram                ),
-    .rvalid  	( ifu_rvalid                ),
-    .rready  	( ifu_rready                ),
-    .rdata   	( inst_in                   ),
-    .rresp   	( ifu_rresp                 )
-);
+// localparam DATA_STROB_LEN = DATA_LEN/8;
+// wire ifu_awready,ifu_wready,ifu_bvalid;
+// wire [2:0]  ifu_bresp;
+// assign unuse = ifu_awready&ifu_wready&ifu_bvalid&(ifu_bresp==3'b000);
+// sram #(DATA_LEN,DATA_STROB_LEN,DATA_LEN)ifu_sram(
+//     .clk     	( sys_clk                   ),
+//     .rst_n   	( rst_n                     ),
+//     .awvalid 	( 1'b0                      ),
+//     .awready 	( ifu_awready               ),
+//     .waddr   	( {DATA_LEN{1'b0}}          ),
+//     .wvalid  	( 1'b0                      ),
+//     .wready  	( ifu_wready                ),
+//     .wdata   	( {DATA_LEN{1'b0}}          ),
+//     .wstrob  	( {DATA_STROB_LEN{1'b0}}    ),
+//     .bvalid  	( ifu_bvalid                ),
+//     .bready  	( 1'b0                      ),
+//     .bresp   	( ifu_bresp                 ),
+//     .arvalid 	( ifu_arvalid               ),
+//     .arready 	( ifu_arready               ),
+//     .raddr   	( PC_to_sram                ),
+//     .rvalid  	( ifu_rvalid                ),
+//     .rready  	( ifu_rready                ),
+//     .rdata   	( inst_in                   ),
+//     .rresp   	( ifu_rresp                 )
+// );
 
-sram #(DATA_LEN,DATA_STROB_LEN,DATA_LEN)lsu_sram(
-    .clk     	( sys_clk       ),
-    .rst_n   	( rst_n         ),
-    .awvalid 	( lsu_awvalid   ),
-    .awready 	( lsu_awready   ),
-    .waddr   	( lsu_waddr     ),
-    .wvalid  	( lsu_wvalid    ),
-    .wready  	( lsu_wready    ),
-    .wdata   	( lsu_wdata     ),
-    .wstrob  	( lsu_wstrob    ),
-    .bvalid  	( lsu_bvalid    ),
-    .bready  	( lsu_bready    ),
-    .bresp   	( lsu_bresp     ),
-    .arvalid 	( lsu_arvalid   ),
-    .arready 	( lsu_arready   ),
-    .raddr   	( lsu_raddr     ),
-    .rvalid  	( lsu_rvalid    ),
-    .rready  	( lsu_rready    ),
-    .rdata   	( lsu_rdata     ),
-    .rresp   	( lsu_rresp     )
+// sram #(DATA_LEN,DATA_STROB_LEN,DATA_LEN)lsu_sram(
+//     .clk     	( sys_clk       ),
+//     .rst_n   	( rst_n         ),
+//     .awvalid 	( lsu_awvalid   ),
+//     .awready 	( lsu_awready   ),
+//     .waddr   	( lsu_waddr     ),
+//     .wvalid  	( lsu_wvalid    ),
+//     .wready  	( lsu_wready    ),
+//     .wdata   	( lsu_wdata     ),
+//     .wstrob  	( lsu_wstrob    ),
+//     .bvalid  	( lsu_bvalid    ),
+//     .bready  	( lsu_bready    ),
+//     .bresp   	( lsu_bresp     ),
+//     .arvalid 	( lsu_arvalid   ),
+//     .arready 	( lsu_arready   ),
+//     .raddr   	( lsu_raddr     ),
+//     .rvalid  	( lsu_rvalid    ),
+//     .rready  	( lsu_rready    ),
+//     .rdata   	( lsu_rdata     ),
+//     .rresp   	( lsu_rresp     )
+// );
+
+axi_bus_matrix u_axi_bus_matrix(
+    .clk          	( sys_clk           ),
+    .rst_n        	( rst_n             ),
+    .ifu_arvalid  	( ifu_arvalid       ),
+    .ifu_arready  	( ifu_arready       ),
+    .ifu_raddr    	( PC_to_sram        ),
+    .ifu_rvalid   	( ifu_rvalid        ),
+    .ifu_rready   	( ifu_rready        ),
+    .ifu_rresp    	( ifu_rresp         ),
+    .ifu_rdata    	( inst_in           ),
+    .lsu_arvalid  	( lsu_arvalid       ),
+    .lsu_arready  	( lsu_arready       ),
+    .lsu_raddr    	( lsu_raddr         ),
+    .lsu_rvalid   	( lsu_rvalid        ),
+    .lsu_rready   	( lsu_rready        ),
+    .lsu_rresp    	( lsu_rresp         ),
+    .lsu_rdata    	( lsu_rdata         ),
+    .lsu_awvalid  	( lsu_awvalid       ),
+    .lsu_awready  	( lsu_awready       ),
+    .lsu_waddr    	( lsu_waddr         ),
+    .lsu_wvalid   	( lsu_wvalid        ),
+    .lsu_wready   	( lsu_wready        ),
+    .lsu_strob    	( lsu_wstrob        ),
+    .lsu_wdata    	( lsu_wdata         ),
+    .lsu_bvalid   	( lsu_bvalid        ),
+    .lsu_bready   	( lsu_bready        ),
+    .lsu_bresp    	( lsu_bresp         ),
+    .sram_arvalid 	( sram_arvalid      ),
+    .sram_arready 	( sram_arready      ),
+    .sram_raddr   	( sram_raddr        ),
+    .sram_rvalid  	( sram_rvalid       ),
+    .sram_rready  	( sram_rready       ),
+    .sram_rresp   	( sram_rresp        ),
+    .sram_rdata   	( sram_rdata        ),
+    .sram_awvalid 	( sram_awvalid      ),
+    .sram_awready 	( sram_awready      ),
+    .sram_waddr   	( sram_waddr        ),
+    .sram_wvalid  	( sram_wvalid       ),
+    .sram_wready  	( sram_wready       ),
+    .sram_strob   	( sram_wstrob       ),
+    .sram_wdata   	( sram_wdata        ),
+    .sram_bvalid  	( sram_bvalid       ),
+    .sram_bready  	( sram_bready       ),
+    .sram_bresp   	( sram_bresp        )
+);
+sram #(DATA_LEN,DATA_STROB_LEN,DATA_LEN)u_sram(
+    .clk     	( sys_clk        ),
+    .rst_n   	( rst_n          ),
+    .awvalid 	( sram_awvalid   ),
+    .awready 	( sram_awready   ),
+    .waddr   	( sram_waddr     ),
+    .wvalid  	( sram_wvalid    ),
+    .wready  	( sram_wready    ),
+    .wdata   	( sram_wdata     ),
+    .wstrob  	( sram_wstrob    ),
+    .bvalid  	( sram_bvalid    ),
+    .bready  	( sram_bready    ),
+    .bresp   	( sram_bresp     ),
+    .arvalid 	( sram_arvalid   ),
+    .arready 	( sram_arready   ),
+    .raddr   	( sram_raddr     ),
+    .rvalid  	( sram_rvalid    ),
+    .rready  	( sram_rready    ),
+    .rdata   	( sram_rdata     ),
+    .rresp   	( sram_rresp     )
 );
 
 

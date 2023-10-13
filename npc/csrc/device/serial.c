@@ -3,7 +3,7 @@
 
 void serial_out(word_t ch){
     // putchar(ch);
-    fflush(stdout);
+    // fflush(stdout);
     fprintf(stderr, "%c", ch);
     difftest_skip_ref();
 }
