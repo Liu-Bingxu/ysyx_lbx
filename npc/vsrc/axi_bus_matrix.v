@@ -71,7 +71,7 @@ axi_arbiter #(2)u_axi_read_arbiter(
     .sel    	( read_sel                  )
 );
 
-assign sram_arvalid = (read_sel==2'b01)?ifu_arvalid:(lsu_arvalid);
+assign sram_arvalid = (read_sel==2'b01)?ifu_arvalid:((r)lsu_arvalid);
 assign sram_rready = (read_sel==2'b01)?ifu_rready:lsu_rready;
 assign sram_raddr = (read_sel==2'b01)?ifu_raddr:lsu_raddr;
 
