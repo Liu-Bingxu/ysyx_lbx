@@ -27,13 +27,14 @@ static uint8_t pmem[CONFIG_MSIZE] PG_ALIGN = {};
 
 uint8_t* guest_to_host(paddr_t paddr) { return pmem + paddr - CONFIG_MBASE; }
 paddr_t host_to_guest(uint8_t *haddr) { return haddr - pmem + CONFIG_MBASE; }
-#ifndef CACHE_ENABLE
+#ifdef CACHE_ENABLE
 static word_t pmem_read(paddr_t addr, int len) {
   word_t ret = host_read(guest_to_host(addr), len);
   IFDEF(CONFIG_MTRACE, _Log_mem(addr,"Read  Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, ret));
   return ret;
 }
-
+#endif
+#ifndef CACHE_ENABLE
 static void pmem_write(paddr_t addr, int len, word_t data) {
   host_write(guest_to_host(addr), len, data);
   IFDEF(CONFIG_MTRACE, _Log_mem(addr,"Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, data));
@@ -64,7 +65,7 @@ void init_mem() {
 
 word_t paddr_read(paddr_t addr, int len) {
   if (likely(in_pmem(addr))){
-  #ifdef CACHE_ENABLE
+  #ifndef CACHE_ENABLE
       return cache_read(addr,len);
     #else
       return pmem_read(addr, len);
