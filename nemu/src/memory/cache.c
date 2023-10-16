@@ -4,11 +4,11 @@
 static cache_line cache[ASS_NUM][ASS_SIZE];
 
 static void mem_read(uintptr_t block_num, uint8_t *buf){
-    memcpy(buf, guest_to_host(CONFIG_MBASE) + (block_num << BLOCK_WIDTH), BLOCK_SIZE);
+    memcpy(buf, (void *)guest_to_host(CONFIG_MBASE) + (block_num << BLOCK_WIDTH), BLOCK_SIZE);
 }
 
 static void mem_write(uintptr_t block_num, const uint8_t *buf){
-    memcpy(guest_to_host(CONFIG_MBASE) + (block_num << BLOCK_WIDTH), buf, BLOCK_SIZE);
+    memcpy((void *)guest_to_host(CONFIG_MBASE) + (block_num << BLOCK_WIDTH), buf, BLOCK_SIZE);
 }
 
 static uint32_t __cache_read(uintptr_t addr){
