@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-#define CACHE_ENABLE
+// #define CACHE_ENABLE
 #define BLOCK_WIDTH 6
 #define BLOCK_SIZE 64
 
