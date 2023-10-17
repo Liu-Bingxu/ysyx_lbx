@@ -50,7 +50,7 @@ static void __cache_write(uintptr_t addr, uint32_t data, uint32_t wmask){
 const uint32_t len2datamask[] = {0x0, 0xff, 0xffff, 0xffffff, 0xffffffff};
 
 uint32_t cache_read(paddr_t addr, size_t len){
-    printf("the addr is " FMT_PADDR ", the len is %ld\n", addr, len);
+    // printf("the addr is " FMT_PADDR ", the len is %ld\n", addr, len);
     return (__cache_read(addr) >> addr_offset_bit(addr)) & len2datamask[len];
 }
 
