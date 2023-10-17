@@ -34,7 +34,7 @@ static word_t pmem_read(paddr_t addr, int len) {
   return ret;
 }
 #endif
-#ifdef CACHE_ENABLE
+#ifndef CACHE_ENABLE
 static void pmem_write(paddr_t addr, int len, word_t data) {
   host_write(guest_to_host(addr), len, data);
   IFDEF(CONFIG_MTRACE, _Log_mem(addr,"Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, data));
@@ -78,7 +78,7 @@ word_t paddr_read(paddr_t addr, int len) {
 
 void paddr_write(paddr_t addr, int len, word_t data) {
   if (likely(in_pmem(addr))) { 
-    #ifndef CACHE_ENABLE
+    #ifdef CACHE_ENABLE
       cache_write(addr, len, data);
     #else
       pmem_write(addr, len, data);
