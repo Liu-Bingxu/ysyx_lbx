@@ -9,7 +9,7 @@ static void mem_read(uintptr_t block_num, uint8_t *buf){
 }
 
 static void mem_write(uintptr_t block_num, const uint8_t *buf){
-    memcpy((void *)(guest_to_host(CONFIG_MBASE)) + (block_num << BLOCK_WIDTH), buf, BLOCK_SIZE);
+    memcpy((void *)(guest_to_host(block_num << BLOCK_WIDTH)) , buf, BLOCK_SIZE);
 }
 
 static uint32_t __cache_read(uintptr_t addr){
