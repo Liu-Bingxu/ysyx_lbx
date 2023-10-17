@@ -74,7 +74,11 @@ const uint32_t len2datamask[] = {0x0, 0xff, 0xffff, 0xffffff, 0xffffffff};
 uint32_t cache_read(paddr_t addr, size_t len){
     // printf("the addr is " FMT_PADDR ", the len is %ld\n", addr, len);
     cache_access_num++;
-    assert((addr % len) == 0);
+    // assert((addr % len) == 0);
+    if((addr%len)!=0){
+        printf("the addr is " FMT_PADDR ", the len is %ld\n", addr, len);
+        assert(0);
+    }
     return (__cache_read(addr) >> addr_offset_bit(addr)) & len2datamask[len];
 }
 
