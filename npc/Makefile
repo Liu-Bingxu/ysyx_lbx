@@ -56,7 +56,7 @@ $(BUILD_DIR)/.stamp.verilate: $(MODULE) $(CSRC) $(HEAD_FILE)
 	@echo
 	@echo "### VERILATING ###"
 	@echo verilator --Mdir $(BUILD_DIR)/build -Wall --trace --x-assign unique --x-initial unique --timing --top-module $(TOPNAME)  -cc $(MODULE) --exe $(CSRC) $(INC) -CFLAGS -D__GUEST_ISA__=$(ISA) -Ivsrc $(MY_CXXFLAGS) $(MY_LDFLAGS)
-	verilator --Mdir $(BUILD_DIR)/build -Wall --trace --x-assign unique --x-initial unique --timing --top-module $(TOPNAME)  -cc $(MODULE) --exe $(CSRC) $(INC) -CFLAGS -D__GUEST_ISA__=$(ISA)  $(MY_CXXFLAGS) $(MY_LDFLAGS)
+	verilator --Mdir $(BUILD_DIR)/build -Wall --trace --x-assign unique --x-initial unique --timing --top-module $(TOPNAME)  -cc $(MODULE) --exe $(CSRC) $(INC) -CFLAGS -D__GUEST_ISA__=$(ISA) -Ivsrc $(MY_CXXFLAGS) $(MY_LDFLAGS)
 	@touch $(BUILD_DIR)/.stamp.verilate
 
 .PHONY:lint
