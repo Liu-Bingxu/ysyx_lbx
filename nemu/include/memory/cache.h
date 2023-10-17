@@ -23,4 +23,8 @@ void init_cache(void);
 uint32_t cache_read(paddr_t addr, size_t len);
 void cache_write(paddr_t addr, size_t len, uint32_t data);
 
+uint64_t get_cache_hit_num(void);
+uint64_t get_cache_access_num(void);
+uint64_t get_access_mem_time(void);
+
 #endif
