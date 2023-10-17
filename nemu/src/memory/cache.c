@@ -20,6 +20,7 @@ static uint32_t __cache_read(uintptr_t addr){
     }
     printf("cache miss\n");
     int rand_num = rand() % ASS_SIZE;
+    printf("start read data\n");
     mem_read((addr / BLOCK_SIZE), (void *)(cache[(addr / BLOCK_SIZE) % ASS_NUM][rand_num].cache_mem));
     printf("finish read data\n");
     cache[(addr / BLOCK_SIZE) % ASS_NUM][rand_num].tag = (addr / BLOCK_SIZE) / ASS_NUM;
