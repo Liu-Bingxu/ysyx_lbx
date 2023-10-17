@@ -70,18 +70,19 @@ static void __cache_write(uintptr_t addr, uint32_t data, uint32_t wmask){
 #define addr_offset_bit_s(addr) (((addr) & 0x3) * 8)
 #define addr_offset_bit_h(addr) ((4 - ((addr) & 0x3)) * 8)
 
-const uint32_t len2datamask[] = {0x0, 0xff, 0xffff, 0xffffff, 0xffffffff};
+const uint32_t len2datamask_s[] = {0x0, 0xff, 0xffff, 0xffffff, 0xffffffff};
+const uint32_t len2datamask_h[] = {0x0, 0xffffff00, 0xffff0000, 0xffffff00};
 
 uint32_t cache_read(paddr_t addr, size_t len){
     // printf("the addr is " FMT_PADDR ", the len is %ld\n", addr, len);
     cache_access_num++;
-    uint32_t data_s = (__cache_read(addr) >> addr_offset_bit_s(addr)) & len2datamask[len - (addr % len)];
+    uint32_t data_s = (__cache_read(addr) >> addr_offset_bit_s(addr)) & len2datamask_s[len - (addr % len)];
     uint32_t data_h = 0;
     // assert((addr % len) == 0);
     if((addr%len)!=0){
         // printf("the addr is " FMT_PADDR ", the len is %ld\n", addr, len);
         // assert(0);
-        data_h = (__cache_read(addr+4) << addr_offset_bit_h(addr)) & len2datamask[len];
+        data_h = (__cache_read(addr+4) << addr_offset_bit_h(addr)) & ((len==2)?0xff000000:len2datamask_h[addr%len]);
     }
     return (data_s | data_h);
 }
@@ -89,7 +90,7 @@ uint32_t cache_read(paddr_t addr, size_t len){
 void cache_write(paddr_t addr, size_t len, uint32_t data){
     cache_access_num++;
     assert((addr % len) == 0);
-    __cache_write(addr, data << addr_offset_bit_s(addr), len2datamask[len] << addr_offset_bit_s(addr));
+    __cache_write(addr, data << addr_offset_bit_s(addr), len2datamask_s[len] << addr_offset_bit_s(addr));
 }
 
 void init_cache(void){
