@@ -104,6 +104,7 @@ static void statistic() {
     if (g_timer > 0)Log("simulation frequency = " NUMBERIC_FMT " inst/s", g_nr_guest_inst * 1000000 / g_timer);
     else Log("Finish running in less than 1 us and can not calculate the simulation frequency");
     Log("runing time is %ld, without cache is %ld", get_access_mem_time(), get_cache_access_num() * 100);
+    Log("the hit num is %ld, the access num is %ld", get_cache_hit_num(), get_cache_access_num());
     Log("the cache hit rate is %ld", get_cache_hit_num() / get_cache_access_num());
 }
 
