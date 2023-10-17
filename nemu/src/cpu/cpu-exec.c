@@ -105,7 +105,7 @@ static void statistic() {
     else Log("Finish running in less than 1 us and can not calculate the simulation frequency");
     Log("runing time is %ld, without cache is %ld", get_access_mem_time(), get_cache_access_num() * 100);
     Log("the hit num is %ld, the access num is %ld", get_cache_hit_num(), get_cache_access_num());
-    Log("the cache hit rate is %ld", get_cache_hit_num() / get_cache_access_num());
+    Log("the cache hit rate is %f", get_cache_hit_num() * (double)1.0 / get_cache_access_num());
 }
 
 void assert_fail_msg() {
