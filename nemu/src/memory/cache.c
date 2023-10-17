@@ -4,7 +4,7 @@
 static cache_line cache[ASS_NUM][ASS_SIZE];
 
 static void mem_read(uintptr_t block_num, uint8_t *buf){
-    printf("the block_num is 0x%08lx\n", block_num<<BLOCK_WIDTH);
+    // printf("the block_num is 0x%08lx\n", block_num<<BLOCK_WIDTH);
     memcpy(buf, (void *)(guest_to_host(block_num << BLOCK_WIDTH)), BLOCK_SIZE);
 }
 
@@ -19,11 +19,11 @@ static uint32_t __cache_read(uintptr_t addr){
             return cache[(addr / BLOCK_SIZE) % ASS_NUM][i].cache_mem[(addr % BLOCK_SIZE) / 4];
         }
     }
-    printf("cache miss\n");
+    // printf("cache miss\n");
     int rand_num = rand() % ASS_SIZE;
-    printf("start read data\n");
+    // printf("start read data\n");
     mem_read((addr / BLOCK_SIZE), (void *)(cache[(addr / BLOCK_SIZE) % ASS_NUM][rand_num].cache_mem));
-    printf("finish read data\n");
+    // printf("finish read data\n");
     cache[(addr / BLOCK_SIZE) % ASS_NUM][rand_num].tag = (addr / BLOCK_SIZE) / ASS_NUM;
     cache[(addr / BLOCK_SIZE) % ASS_NUM][rand_num].valid = 1;
     return cache[(addr / BLOCK_SIZE) % ASS_NUM][rand_num].cache_mem[(addr % BLOCK_SIZE) / 4];
