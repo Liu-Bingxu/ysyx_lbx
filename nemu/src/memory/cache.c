@@ -4,8 +4,7 @@
 static cache_line cache[ASS_NUM][ASS_SIZE];
 
 static void mem_read(uintptr_t block_num, uint8_t *buf){
-    (*buf) = 10;
-    printf("finish test\n");
+    printf("the block_num is 0x%016lx\n", block_num);
     memcpy(buf, (void *)(guest_to_host(CONFIG_MBASE)) + (block_num << BLOCK_WIDTH), BLOCK_SIZE);
 }
 
