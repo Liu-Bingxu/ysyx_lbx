@@ -61,7 +61,7 @@ enum
 #define immJ()                                                                                                                   \
     do                                                                                                                           \
     {                                                                                                                            \
-        *imm = (SEXT((BITS(i, 31, 31) << 20) | (BITS(i, 30, 21) << 1) | (BITS(i, 20, 20) << 11) | (BITS(i, 19, 12) << 12), 20)); \
+        *imm = (SEXT((BITS(i, 31, 31) << 20) | (BITS(i, 30, 21) << 1) | (BITS(i, 20, 20) << 11) | (BITS(i, 19, 12) << 12), 21)); \
     } while (0)
 #define immB()                                                                                                           \
     do                                                                                                                   \
@@ -123,7 +123,7 @@ static int decode_exec(Decode *s) {
     INSTPAT("0000000 ????? ????? 001 ????? 00100 11", slli   , I, R(rd) = (src1 << imm););
     INSTPAT("??????? ????? ????? 010 ????? 00100 11", slti   , I, R(rd) = (((sword_t)src1 < (sword_t)imm) ? 1 : 0););
     INSTPAT("??????? ????? ????? 011 ????? 00100 11", sltiu  , I, R(rd) = ((src1 < imm) ? 1 : 0););
-    INSTPAT("??????? ????? ????? ??? ????? 11011 11", jal    , J, R(rd) = s->snpc; s->dnpc = s->pc + imm;if(rd==1)FTRACE_JUMP(s->dnpc));
+    INSTPAT("??????? ????? ????? ??? ????? 11011 11", jal    , J, R(rd) = s->snpc; s->dnpc = s->pc + imm;/* printf("rd is %d, snpc is "FMT_PADDR", dnpc is "FMT_PADDR", PC is "FMT_PADDR", imm is %d\n",rd,s->snpc,s->dnpc,s->pc,imm); */if(rd==1)FTRACE_JUMP(s->dnpc));
     INSTPAT("??????? ????? ????? 000 ????? 11001 11", jalr   , I, R(rd) = s->snpc; s->dnpc = src1 + imm; s->dnpc &= 0xfffffffe;if(rd==1)FTRACE_JUMP(s->dnpc));
     INSTPAT("??????? ????? ????? 010 ????? 01000 11", sw     , S, Mw(src1 + imm, 4, src2););
     INSTPAT("??????? ????? ????? 001 ????? 01000 11", sh     , S, Mw(src1 + imm, 2, src2););

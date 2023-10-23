@@ -18,7 +18,7 @@ CFLAGS += -DMAINARGS=\"$(mainargs)\"
 # LIBS+=am/src/riscv/npc
 
 NPCFLAGS += $(shell dirname $(IMAGE).elf)/npc-log.txt
-NPCDIR = $(addsuffix $(NAME)-RTL_build,$(dir $(abspath NPCFLAGS)))
+NPCDIR = $(addsuffix /$(NAME)-RTL_build,$(shell dirname $(IMAGE).elf))
 
 .PHONY: $(AM_HOME)/am/src/riscv/npc/trm.c
 
@@ -30,5 +30,4 @@ image: $(IMAGE).elf
 run:image
 	$(shell if [ ! -d $(NPCDIR)/build ]; then mkdir -p $(NPCDIR)/build ;fi)
 	$(MAKE) -C $(NPC_HOME) run ARGS="-w $(NPCDIR)/$(NAME)-wave.vcd -l $(NPCFLAGS) $(B) -e $(IMAGE).elf" IMG=$(IMAGE).bin ISA=$(ISA) BUILD_DIR=$(NPCDIR) name=$(NAME)-
-
 

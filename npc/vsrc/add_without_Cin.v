@@ -1,10 +1,9 @@
+`include "define.v"
 module add_without_Cin #(parameter DATA_LEN=32)(
     input  [DATA_LEN-1:0]   OP_A,
     input  [DATA_LEN-1:0]   OP_B,
     output [DATA_LEN-1:0]   Sum
 );
-
-wire [DATA_LEN-2:0] c;
 
 wire [DATA_LEN-1:0] a,b,s; 
 
@@ -12,6 +11,9 @@ assign a = OP_A;
 assign b = OP_B;
 assign Sum = s;
 
+`ifdef ADD_USE_ADD_BASE
+
+wire [DATA_LEN-2:0] c;
 genvar i;
 
 generate 
@@ -34,5 +36,11 @@ generate
         end
     end
 endgenerate
+
+`else 
+
+assign s = a + b;
+
+`endif
 
 endmodule //adadd_with_Cin

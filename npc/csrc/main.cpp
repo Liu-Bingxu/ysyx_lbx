@@ -108,11 +108,11 @@ void sim_rst(){
     // step_and_dump_wave();
 }
 
-void halt(int code,int pc){
+void halt(void){
 	// Log("npc: %s at pc = " FMT_WORD,((code==0)?ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED)),pc); 
     // sim_exit(code);
     // assert_fail_msg();
-    set_npc_state(NPC_END, pc, code);
+    set_npc_state(NPC_END, get_gpr(32), get_gpr(10));
 }
 
 static void exec_once(char *p,paddr_t pc){
@@ -246,8 +246,8 @@ void cpu_exec(uint64_t n)
             (npc_state.state == NPC_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) : (npc_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) : ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),
             npc_state.halt_pc);
         // fall through
-    case NPC_QUIT:
-        statistic();
+    // case NPC_QUIT:
+        // statistic();
     }
 }
 

@@ -21,29 +21,36 @@
 extern const char *regs[];
 
 bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
-    for (int i = 0; i < MUXDEF(CONFIG_RVE, 16, 32);i++){
+    bool error = true;
+    for (int i = 0; i < MUXDEF(CONFIG_RVE, 16, 32); i++){
         if(ref_r->gpr[i]!=cpu.gpr[i]){
-            for (int i = 0; i < 32;i++){
-                printf("%-4s : %-12u(0x%08x)\n", regs[i], ref_r->gpr[i], ref_r->gpr[i]);
-            }
-            printf("pc   : %-12u(0x%08x)\n", ref_r->pc,ref_r->pc);
-            printf("error inst: "
-                   "\n" FMT_PADDR ": " FMT_WORD "\n",
-                   pc, vaddr_read(pc, 4));
-            return false;
+            // for (int i = 0; i < 32;i++){
+            //     printf("%-4s : %-12u(0x%08x)\n", regs[i], ref_r->gpr[i], ref_r->gpr[i]);
+            // }
+            // printf("pc   : %-12u(0x%08x)\n", ref_r->pc,ref_r->pc);
+            // printf("error inst: "
+            //        "\n" FMT_PADDR ": " FMT_WORD "\n",
+            //        pc, vaddr_read(pc, 4));
+            // return false;
+            error = false;
+            printf("%-4s is diff\n", regs[i]);
         }
     }
     if(ref_r->pc!=cpu.pc){
+        // return false;
+        error = false;
+        printf("%-4s is diff\n", "PC");
+    }
+    if(error==false){
         for (int i = 0; i < 32; i++){
             printf("%-4s : %-12u(0x%08x)\n", regs[i], ref_r->gpr[i], ref_r->gpr[i]);
         }
         printf("pc   : %-12u(0x%08x)\n", ref_r->pc, ref_r->pc);
         printf("error inst: "
-               "\n" FMT_PADDR ": " FMT_WORD"\n"
-                , pc, vaddr_read(pc, 4));
-        return false;
+               "\n" FMT_PADDR ": " FMT_WORD "\n",
+               pc, vaddr_read(pc, 4));
     }
-    return true;
+    return error;
 }
 
 void isa_difftest_attach() {
