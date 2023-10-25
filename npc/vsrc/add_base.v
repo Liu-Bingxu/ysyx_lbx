@@ -10,3 +10,4 @@ assign s = a ^ b ^ c;
 assign Cout = ((a & b) | ((a ^ b) & c));
 
 endmodule //add_base
+

@@ -1,5 +1,7 @@
 #include "pmem.h"
+#include "debug.h"
 #include "device.h"
+#include "regs.h"
 
 static char pmem[PMEM_SIZE];
 
@@ -21,7 +23,7 @@ void pmem_write(uint32_t waddr, uint32_t wdata,char wmask){
     if((waddr==TIMER_ADDR)&&(wdata==0)){get_uptime();return;}
     if((waddr==TIMER_ADDR)&&(wdata==1)){get_rtc();return;}
     waddr &= (~0x80000003U);
-    assert(waddr < PMEM_SIZE);
+    Assert(waddr < PMEM_SIZE,"PC is " FMT_PADDR ", try to access " FMT_PADDR ,get_gpr(32),waddr);
     // switch (wmask){
     // case 0x1:
     //     pmem[waddr] = (wdata & 0xffU);

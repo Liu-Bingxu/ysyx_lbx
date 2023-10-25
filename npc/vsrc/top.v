@@ -4,7 +4,8 @@ module top#(parameter DATA_LEN=32) (
     output                  unuse,
 `endif
     input                   sys_clk,
-    input                   sys_rst_n
+    input                   sys_rst_n,
+    output [1:0]            addr
     // input  [DATA_LEN-1:0]   inst_in,
     // output [DATA_LEN-1:0]   PC_out
 );
@@ -100,6 +101,14 @@ wire                        lsu_wready;
 wire                        lsu_bvalid;
 wire                        lsu_arready;
 wire                        lsu_rvalid;
+
+wire                        icache_arvalid;
+wire                        icache_arready;
+wire [DATA_LEN-1:0]         icache_raddr;
+wire                        icache_rvalid;
+wire                        icache_rready;
+wire [DATA_LEN-1:0]         icache_rdata;
+wire [2:0]                  icache_rresp;
 
 `ifdef HAS_AXI_BUS_ARBITER
 
@@ -301,13 +310,14 @@ sram #(DATA_LEN,DATA_STROB_LEN,DATA_LEN)ifu_sram(
     .bvalid  	( ifu_bvalid                ),
     .bready  	( 1'b0                      ),
     .bresp   	( ifu_bresp                 ),
-    .arvalid 	( ifu_arvalid               ),
-    .arready 	( ifu_arready               ),
-    .raddr   	( PC_to_sram                ),
-    .rvalid  	( ifu_rvalid                ),
-    .rready  	( ifu_rready                ),
-    .rdata   	( inst_in                   ),
-    .rresp   	( ifu_rresp                 )
+
+    .arvalid 	( icache_arvalid            ),
+    .arready 	( icache_arready            ),
+    .raddr   	( icache_raddr              ),
+    .rvalid  	( icache_rvalid             ),
+    .rready  	( icache_rready             ),
+    .rdata   	( icache_rdata              ),
+    .rresp   	( icache_rresp              )
 );
 
 sram #(DATA_LEN,DATA_STROB_LEN,DATA_LEN)lsu_sram(
@@ -337,13 +347,13 @@ sram #(DATA_LEN,DATA_STROB_LEN,DATA_LEN)lsu_sram(
 axi_bus_matrix u_axi_bus_matrix(
     .clk          	( sys_clk           ),
     .rst_n        	( rst_n             ),
-    .ifu_arvalid  	( ifu_arvalid       ),
-    .ifu_arready  	( ifu_arready       ),
-    .ifu_raddr    	( PC_to_sram        ),
-    .ifu_rvalid   	( ifu_rvalid        ),
-    .ifu_rready   	( ifu_rready        ),
-    .ifu_rresp    	( ifu_rresp         ),
-    .ifu_rdata    	( inst_in           ),
+    .ifu_arvalid  	( icache_arvalid    ),
+    .ifu_arready  	( icache_arready    ),
+    .ifu_raddr    	( icache_raddr      ),
+    .ifu_rvalid   	( icache_rvalid     ),
+    .ifu_rready   	( icache_rready     ),
+    .ifu_rresp    	( icache_rresp      ),
+    .ifu_rdata    	( icache_rdata      ),
     .lsu_arvalid  	( lsu_arvalid       ),
     .lsu_arready  	( lsu_arready       ),
     .lsu_raddr    	( lsu_raddr         ),
@@ -402,5 +412,40 @@ sram #(DATA_LEN,DATA_STROB_LEN,DATA_LEN)u_sram(
 );
 
 `endif
+
+`ifdef HAS_ICACHE
+
+icache_rv32 #(4,1,DATA_LEN)u_icache_rv32(
+    .clk            	( sys_clk                   ),
+    .rst_n          	( rst_n                     ),
+    .ifu_arvalid    	( ifu_arvalid               ),
+    .ifu_arready    	( ifu_arready               ),
+    .ifu_raddr      	( PC_to_sram[DATA_LEN-1:2]  ),
+    .ifu_rvalid     	( ifu_rvalid                ),
+    .ifu_rready     	( ifu_rready                ),
+    .ifu_rdata      	( inst_in                   ),
+    .ifu_rresp      	( ifu_rresp                 ),
+    .icache_arvalid 	( icache_arvalid            ),
+    .icache_arready 	( icache_arready            ),
+    .icache_raddr   	( icache_raddr              ),
+    .icache_rvalid  	( icache_rvalid             ),
+    .icache_rready  	( icache_rready             ),
+    .icache_rresp   	( icache_rresp              ),
+    .icache_rdata   	( icache_rdata              )
+);
+
+`else
+
+assign icache_arvalid   = ifu_arvalid;
+assign ifu_arready      = icache_arready;
+assign icache_raddr     = PC_to_sram;
+assign ifu_rvalid       = icache_rvalid;
+assign icache_rready    = ifu_rready;
+assign inst_in          = icache_rdata;
+assign ifu_rresp        = icache_rresp;
+
+`endif
+
+assign addr = PC_to_sram[1:0];
 
 endmodule //top

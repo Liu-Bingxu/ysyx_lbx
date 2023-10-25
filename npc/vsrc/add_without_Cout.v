@@ -44,9 +44,8 @@ generate
 endgenerate
 
 `else
-
-localparam FILTTER_LEN = DATA_LEN - 1;
-assign s = a + b + {{FILTTER_LEN{1'b0}},Cin};
+/* verilator lint_off WIDTHEXPAND */
+assign s = a + b + Cin;
 
 `endif
 

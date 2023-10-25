@@ -34,7 +34,25 @@ extern void ftrace_watch(paddr_t pc,paddr_t pc_jump);
 extern void device_update();
 extern int  is_exit_status_bad();
 
+//cache hit rate
+static uint64_t icache_hit_num = 0;
+static uint64_t icache_access_num = 0;
+void icache_access(void){
+    icache_access_num++;
+}
+void icache_hit(void){
+    icache_hit_num++;
+}
+//cache hit rate
+
+static uint64_t clock_cnt = 0;
 void step_and_dump_wave(){
+    // static int cnt = 0;
+    // cnt++;
+    // if(cnt==2){
+    //     cnt = 0;
+    //     clock_cnt++;
+    // }
     top->eval();
     // printf("Hello\n");
     contextp->timeInc(1);
@@ -50,6 +68,9 @@ static void statistic(){
         Log("simulation frequency = " NUMBERIC_FMT " inst/s", g_nr_guest_inst * 1000000 / g_timer);
     else
         Log("Finish running in less than 1 us and can not calculate the simulation frequency");
+    Log("the clock_num is %ld, the ipc is %f", clock_cnt , 1.0 * g_nr_guest_inst / clock_cnt);
+    Log("the hit num is %ld, the access num is %ld", icache_hit_num, icache_access_num);
+    Log("the cache hit rate is %lf", icache_hit_num * (double)1.0 / icache_access_num);
 }
 
 void sim_exit()
@@ -108,11 +129,11 @@ void sim_rst(){
     // step_and_dump_wave();
 }
 
-void halt(void){
+void halt(char code){
 	// Log("npc: %s at pc = " FMT_WORD,((code==0)?ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED)),pc); 
     // sim_exit(code);
     // assert_fail_msg();
-    set_npc_state(NPC_END, get_gpr(32), get_gpr(10));
+    set_npc_state(NPC_END, (code==1)?1:get_gpr(32), get_gpr(10));
 }
 
 static void exec_once(char *p,paddr_t pc){
@@ -150,10 +171,16 @@ static void exec_once(char *p,paddr_t pc){
     while(npc_ifu_status!=3){
         top->sys_clk = !top->sys_clk;
         step_and_dump_wave();
+        top->sys_clk = !top->sys_clk;
+        step_and_dump_wave();
+        clock_cnt++;
     }
     while(npc_ifu_status!=1){
         top->sys_clk = !top->sys_clk;
         step_and_dump_wave();
+        top->sys_clk = !top->sys_clk;
+        step_and_dump_wave();
+        clock_cnt++;
     }
 // #ifdef CONFIG_ITRACE
     // p += snprintf(p, 128, FMT_WORD ":", (pc));
@@ -212,6 +239,11 @@ static void execute(uint64_t n)
         trace_and_difftest(p, pc, dnpc);
         if (npc_state.state != NPC_RUNNING)
             break;
+        if (get_time() >= 2300000){
+            npc_state.state = NPC_END;
+            npc_state.halt_pc = get_gpr(32);
+            npc_state.halt_ret = 0;
+        }
         // IFDEF(CONFIG_DEVICE, device_update());
     }
 }
@@ -267,5 +299,6 @@ int main(int argc, char *argv[]){
     // }
     // top->sys_clk = !top->sys_clk;
     sdb_mainloop();
+    IFDEF(CONFIG_ITRACE, irangbuf_printf());
     sim_exit();
 }

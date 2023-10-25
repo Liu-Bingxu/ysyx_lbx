@@ -52,12 +52,12 @@ generate
 endgenerate
 
 `else
-
-localparam FILTTEL_LEN = DATA_LEN - 1;
-assign {Cout,s} = a + b +{{FILTTEL_LEN{1'b0}},Cin};
+/* verilator lint_off WIDTHEXPAND */
+assign {Cout,s} = a + b +Cin;
 
 `endif
 
 assign overflow = ((a[DATA_LEN-1]==b[DATA_LEN-1])&(a[DATA_LEN-1]!=Sum[DATA_LEN-1]));
 
 endmodule //adadd_with_Cin
+

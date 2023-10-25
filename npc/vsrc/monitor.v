@@ -1,5 +1,5 @@
 `include "define.v"
-import "DPI-C" function void halt();
+import "DPI-C" function void halt(byte code);
 
 `ifndef HAS_AXI_BUS
 
@@ -36,7 +36,7 @@ module monitor(
 // assign store_mask = store_addr[1:0];
 
 always @(posedge clk ) begin
-    if(ebreak)halt();
+    if(ebreak)halt(0);
 end
 
 // always @(negedge clk) begin
