@@ -1,4 +1,4 @@
-module lsu #(parameter DATA_LEN=32,DATA_BIT_NUM=4)(
+module lsu_rv32 #(parameter DATA_LEN=32,DATA_BIT_NUM=4)(
     input                       clk,
     input                       rst_n,
 //interface with exu 
@@ -59,7 +59,8 @@ wire [DATA_LEN-1:0] pre_move_data_0;
 wire [DATA_LEN-1:0] pre_move_data_1;
 wire [DATA_LEN-1:0] pre_move_data_2;
 wire [DATA_LEN-1:0] pre_move_data_3;
-assign pre_move_data_0 = pre_data;
+reg  [DATA_LEN-1:0] pre_read_data_reg;
+assign pre_move_data_0 = pre_read_data_reg;
 assign pre_move_data_1 = { 8'h0,pre_move_data_0[DATA_LEN-1:8] };
 assign pre_move_data_2 = {16'h0,pre_move_data_0[DATA_LEN-1:16]};
 assign pre_move_data_3 = {24'h0,pre_move_data_0[DATA_LEN-1:24]};
@@ -140,6 +141,7 @@ always @(posedge clk or negedge rst_n) begin
                 if(rvalid&rready&(rresp==3'b000))begin
                     load_vaild_reg<=1'b1;
                     load_wen_reg<=1'b1;
+                    pre_read_data_reg<=pre_data;
                     axi_load_fsm<=AXI_LOAD_WAIT_LS_READY;
                 end
                 else if(rvalid&rready&(rresp!=3'b000))begin
@@ -184,6 +186,16 @@ wire [1:0] store_mask;
 assign store_mask = store_addr[1:0];
 //get wstrb by control sign 
 reg [3:0] byte_wstrob,half_wstrob,word_wstrob;
+reg [DATA_LEN-1:0]  lsu_wdata;
+always @(*) begin
+    case (store_mask)
+        2'b00: lsu_wdata = store_data;
+        2'b01: lsu_wdata = {store_data[DATA_LEN-9:0],8'h0};
+        2'b10: lsu_wdata = {store_data[DATA_LEN-17:0],16'h0};
+        2'b11: lsu_wdata = {store_data[DATA_LEN-25:0],24'h0};
+        // default: 
+    endcase
+end
 always @(*) begin
     case (store_mask)
         2'b00: byte_wstrob=4'b0001;
@@ -326,10 +338,10 @@ end
 assign awvalid  = awvalid_reg;
 assign waddr    = store_addr;
 assign wvalid   = wvalid_reg;
-assign wdata    = store_data;
+assign wdata    = lsu_wdata;
 assign bready   = 1'b1;
 
 //last
 assign ls_valid = load_vaild_reg|store_valid_reg;
 
-endmodule //lsu
+endmodule //lsu_rv32

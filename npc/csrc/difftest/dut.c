@@ -103,7 +103,7 @@ void init_difftest(char *ref_so_file, long img_size, int port) {
 
 static void checkregs(CPU_state *ref, paddr_t pc) {
   if (!isa_difftest_checkregs(ref, pc)) {
-      IFDEF(CONFIG_ITRACE, irangbuf_printf());
+    //   IFDEF(CONFIG_ITRACE, irangbuf_printf());
       npc_state.state = NPC_ABORT;
       npc_state.halt_pc = pc;
       isa_reg_display();

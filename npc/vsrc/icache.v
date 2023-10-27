@@ -1,6 +1,7 @@
+`include "define.v"
 import "DPI-C" function void icache_access();
 import "DPI-C" function void icache_hit();
-module icache_rv32#(parameter WAY_NUM=4,SRAM_NUM=2,DATA_LEN=32)(
+module icache#(parameter WAY_NUM=4,SRAM_NUM=2,DATA_LEN=32)(
     input                   clk,
     input                   rst_n,
 //interface with ifu
@@ -28,6 +29,7 @@ module icache_rv32#(parameter WAY_NUM=4,SRAM_NUM=2,DATA_LEN=32)(
 localparam TAG_LEN = DATA_LEN - 10 - $clog2(SRAM_NUM);
 localparam ADDR_LEN = 6 + $clog2(SRAM_NUM);
 localparam WAY_ADDR_LEN = $clog2(WAY_NUM);
+localparam STEP = 2-DATA_LEN/32;
 
 localparam ICACHE_IDLE      = 3'b000;
 localparam ICACHE_CMP_TAG   = 3'b001;
@@ -59,8 +61,10 @@ wire                    icache_data_handshake_flag;
 reg   [WAY_NUM-1:0]     CEN_reg;
 reg                     WEN_reg;
 reg                     ifu_arready_reg;
+reg   [DATA_LEN-1:2]    ifu_raddr_reg;
 reg                     ifu_rvalid_reg;
 reg  [31:0]             ifu_rdata_reg;
+reg  [2:0]              ifu_rresp_reg;
 reg                     icache_arvalid_reg;
 reg  [DATA_LEN-1:0]     icache_raddr_reg;
 wire [127:0]            data;
@@ -70,10 +74,11 @@ reg                     icache_read_error;
 wire [127:0]            data_sel;
 
 reg  [2:0]              icache_fsm_status;
-reg  [1:0]              icache_read_cnt;
+reg  [STEP:0]           icache_read_cnt;
 
 wire [WAY_ADDR_LEN-1:0] rand_way;
 reg  [WAY_ADDR_LEN-1:0] hit_way;
+reg  [WAY_ADDR_LEN-1:0] hit_way_reg;
 
 genvar i;
 generate 
@@ -82,7 +87,7 @@ generate
             .clk          	( clk                       ),
             .rst_n        	( rst_n                     ),
             .tag_in       	( tag_in                    ),
-            .addr_valid     ( ifu_addr_handshake_flag   ),
+            // .addr_valid     ( ifu_addr_handshake_flag   ),
             .valid        	( valid[i]                  ),
             .tag          	( tag[i]                    ),
             .Q            	( Q[i]                      ),
@@ -97,13 +102,13 @@ generate
     end
 endgenerate
 
-assign offset       = ifu_raddr[3:2];
-assign A            = ifu_raddr[(3+ADDR_LEN):4];
-assign target_tag   = ifu_raddr[31:(4+ADDR_LEN)];
+assign offset       = ifu_raddr_reg[3:2];
+assign A            = ifu_raddr_reg[(3+ADDR_LEN):4];
+assign target_tag   = ifu_raddr_reg[DATA_LEN-1:(4+ADDR_LEN)];
 assign D            = data;
 assign tag_in       = target_tag;
 
-FF_D_without_asyn_rst #(128) write_data_to_cache(clk,icache_data_handshake_flag,{icache_rdata,data[127:32]},data);
+FF_D_without_asyn_rst #(128) write_data_to_cache(clk,icache_data_handshake_flag,{icache_rdata,data[127:DATA_LEN]},data);
 
 rand_lfsr_8_bit #(WAY_ADDR_LEN)u_rand_lfsr_8_bit_get_rand_way_num(
     .clk   	( clk           ),
@@ -111,11 +116,15 @@ rand_lfsr_8_bit #(WAY_ADDR_LEN)u_rand_lfsr_8_bit_get_rand_way_num(
     .out   	( rand_way      )
 );
 
+// always @(*) begin
+//     ifu_raddr_reg=ifu_raddr;
+// end
+
 //fsm logic 
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n)begin
         icache_fsm_status<=ICACHE_IDLE;
-        icache_read_cnt<=2'b0;
+        icache_read_cnt<={(STEP+1){1'b0}};
         ifu_rvalid_reg<=1'b0;
         WEN_reg<=1'b1;
         CEN_reg<={WAY_NUM{1'b1}};
@@ -123,12 +132,14 @@ always @(posedge clk or negedge rst_n) begin
         bypass_flag<=1'b0;
         icache_read_error<=1'b0;
         ifu_arready_reg<=1'b1;
+        // ifu_rresp_reg<=3'h0;
     end
     else begin
         case (icache_fsm_status)
             ICACHE_IDLE:begin
                 if(ifu_addr_handshake_flag)begin
                     icache_fsm_status<=ICACHE_CMP_TAG;
+                    ifu_raddr_reg<=ifu_raddr;
                     ifu_arready_reg<=1'b0;
                     icache_access();
                 end
@@ -137,14 +148,18 @@ always @(posedge clk or negedge rst_n) begin
                 if(res==0)begin
                     icache_fsm_status<=ICACHE_READ_ADDR;
                     icache_arvalid_reg<=1'b1;
-                    icache_raddr_reg<={ifu_raddr[DATA_LEN-1:4],icache_read_cnt,2'h0};
+                    icache_raddr_reg<={ifu_raddr_reg[DATA_LEN-1:4],icache_read_cnt,{(DATA_LEN/32+1){1'b0}}};
+                    // /* verilator lint_off WIDTHEXPAND */
+                    // /* verilator lint_off WIDTHTRUNC */
                     icache_read_cnt<=icache_read_cnt+1'b1;
                 end
                 else begin
                     icache_fsm_status<=ICACHE_GET_DATA;
+                    ifu_rresp_reg<=3'h0;
                     bypass_flag<=1'b0;
                     CEN_reg<=~res;
                     WEN_reg<=1'b1;
+                    hit_way_reg<=hit_way;
                     icache_hit();
                 end
             end
@@ -156,8 +171,9 @@ always @(posedge clk or negedge rst_n) begin
             end
             ICACHE_READ_DATA:begin
                 if(icache_data_handshake_flag&(icache_rresp==3'b000)&(~icache_read_error))begin
-                    if(icache_read_cnt==2'b00)begin
+                    if(icache_read_cnt=={(STEP+1){1'b0}})begin
                         icache_fsm_status<=ICACHE_GET_DATA;
+                        ifu_rresp_reg<=3'h0;
                         bypass_flag<=1'b1;
                         WEN_reg<=1'b0;
                         CEN_reg[rand_way]<=1'b0;
@@ -166,12 +182,13 @@ always @(posedge clk or negedge rst_n) begin
                         icache_fsm_status<=ICACHE_READ_ADDR;
                         icache_arvalid_reg<=1'b1;
                         icache_read_cnt<=icache_read_cnt+1'b1;
-                        icache_raddr_reg<={ifu_raddr[DATA_LEN-1:4],icache_read_cnt,2'h0};
+                        icache_raddr_reg<={ifu_raddr_reg[DATA_LEN-1:4],icache_read_cnt,{(DATA_LEN/32+1){1'b0}}};
                     end
                 end
                 else if(icache_data_handshake_flag)begin
-                    if(icache_read_cnt==2'b00)begin
-                        icache_fsm_status<=ICACHE_IDLE;
+                    if(icache_read_cnt=={(STEP+1){1'b0}})begin
+                        icache_fsm_status<=ICACHE_GET_DATA;
+                        ifu_rresp_reg<=3'h2;
                         ifu_arready_reg<=1'b1;
                         icache_read_error<=1'b0;
                     end
@@ -179,7 +196,7 @@ always @(posedge clk or negedge rst_n) begin
                         icache_fsm_status<=ICACHE_READ_ADDR;
                         icache_arvalid_reg<=1'b1;
                         icache_read_cnt<=icache_read_cnt+1'b1;
-                        icache_raddr_reg<={ifu_raddr[DATA_LEN-1:4],icache_read_cnt,2'h0};
+                        icache_raddr_reg<={ifu_raddr_reg[DATA_LEN-1:4],icache_read_cnt,{(DATA_LEN/32+1){1'b0}}};
                         icache_read_error<=1'b1;
                     end
                 end
@@ -206,25 +223,25 @@ end
 //change with the way number 
 always @(*) begin
     case (res)
-        4'b0001: begin
-            hit_way=0;
-        end
-        4'b0010:begin
-            hit_way=1;
-        end
-        4'b0100:begin
-            hit_way=2;
-        end
-        4'b1000:begin
-            hit_way=3;
-        end
+        4'b0001:hit_way=0;
+        4'b0010:hit_way=1;
+        4'b0100:hit_way=2;
+        4'b1000:hit_way=3;
+        // 8'h01:hit_way=0;
+        // 8'h02:hit_way=1;
+        // 8'h04:hit_way=2;
+        // 8'h08:hit_way=3;
+        // 8'h10:hit_way=4;
+        // 8'h20:hit_way=5;
+        // 8'h40:hit_way=6;
+        // 8'h80:hit_way=7;
         default: begin
             hit_way=0;
         end
     endcase
 end
 
-assign data_sel = (bypass_flag)?data:Q[hit_way];
+assign data_sel = (bypass_flag)?data:Q[hit_way_reg];
 always @(*) begin
     case (offset)
         2'b00: begin
@@ -248,6 +265,7 @@ assign CEN = CEN_reg;
 assign ifu_arready = ifu_arready_reg;
 assign ifu_rvalid = ifu_rvalid_reg;
 assign ifu_rdata = ifu_rdata_reg;
+assign ifu_rresp = ifu_rresp_reg;
 assign ifu_addr_handshake_flag = ifu_arvalid&ifu_arready;
 assign ifu_data_handshake_flag = ifu_rvalid &ifu_rready;
 assign icache_arvalid=icache_arvalid_reg;
@@ -257,6 +275,5 @@ assign icache_data_handshake_flag = icache_rvalid &icache_rready;
 
 assign BWEN = 0;
 assign icache_rready = 1'b1;
-assign ifu_rresp = 3'b000;
 
-endmodule //icache_rv32
+endmodule //icache

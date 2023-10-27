@@ -3,9 +3,15 @@ module top#(parameter DATA_LEN=32) (
 `ifndef HAS_AXI_BUS_ARBITER
     output                  unuse,
 `endif
+`ifdef HAS_ICACHE
+    output [1:0]            ifu_addr_offset,
+`endif
+// `ifdef HAS_DCACHE
+//     output [1:0]            lsu_read_addr_offset,
+//     output [1:0]            lsu_write_addr_offset,
+// `endif
     input                   sys_clk,
-    input                   sys_rst_n,
-    output [1:0]            addr
+    input                   sys_rst_n
     // input  [DATA_LEN-1:0]   inst_in,
     // output [DATA_LEN-1:0]   PC_out
 );
@@ -109,6 +115,24 @@ wire                        icache_rvalid;
 wire                        icache_rready;
 wire [DATA_LEN-1:0]         icache_rdata;
 wire [2:0]                  icache_rresp;
+
+wire                 	    dcache_arvalid;
+wire                        dcache_arready;
+wire [DATA_LEN-1:0]  	    dcache_raddr;
+wire                        dcache_rvalid;
+wire                 	    dcache_rready;
+wire [2:0]                  dcache_rresp;
+wire [DATA_LEN-1:0]         dcache_rdata;
+wire                 	    dcache_awvalid;
+wire                        dcache_awready;
+wire [DATA_LEN-1:0]  	    dcache_waddr;
+wire                 	    dcache_wvalid;
+wire                        dcache_wready;
+wire [DATA_STROB_LEN-1:0] 	dcache_wstrob;
+wire [DATA_LEN-1:0]  	    dcache_wdata;
+wire                        dcache_bvalid;
+wire                 	    dcache_bready;
+wire [2:0]                  dcache_bresp;
 
 `ifdef HAS_AXI_BUS_ARBITER
 
@@ -248,7 +272,7 @@ exu #(DATA_LEN)u_exu(
 );
 localparam  DATA_BIT_NUM = DATA_LEN/8;
 
-lsu #(DATA_LEN,DATA_BIT_NUM)u_lsu(
+lsu_rv32 #(DATA_LEN,DATA_BIT_NUM)u_lsu(
     .clk        	( sys_clk           ),
     .rst_n      	( rst_n             ),
     .ls_valid   	( ls_valid          ),
@@ -321,25 +345,25 @@ sram #(DATA_LEN,DATA_STROB_LEN,DATA_LEN)ifu_sram(
 );
 
 sram #(DATA_LEN,DATA_STROB_LEN,DATA_LEN)lsu_sram(
-    .clk     	( sys_clk       ),
-    .rst_n   	( rst_n         ),
-    .awvalid 	( lsu_awvalid   ),
-    .awready 	( lsu_awready   ),
-    .waddr   	( lsu_waddr     ),
-    .wvalid  	( lsu_wvalid    ),
-    .wready  	( lsu_wready    ),
-    .wdata   	( lsu_wdata     ),
-    .wstrob  	( lsu_wstrob    ),
-    .bvalid  	( lsu_bvalid    ),
-    .bready  	( lsu_bready    ),
-    .bresp   	( lsu_bresp     ),
-    .arvalid 	( lsu_arvalid   ),
-    .arready 	( lsu_arready   ),
-    .raddr   	( lsu_raddr     ),
-    .rvalid  	( lsu_rvalid    ),
-    .rready  	( lsu_rready    ),
-    .rdata   	( lsu_rdata     ),
-    .rresp   	( lsu_rresp     )
+    .clk     	( sys_clk           ),
+    .rst_n   	( rst_n             ),
+    .awvalid 	( dcache_awvalid    ),
+    .awready 	( dcache_awready    ),
+    .waddr   	( dcache_waddr      ),
+    .wvalid  	( dcache_wvalid     ),
+    .wready  	( dcache_wready     ),
+    .wdata   	( dcache_wdata      ),
+    .wstrob  	( dcache_wstrob     ),
+    .bvalid  	( dcache_bvalid     ),
+    .bready  	( dcache_bready     ),
+    .bresp   	( dcache_bresp      ),
+    .arvalid 	( dcache_arvalid    ),
+    .arready 	( dcache_arready    ),
+    .raddr   	( dcache_raddr      ),
+    .rvalid  	( dcache_rvalid     ),
+    .rready  	( dcache_rready     ),
+    .rdata   	( dcache_rdata      ),
+    .rresp   	( dcache_rresp      )
 );
 
 `else
@@ -354,23 +378,23 @@ axi_bus_matrix u_axi_bus_matrix(
     .ifu_rready   	( icache_rready     ),
     .ifu_rresp    	( icache_rresp      ),
     .ifu_rdata    	( icache_rdata      ),
-    .lsu_arvalid  	( lsu_arvalid       ),
-    .lsu_arready  	( lsu_arready       ),
-    .lsu_raddr    	( lsu_raddr         ),
-    .lsu_rvalid   	( lsu_rvalid        ),
-    .lsu_rready   	( lsu_rready        ),
-    .lsu_rresp    	( lsu_rresp         ),
-    .lsu_rdata    	( lsu_rdata         ),
-    .lsu_awvalid  	( lsu_awvalid       ),
-    .lsu_awready  	( lsu_awready       ),
-    .lsu_waddr    	( lsu_waddr         ),
-    .lsu_wvalid   	( lsu_wvalid        ),
-    .lsu_wready   	( lsu_wready        ),
-    .lsu_strob    	( lsu_wstrob        ),
-    .lsu_wdata    	( lsu_wdata         ),
-    .lsu_bvalid   	( lsu_bvalid        ),
-    .lsu_bready   	( lsu_bready        ),
-    .lsu_bresp    	( lsu_bresp         ),
+    .lsu_arvalid  	( dcache_arvalid    ),
+    .lsu_arready  	( dcache_arready    ),
+    .lsu_raddr    	( dcache_raddr      ),
+    .lsu_rvalid   	( dcache_rvalid     ),
+    .lsu_rready   	( dcache_rready     ),
+    .lsu_rresp    	( dcache_rresp      ),
+    .lsu_rdata    	( dcache_rdata      ),
+    .lsu_awvalid  	( dcache_awvalid    ),
+    .lsu_awready  	( dcache_awready    ),
+    .lsu_waddr    	( dcache_waddr      ),
+    .lsu_wvalid   	( dcache_wvalid     ),
+    .lsu_wready   	( dcache_wready     ),
+    .lsu_strob    	( dcache_wstrob     ),
+    .lsu_wdata    	( dcache_wdata      ),
+    .lsu_bvalid   	( dcache_bvalid     ),
+    .lsu_bready   	( dcache_bready     ),
+    .lsu_bresp    	( dcache_bresp      ),
     .sram_arvalid 	( sram_arvalid      ),
     .sram_arready 	( sram_arready      ),
     .sram_raddr   	( sram_raddr        ),
@@ -415,7 +439,7 @@ sram #(DATA_LEN,DATA_STROB_LEN,DATA_LEN)u_sram(
 
 `ifdef HAS_ICACHE
 
-icache_rv32 #(4,1,DATA_LEN)u_icache_rv32(
+icache #(4,1,DATA_LEN)u_icache(
     .clk            	( sys_clk                   ),
     .rst_n          	( rst_n                     ),
     .ifu_arvalid    	( ifu_arvalid               ),
@@ -434,6 +458,8 @@ icache_rv32 #(4,1,DATA_LEN)u_icache_rv32(
     .icache_rdata   	( icache_rdata              )
 );
 
+assign ifu_addr_offset = PC_to_sram[1:0];
+
 `else
 
 assign icache_arvalid   = ifu_arvalid;
@@ -446,6 +472,87 @@ assign ifu_rresp        = icache_rresp;
 
 `endif
 
-assign addr = PC_to_sram[1:0];
+`ifdef HAS_DCACHE
+
+dcache #(4,1,DATA_LEN,DATA_BIT_NUM)u_dcache(
+    .clk            	( sys_clk       ),
+    .rst_n          	( rst_n         ),
+    .lsu_arvalid    	( lsu_arvalid   ),
+    .lsu_arready    	( lsu_arready   ),
+    .lsu_raddr      	( lsu_raddr     ),
+    .lsu_rvalid     	( lsu_rvalid    ),
+    .lsu_rready     	( lsu_rready    ),
+    .lsu_rdata      	( lsu_rdata     ),
+    .lsu_rresp      	( lsu_rresp     ),
+    .lsu_awvalid    	( lsu_awvalid   ),
+    .lsu_awready    	( lsu_awready   ),
+    .lsu_waddr      	( lsu_waddr     ),
+    .lsu_wvalid     	( lsu_wvalid    ),
+    .lsu_wready     	( lsu_wready    ),
+    .lsu_wstrob     	( lsu_wstrob    ),
+    .lsu_wdata      	( lsu_wdata     ),
+    .lsu_bvalid     	( lsu_bvalid    ),
+    .lsu_bready     	( lsu_bready    ),
+    .lsu_bresp      	( lsu_bresp     ),
+    .dcache_arvalid 	( dcache_arvalid),
+    .dcache_arready 	( dcache_arready),
+    .dcache_raddr   	( dcache_raddr  ),
+    .dcache_rvalid  	( dcache_rvalid ),
+    .dcache_rready  	( dcache_rready ),
+    .dcache_rresp   	( dcache_rresp  ),
+    .dcache_rdata   	( dcache_rdata  ),
+    .dcache_awvalid 	( dcache_awvalid),
+    .dcache_awready 	( dcache_awready),
+    .dcache_waddr   	( dcache_waddr  ),
+    .dcache_wvalid  	( dcache_wvalid ),
+    .dcache_wready  	( dcache_wready ),
+    .dcache_wstrob  	( dcache_wstrob ),
+    .dcache_wdata   	( dcache_wdata  ),
+    .dcache_bvalid  	( dcache_bvalid ),
+    .dcache_bready  	( dcache_bready ),
+    .dcache_bresp   	( dcache_bresp  )
+);
+//debug temp
+// assign dcache_awvalid   = lsu_awvalid;
+// assign lsu_awready      = dcache_awready;
+// assign dcache_waddr     = lsu_waddr;
+
+// assign dcache_wvalid    = lsu_wvalid;
+// assign lsu_wready       = dcache_wready;
+// assign dcache_wdata     = lsu_wdata;
+// assign dcache_wstrob    = lsu_wstrob;
+
+// assign lsu_bvalid       = dcache_bvalid;
+// assign dcache_bready    = lsu_bready;
+// assign lsu_bresp        = dcache_bresp;
+//debug temp
+// assign lsu_read_addr_offset = lsu_raddr[1:0];
+// assign lsu_write_addr_offset = lsu_waddr[1:0];
+
+`else
+
+assign dcache_arvalid   = lsu_arvalid;
+assign lsu_arready      = dcache_arready;
+assign dcache_raddr     = lsu_raddr;
+
+assign lsu_rvalid       = dcache_rvalid;
+assign dcache_rready    = lsu_rready;
+assign lsu_rdata        = dcache_rdata;
+assign lsu_rresp        = dcache_rresp;
+
+assign dcache_awvalid   = lsu_awvalid;
+assign lsu_awready      = dcache_awready;
+assign dcache_waddr     = lsu_waddr;
+
+assign dcache_wvalid    = lsu_wvalid;
+assign lsu_wready       = dcache_wready;
+assign dcache_wdata     = lsu_wdata;
+assign dcache_wstrob    = lsu_wstrob;
+
+assign lsu_bvalid       = dcache_bvalid;
+assign dcache_bready    = lsu_bready;
+assign lsu_bresp        = dcache_bresp;
+
+`endif
 
 endmodule //top

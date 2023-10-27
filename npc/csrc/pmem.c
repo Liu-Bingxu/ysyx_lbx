@@ -3,6 +3,8 @@
 #include "device.h"
 #include "regs.h"
 
+extern void sim_exit();
+
 static char pmem[PMEM_SIZE];
 
 void *guest_to_host(paddr_t addr){
@@ -13,7 +15,14 @@ void pmem_read(uint32_t raddr,uint32_t *rdata){
     if(raddr==TIMER_ADDR){(*rdata)=get_timer_reg(0);return;}
     if(raddr==(TIMER_ADDR+4)){(*rdata)=get_timer_reg(1);return;}
     raddr &= (~0x80000003U);
-    assert(raddr < PMEM_SIZE);
+    // assert(raddr < PMEM_SIZE);
+    if(raddr>=PMEM_SIZE){
+        printf("raddr >= PMEM_SIZE\n");
+        npc_state.state = NPC_END;
+        npc_state.halt_pc = get_gpr(32);
+        npc_state.halt_ret = 0;
+        sim_exit();
+    }
     (*rdata) = (*((uint32_t *)(pmem + raddr)));
     return;
 }
@@ -39,13 +48,13 @@ void pmem_write(uint32_t waddr, uint32_t wdata,char wmask){
     //     break;
     // }
     if(wmask==0xf)(*((uint32_t *)(pmem + waddr))) = wdata;
-    else if(wmask==0x3)(*((uint16_t *)(pmem + waddr))) = (wdata & 0xffffU);
+    else if(wmask==0x3)(*((uint32_t *)(pmem + waddr))) = ((*((uint32_t *)(pmem + waddr)))&0xffff0000u)|(wdata & 0x0000ffffU);
     // else if(wmask==0x6)(*((uint16_t *)(pmem + waddr + 1))) = (wdata & 0xffffU);
-    else if(wmask==0xc)(*((uint16_t *)(pmem + waddr + 2))) = (wdata & 0xffffU);
-    else if(wmask==0x1)pmem[waddr] = (wdata & 0xffU);
-    else if(wmask==0x2)pmem[waddr+1] = (wdata & 0xffU);
-    else if(wmask==0x4)pmem[waddr+2] = (wdata & 0xffU);
-    else if(wmask==0x8)pmem[waddr+3] = (wdata & 0xffU);
+    else if(wmask==0xc)(*((uint32_t *)(pmem + waddr))) = ((*((uint32_t *)(pmem + waddr)))&0x0000ffffu)|(wdata & 0xffff0000U);
+    else if(wmask==0x1)(*((uint32_t *)(pmem + waddr))) = ((*((uint32_t *)(pmem + waddr)))&0xffffff00u)|(wdata & 0x000000ffU);
+    else if(wmask==0x2)(*((uint32_t *)(pmem + waddr))) = ((*((uint32_t *)(pmem + waddr)))&0xffff00ffu)|(wdata & 0x0000ff00U);
+    else if(wmask==0x4)(*((uint32_t *)(pmem + waddr))) = ((*((uint32_t *)(pmem + waddr)))&0xff00ffffu)|(wdata & 0x00ff0000U);
+    else if(wmask==0x8)(*((uint32_t *)(pmem + waddr))) = ((*((uint32_t *)(pmem + waddr)))&0x00ffffffu)|(wdata & 0xff000000U);
     else assert(0);
     // else sdb_mainloop();
     return;

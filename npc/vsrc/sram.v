@@ -166,7 +166,7 @@ always @(posedge clk or negedge rst_n) begin
     end
     else begin
         if(arvalid)begin
-            // repeat({24'h0,read_lsfr})begin
+            // repeat({24'h0,8'd30})begin
                 // @(posedge clk);
             // end
             // read_lsfr<={(read_lsfr[4]^read_lsfr[3]^read_lsfr[2]^read_lsfr[0]),read_lsfr[7:1]};

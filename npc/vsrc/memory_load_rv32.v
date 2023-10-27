@@ -28,6 +28,6 @@ assign data_word = pre_data;
 assign data_byte = (is_sign)?data_signed_byte:data_unsigned_byte;
 assign data_half = (is_sign)?data_signed_half:data_unsigned_half;
 
-assign data = (is_byte)?data_byte:((is_half)?data_half:((is_word)?data_word:32'h0));
+assign data = (is_byte)?data_byte:((is_half)?data_half:((is_word)?data_word:{DATA_LEN{1'b0}}));
 
 endmodule //memory_load

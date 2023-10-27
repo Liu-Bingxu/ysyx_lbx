@@ -15,7 +15,11 @@ using namespace std;
 #define MAX_INST_TO_PRINT 10
 
 #define PC_now top->rootp->
+#define DUT_inst top->rootp->top__DOT__u_ifu__DOT__inst_reg
 #define npc_ifu_status top->rootp->top__DOT__u_ifu__DOT__IFU_FSM_STATUS
+// #define waddr top->rootp->
+// #define wdata top->rootp->
+// #define wmask top->rootp->
 
 VerilatedContext* contextp = NULL;
 VerilatedVcdC* tfp = NULL;
@@ -34,7 +38,7 @@ extern void ftrace_watch(paddr_t pc,paddr_t pc_jump);
 extern void device_update();
 extern int  is_exit_status_bad();
 
-//cache hit rate
+//icache hit rate
 static uint64_t icache_hit_num = 0;
 static uint64_t icache_access_num = 0;
 void icache_access(void){
@@ -43,7 +47,22 @@ void icache_access(void){
 void icache_hit(void){
     icache_hit_num++;
 }
-//cache hit rate
+//icache hit rate
+
+// dcache hit rate
+static uint64_t dcache_hit_num = 0;
+static uint64_t dcache_access_num = 0;
+static uint64_t mmio_access_num = 0;
+void dcache_access(void){
+    dcache_access_num++;
+}
+void dcache_hit(void){
+    dcache_hit_num++;
+}
+void mmio_access(void){
+    mmio_access_num++;
+}
+// dcache hit rate
 
 static uint64_t clock_cnt = 0;
 void step_and_dump_wave(){
@@ -69,12 +88,14 @@ static void statistic(){
     else
         Log("Finish running in less than 1 us and can not calculate the simulation frequency");
     Log("the clock_num is %ld, the ipc is %f", clock_cnt , 1.0 * g_nr_guest_inst / clock_cnt);
-    Log("the hit num is %ld, the access num is %ld", icache_hit_num, icache_access_num);
-    Log("the cache hit rate is %lf", icache_hit_num * (double)1.0 / icache_access_num);
+    Log("the icache hit num is %ld, the icache access num is %ld", icache_hit_num, icache_access_num);
+    Log("the icache hit rate is %lf", icache_hit_num * (double)1.0 / icache_access_num);
+    Log("the dcache hit num is %ld, the dcache access num is %ld", dcache_hit_num, dcache_access_num);
+    Log("the dcache hit rate is %lf", dcache_hit_num * (double)1.0 / dcache_access_num);
+    Log("the mmio access num is %ld", mmio_access_num);
 }
 
-void sim_exit()
-{
+void sim_exit(){
     step_and_dump_wave();
     top->final();
     IFDEF(CONFIG_VCD_GET, tfp->close());
@@ -182,7 +203,43 @@ static void exec_once(char *p,paddr_t pc){
         step_and_dump_wave();
         clock_cnt++;
     }
-// #ifdef CONFIG_ITRACE
+    //debug icache mutil sram in a way 2023.10.26
+    // uint32_t _inst;
+    // pmem_read(pc, &_inst);
+    // Assert(DUT_inst == _inst, "error: PC is " FMT_PADDR ", read data is " FMT_WORD ", but true data is " FMT_WORD, pc, DUT_inst, _inst);
+    // if (DUT_inst != _inst){
+    //     Log(ANSI_FMT("error: PC is " FMT_PADDR ", read data is " FMT_WORD ", but true data is " FMT_WORD "\n", ANSI_FG_RED), pc, DUT_inst, _inst);
+    //     npc_state.state = NPC_END;
+    //     npc_state.halt_pc = get_gpr(32);
+    //     npc_state.halt_ret = 0;
+    //     sim_exit();
+    // }
+
+    // debug dcache mutil sram in a way 2023.10.27
+    //  uint32_t _inst;
+    //  pmem_read(pc, &_inst);
+    //  Assert(DUT_inst == _inst, "error: PC is " FMT_PADDR ", read data is " FMT_WORD ", but true data is " FMT_WORD, pc, DUT_inst, _inst);
+    //  if (DUT_inst != _inst){
+    //      Log(ANSI_FMT("error: PC is " FMT_PADDR ", read data is " FMT_WORD ", but true data is " FMT_WORD "\n", ANSI_FG_RED), pc, DUT_inst, _inst);
+    //      npc_state.state = NPC_END;
+    //      npc_state.halt_pc = get_gpr(32);
+    //      npc_state.halt_ret = 0;
+    //      sim_exit();
+    //  }
+
+    // debug dcache mutil sram in a way 2023.10.27
+    //  uint32_t _inst;
+    //  pmem_read(pc, &_inst);
+    //  Assert(DUT_inst == _inst, "error: PC is " FMT_PADDR ", read data is " FMT_WORD ", but true data is " FMT_WORD, pc, DUT_inst, _inst);
+    //  if (DUT_inst != _inst){
+    //      Log(ANSI_FMT("error: PC is " FMT_PADDR ", read data is " FMT_WORD ", but true data is " FMT_WORD "\n", ANSI_FG_RED), pc, DUT_inst, _inst);
+    //      npc_state.state = NPC_END;
+    //      npc_state.halt_pc = get_gpr(32);
+    //      npc_state.halt_ret = 0;
+    //      sim_exit();
+    //  }
+
+    // #ifdef CONFIG_ITRACE
     // p += snprintf(p, 128, FMT_WORD ":", (pc));
     // int ilen = 4;
     // int i;
@@ -190,12 +247,12 @@ static void exec_once(char *p,paddr_t pc){
     // pmem_read(pc, &val);
     // uint8_t *inst = (uint8_t *)&val;
     // for (i = ilen - 1; i >= 0; i--){
-        // p += snprintf(p, 4, " %02x", inst[i]);
+    // p += snprintf(p, 4, " %02x", inst[i]);
     // }
     // int ilen_max = MUXDEF(CONFIG_ISA_x86, 8, 4);
     // int space_len = ilen_max - ilen;
     // if (space_len < 0)
-        // space_len = 0;
+    // space_len = 0;
     // space_len = space_len * 3 + 1;
     // memset(p, ' ', space_len);
     // p += space_len;
@@ -239,7 +296,7 @@ static void execute(uint64_t n)
         trace_and_difftest(p, pc, dnpc);
         if (npc_state.state != NPC_RUNNING)
             break;
-        if (get_time() >= 2300000){
+        if (get_time() >= 4500000){
             npc_state.state = NPC_END;
             npc_state.halt_pc = get_gpr(32);
             npc_state.halt_ret = 0;
