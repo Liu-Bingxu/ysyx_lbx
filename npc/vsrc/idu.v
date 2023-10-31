@@ -1,55 +1,67 @@
 `include "./define.v"
 module idu#(parameter DATA_LEN=32) (
-    // input                   clk,
-    // input                   rst_n,
-    input                   unusual_flag,
+    input                   clk,
+    input                   rst_n,
+    // input                   unusual_flag,
     // input  [DATA_LEN-1:0]   PC_S,
 //interface with ifu
-    input  [31:0]           inst,
-    input  [DATA_LEN-1:0]   PC,
-    input                   inst_valid,
-    output                  inst_ready,
+    input  [31:0]           IF_ID_reg_inst,
+    input  [DATA_LEN-1:0]   IF_ID_reg_PC,
+    input                   IF_ID_reg_inst_valid,
+    // output                  ID_IF_reg_inst_ready,
 //interface with exu
-    output                  decode_valid,
-    input                   decode_ready,
+    output                  ID_EX_reg_decode_valid,
+    input                   ID_reg_decode_enable,
+    input                   EX_reg_execute_enable,
+    input                   ID_reg_decode_flush,
+    input                   MON_ID_src_block_flag,
     input  [DATA_LEN-1:0]   src1,
     input  [DATA_LEN-1:0]   src2,
-    input  [DATA_LEN-1:0]   csr_rdata,
+    // input  [DATA_LEN-1:0]   csr_rdata,
     output [4 :0]           rs1,
+    output                  rs1_valid,
     output [4 :0]           rs2,
-    output [4 :0]           rd,
-    output [11:0]           CSR_addr,
-    output [DATA_LEN-1:0]   operand1,   
-    output [DATA_LEN-1:0]   operand2, 
-    output [DATA_LEN-1:0]   operand3,   
-    output [DATA_LEN-1:0]   operand4,
-    output [15:0]           control_sign, 
-    output [2:0]            csr_sign,
-    output                  inst_jump_flag,
-    output                  jump_without,
-    output [4:0]            load_sign,
-    output [3:0]            store_sign,
-    output                  ebreak,
-    output                  op,
+    output                  rs2_valid,
+    output [11:0]           ID_EX_reg_CSR_addr,
+    output [4 :0]           ID_EX_reg_rd,
+    output [1 :0]           ID_EX_reg_csr_wfunc,
+    output [DATA_LEN-1:0]   ID_EX_reg_PC,
+`ifdef SIM
+    output  [31:0]          ID_EX_reg_inst,
+`endif
+    output [DATA_LEN-1:0]   ID_EX_reg_operand1,   
+    output [DATA_LEN-1:0]   ID_EX_reg_operand2, 
+    output [DATA_LEN-1:0]   ID_EX_reg_operand3,   
+    output [DATA_LEN-1:0]   ID_EX_reg_operand4,
+    output [DATA_LEN-1:0]   ID_EX_reg_store_data,
+    output [13:0]           ID_EX_reg_control_sign, 
+    output [1:0]            ID_EX_reg_csr_sign,
+    output                  ID_EX_reg_inst_jump_flag,
+    output                  ID_EX_reg_jump_without,
+    output [4:0]            ID_EX_reg_load_sign,
+    output [3:0]            ID_EX_reg_store_sign,
+    output                  ID_EX_reg_ebreak,
+    output                  ID_EX_reg_op,
 //interfaace with the register module 
-    output                  CSR_ren,
-    output                  CSR_wen,
-    output                  dest_wen
+    // output                  csr_ren,
+    output                  ID_EX_reg_CSR_ren,
+    output                  ID_EX_reg_CSR_wen,
+    output                  ID_EX_reg_dest_wen
 );
 
 localparam FILLER_LEN = 20 + $clog2(DATA_LEN);
 localparam CSR_FILLER_LEN = DATA_LEN-5;
 
-// reg [31:0]  inst;
+// reg [31:0]  IF_ID_reg_inst;
 // reg         inst_valid_reg;
 // reg [DATA_LEN-1:0]  PC;
 // always @(posedge clk or negedge rst_n) begin
 //     if(!rst_n)begin
-//         inst<=`NOP;
+//         IF_ID_reg_inst<=`NOP;
 //         PC<=`RST_PC;
 //     end
 //     else if(inst_valid&inst_ready)begin
-//         inst<=inst_in;
+//         IF_ID_reg_inst<=inst_in;
 //         PC<=PC_now;
 //     end
 // end
@@ -65,11 +77,30 @@ localparam CSR_FILLER_LEN = DATA_LEN-5;
 //     end
 // end
 
+wire [4 :0]           rd;
+wire [DATA_LEN-1:0]   operand1;
+wire [DATA_LEN-1:0]   operand2;
+wire [DATA_LEN-1:0]   operand3;
+wire [DATA_LEN-1:0]   operand4;
+wire [13:0]           control_sign;
+wire [1:0]            csr_sign;
+wire                  inst_jump_flag;
+wire                  jump_without;
+wire [4:0]            load_sign;
+wire [3:0]            store_sign;
+wire                  ebreak;
+wire                  op;
+wire                  CSR_ren;
+wire                  CSR_wen;
+wire                  dest_wen;
+
 wire [DATA_LEN-1:0] imm;
 wire [DATA_LEN-1:0] imm_I,imm_J,imm_U,imm_B,imm_S,CSR_imm;
 
 wire [DATA_LEN-1:0]  CSR_operand1;
-wire [DATA_LEN-1:0]  CSR_operand2;
+// wire [DATA_LEN-1:0]  CSR_operand2;
+wire [1:0]  csr_wfunc;
+wire [11:0] CSR_addr;
 
 wire [6:0] funct7;
 wire [2:0] funct3;
@@ -119,27 +150,27 @@ wire is_bgeu;
 wire ecall;
 wire mret;  
 
-assign rs1 = inst[19:15];
-assign rs2 = inst[24:20];
-assign rd  = inst[11:7 ];
+assign rs1 = IF_ID_reg_inst[19:15];
+assign rs2 = IF_ID_reg_inst[24:20];
+assign rd  = IF_ID_reg_inst[11:7 ];
 
-assign funct3 = inst[14:12];
-assign funct7 = inst[31:25];
+assign funct3 = IF_ID_reg_inst[14:12];
+assign funct7 = IF_ID_reg_inst[31:25];
 
-assign imm_I = {{20{inst[31]}},inst[31:20]};
-assign imm_S = {{20{inst[31]}},inst[31:25],inst[11:7]};
-assign imm_B = {{20{inst[31]}},inst[7],inst[30:25],inst[11:8],1'b0};
-assign imm_U = {inst[31:12],12'h0};
-assign imm_J = {{12{inst[31]}},inst[19:12],inst[20],inst[30:21],1'b0};
+assign imm_I = {{20{IF_ID_reg_inst[31]}},IF_ID_reg_inst[31:20]};
+assign imm_S = {{20{IF_ID_reg_inst[31]}},IF_ID_reg_inst[31:25],IF_ID_reg_inst[11:7]};
+assign imm_B = {{20{IF_ID_reg_inst[31]}},IF_ID_reg_inst[7],IF_ID_reg_inst[30:25],IF_ID_reg_inst[11:8],1'b0};
+assign imm_U = {IF_ID_reg_inst[31:12],12'h0};
+assign imm_J = {{12{IF_ID_reg_inst[31]}},IF_ID_reg_inst[19:12],IF_ID_reg_inst[20],IF_ID_reg_inst[30:21],1'b0};
 assign CSR_imm = {{CSR_FILLER_LEN{1'b0}},rs1};
 // 
-assign R_flag   = (inst[6:0]==7'b0110011)?1'b1:1'b0;
-assign S_flag   = (inst[6:0]==7'b0100011)?1'b1:1'b0;
+assign R_flag   = (IF_ID_reg_inst[6:0]==7'b0110011)?1'b1:1'b0;
+assign S_flag   = (IF_ID_reg_inst[6:0]==7'b0100011)?1'b1:1'b0;
 assign I_flag   = (load_flag|arith_flag|jalr);
-assign B_flag   = (inst[6:0]==7'b1100011)?1'b1:1'b0;
+assign B_flag   = (IF_ID_reg_inst[6:0]==7'b1100011)?1'b1:1'b0;
 assign U_flag   = (lui|auipc);
 assign J_flag   = jal;
-assign CSR_flag = ((inst[6:0]==7'b1110011)&(~ebreak)&(~ecall))?1'b1:1'b0;
+assign CSR_flag = ((IF_ID_reg_inst[6:0]==7'b1110011)&(~ebreak)&(~ecall))?1'b1:1'b0;
 
 assign imm = (I_flag)?imm_I:(
     (U_flag)?imm_U:(
@@ -149,13 +180,13 @@ assign imm = (I_flag)?imm_I:(
     )
 );
 
-assign load_flag    = (inst[6:0]==7'b0000011)?1'b1:1'b0;
-assign arith_flag   = (inst[6:0]==7'b0010011)?1'b1:1'b0;
+assign load_flag    = (IF_ID_reg_inst[6:0]==7'b0000011)?1'b1:1'b0;
+assign arith_flag   = (IF_ID_reg_inst[6:0]==7'b0010011)?1'b1:1'b0;
 
-assign lui      =   (inst[6:0]  ==  7'b0110111  ) ? 1'b1 : 1'b0;
-assign auipc    =   (inst[6:0]  ==  7'b0010111  ) ? 1'b1 : 1'b0;
-assign jal      =   (inst[6:0]  ==  7'b1101111  ) ? 1'b1 : 1'b0;
-assign jalr     =   (inst[6:0]  ==  7'b1100111  ) ? 1'b1 : 1'b0;
+assign lui      =   (IF_ID_reg_inst[6:0]  ==  7'b0110111  ) ? 1'b1 : 1'b0;
+assign auipc    =   (IF_ID_reg_inst[6:0]  ==  7'b0010111  ) ? 1'b1 : 1'b0;
+assign jal      =   (IF_ID_reg_inst[6:0]  ==  7'b1101111  ) ? 1'b1 : 1'b0;
+assign jalr     =   (IF_ID_reg_inst[6:0]  ==  7'b1100111  ) ? 1'b1 : 1'b0;
 // assign addi     =   (arith_flag&(funct3==3'b000)) ? 1'b1 : 1'b0;
 assign sub      =   (R_flag&({funct3,funct7}==10'h20))?1'b1:1'b0;
 
@@ -172,11 +203,11 @@ assign sltu     =   (R_flag&({funct7,funct3}==10'h3 ))?1'b1:1'b0;
 assign sltiu    =   (arith_flag & (funct3 == 3'h3))   ?1'b1:1'b0;
 
 assign sll      =   (R_flag&({funct7,funct3}==10'h001 ))?1'b1:1'b0;
-assign slli     =   (arith_flag&({inst[31:FILLER_LEN],funct3}=='h001))?1'b1:1'b0;
+assign slli     =   (arith_flag&({IF_ID_reg_inst[31:FILLER_LEN],funct3}=='h001))?1'b1:1'b0;
 assign srl      =   (R_flag&({funct7,funct3}==10'h005 ))?1'b1:1'b0;
-assign srli     =   (arith_flag&({inst[31:FILLER_LEN],funct3}=='h005))?1'b1:1'b0;
+assign srli     =   (arith_flag&({IF_ID_reg_inst[31:FILLER_LEN],funct3}=='h005))?1'b1:1'b0;
 assign sra      =   (R_flag&({funct7,funct3}==10'h105 ))?1'b1:1'b0;
-assign srai     =   (arith_flag&({inst[31:FILLER_LEN],funct3}=='h105))?1'b1:1'b0;
+assign srai     =   (arith_flag&({IF_ID_reg_inst[31:FILLER_LEN],funct3}=='h105))?1'b1:1'b0;
 
 assign beq      =   (B_flag&(funct3==3'b000))?1'b1:1'b0;
 assign bne      =   (B_flag&(funct3==3'b001))?1'b1:1'b0;
@@ -202,29 +233,29 @@ assign csrrwi   =   (CSR_flag&(funct3==3'b101))?1'b1:1'b0;
 assign csrrsi   =   (CSR_flag&(funct3==3'b110))?1'b1:1'b0;
 assign csrrci   =   (CSR_flag&(funct3==3'b111))?1'b1:1'b0;
 
-assign mret     =   (inst ==  32'h30200073) ? 1'b1 : 1'b0;
-assign ecall    =   (inst ==  32'h00000073) ? 1'b1 : 1'b0;
-assign ebreak   =   (inst ==  32'h00100073) ? 1'b1 : 1'b0;
+assign mret     =   (IF_ID_reg_inst ==  32'h30200073) ? 1'b1 : 1'b0;
+assign ecall    =   (IF_ID_reg_inst ==  32'h00000073) ? 1'b1 : 1'b0;
+assign ebreak   =   (IF_ID_reg_inst ==  32'h00100073) ? 1'b1 : 1'b0;
 
-assign operand1 = ((csr_rw_flag)?CSR_operand1:((auipc|jalr|jal)?PC:((J_flag|jalr|lui)?32'h0:src1)));
-assign operand2 = ((csr_rw_flag)?CSR_operand2:((jalr|jal)?4:((B_flag|R_flag)?src2:imm)));
+assign operand1 = ((csr_rw_flag)?CSR_operand1:((auipc|jalr|jal)?IF_ID_reg_PC:((J_flag|lui)?32'h0:src1)));
+assign operand2 = (jalr|jal)?4:((B_flag|R_flag)?src2:imm);
 assign op       = (B_flag|is_cmp|sub);
 
-assign operand3 = (csr_rw_flag==1'b1)?csr_rdata:((jalr)?src1:PC);
-assign operand4 = (csr_rw_flag==1'b1)?0:(imm);
+assign operand3 = (jalr)?src1:IF_ID_reg_PC;
+assign operand4 = imm;
 
 assign inst_jump_flag = (B_flag);
 assign jump_without   = (jal|jalr);
 
-assign dest_wen = ((!(B_flag|S_flag|(CSR_flag&(~CSR_ren))|unusual_flag|ebreak|mret|is_load))&inst_valid&inst_ready);
+assign dest_wen = ((!(B_flag|S_flag|(CSR_flag&(~CSR_ren))|ebreak|mret)));
 
 assign is_or    = OR    |   ori |   csrrc   |   csrrci  |   csrrs   |   csrrsi;
 assign is_xor   = XOR   |   xori;
 assign is_and   = AND   |   andi;
 assign is_cmp   = slt|slti|sltiu|sltu;
 assign is_unsign= sltiu|sltu|lbu|lhu;
-assign is_store = S_flag&inst_valid;
-assign is_load  = load_flag&inst_valid;
+assign is_store = S_flag;
+assign is_load  = load_flag;
 assign is_beq   = beq;
 assign is_bne   = bne;
 assign is_blt   = blt;
@@ -236,31 +267,60 @@ assign is_half  = lh|lhu;
 assign is_word  = lw;
 assign is_shift = sll|slli|srl|srli|sra|srai;
 assign LR       = sll|slli;
-assign AL       = inst[30];
+assign AL       = IF_ID_reg_inst[30];
 
-assign control_sign = {is_store,is_load,is_bgeu,is_bge,is_bne,is_beq,is_bltu,is_blt,
+assign control_sign = {is_bgeu,is_bge,is_bne,is_beq,is_bltu,is_blt,
                         is_cmp,is_unsign,is_shift,AL,LR,is_and,is_xor,is_or};          
 // assign control_sign = {is_or,is_xor,is_and,LR,AL,is_shift,is_unsign,is_cmp,is_blt,is_bltu,
 //                         is_beq,is_bne,is_bge,is_bgeu,is_load,is_byte,is_half,is_word};
 assign  load_sign = {is_word,is_half,is_byte,is_unsign,is_load};
 assign store_sign = {sw,sh,sb,is_store};
 
-assign CSR_operand1 = (inst[14])?CSR_imm:src1;
-assign CSR_operand2 = (inst[13:12]==2'b01)?0:((inst[13:12]==2'b10)?csr_rdata:(~csr_rdata));
+assign CSR_operand1 = (IF_ID_reg_inst[14])?CSR_imm:src1;
+// assign CSR_operand2 = (IF_ID_reg_inst[13:12]==2'b01)?0:((IF_ID_reg_inst[13:12]==2'b10)?csr_rdata:(~csr_rdata));
 assign csr_rw_flag = (csrrc|csrrci|csrrw|csrrwi|csrrs|csrrsi);
-assign CSR_addr = inst[31:20];
+assign CSR_addr = IF_ID_reg_inst[31:20];
 wire csrrw_with_rd0;
 assign csrrw_with_rd0 = ((csrrw|csrrwi)&(rd==0));
-assign CSR_ren = (( ( ~csrrw_with_rd0 | unusual_flag ) & csr_rw_flag)&inst_valid&inst_ready);
+assign CSR_ren = (( ( ~csrrw_with_rd0 ) & csr_rw_flag));
 wire csrr_with_rs0,csrr_with_imm0;
 assign csrr_with_rs0 = ((rs1==0)&(csrrc|csrrs));
 assign csrr_with_imm0 = ((CSR_imm==0)&(csrrci|csrrsi));
-assign CSR_wen = (( ( ~ ( csrr_with_imm0 | csrr_with_rs0 | unusual_flag ) ) & csr_rw_flag )&inst_valid&inst_ready);
-assign csr_sign = {ecall,mret,csr_rw_flag};
+assign CSR_wen = (( ( ~ ( csrr_with_imm0 | csrr_with_rs0 ) ) & csr_rw_flag ));
+assign csr_sign = {ecall,mret};
+assign csr_wfunc = IF_ID_reg_inst[13:12];
+
+assign rs1_valid = R_flag|I_flag|S_flag|B_flag|csrrw|csrrs|csrrc;
+assign rs2_valid = R_flag|S_flag|B_flag;
 
 //temp because the idu decode but not need one cycle 
-assign inst_ready   = decode_ready;
-assign decode_valid = inst_valid;
+// assign inst_ready   = decode_ready;
+// assign decode_valid = inst_valid;
+FF_D_with_syn_rst #(1,0)           u_decode_valid    (clk,rst_n,ID_reg_decode_flush|(MON_ID_src_block_flag&EX_reg_execute_enable),ID_reg_decode_enable,IF_ID_reg_inst_valid,ID_EX_reg_decode_valid);
+FF_D_without_asyn_rst #(5)         u_rd              (clk,ID_reg_decode_enable&IF_ID_reg_inst_valid,rd,ID_EX_reg_rd);
+FF_D_without_asyn_rst #(14)        u_control_sign    (clk,ID_reg_decode_enable&IF_ID_reg_inst_valid,control_sign,ID_EX_reg_control_sign);
+FF_D_without_asyn_rst #(2)         u_csr_sign        (clk,ID_reg_decode_enable&IF_ID_reg_inst_valid,csr_sign,ID_EX_reg_csr_sign);
+FF_D_without_asyn_rst #(1)         u_inst_jump_flag  (clk,ID_reg_decode_enable&IF_ID_reg_inst_valid,inst_jump_flag,ID_EX_reg_inst_jump_flag);
+FF_D_without_asyn_rst #(1)         u_jump_without    (clk,ID_reg_decode_enable&IF_ID_reg_inst_valid,jump_without,ID_EX_reg_jump_without);
+FF_D_without_asyn_rst #(5)         u_load_sign       (clk,ID_reg_decode_enable&IF_ID_reg_inst_valid,load_sign,ID_EX_reg_load_sign);
+FF_D_without_asyn_rst #(4)         u_store_sign      (clk,ID_reg_decode_enable&IF_ID_reg_inst_valid,store_sign,ID_EX_reg_store_sign);
+FF_D_without_asyn_rst #(1)         u_ebreak          (clk,ID_reg_decode_enable&IF_ID_reg_inst_valid,ebreak,ID_EX_reg_ebreak);
+FF_D_without_asyn_rst #(1)         u_op              (clk,ID_reg_decode_enable&IF_ID_reg_inst_valid,op,ID_EX_reg_op);
+FF_D_without_asyn_rst #(1)         u_CSR_ren         (clk,ID_reg_decode_enable&IF_ID_reg_inst_valid,CSR_ren,ID_EX_reg_CSR_ren);
+FF_D_without_asyn_rst #(2)         u_CSR_wfunc       (clk,ID_reg_decode_enable&IF_ID_reg_inst_valid,csr_wfunc,ID_EX_reg_csr_wfunc);
+FF_D_without_asyn_rst #(12)        u_CSR_addr        (clk,ID_reg_decode_enable&IF_ID_reg_inst_valid,CSR_addr,ID_EX_reg_CSR_addr);
+// assign csr_ren = CSR_ren;
+FF_D_without_asyn_rst #(1)         u_CSR_wen         (clk,ID_reg_decode_enable&IF_ID_reg_inst_valid,CSR_wen,ID_EX_reg_CSR_wen);
+FF_D_without_asyn_rst #(1)         u_dest_wen        (clk,ID_reg_decode_enable&IF_ID_reg_inst_valid,dest_wen,ID_EX_reg_dest_wen);
+`ifdef SIM
+FF_D_without_asyn_rst #(32)        u_inst            (clk,ID_reg_decode_enable&IF_ID_reg_inst_valid,IF_ID_reg_inst,ID_EX_reg_inst);
+`endif
+FF_D_without_asyn_rst #(DATA_LEN)  u_PC              (clk,ID_reg_decode_enable&IF_ID_reg_inst_valid,IF_ID_reg_PC,ID_EX_reg_PC);
+FF_D_without_asyn_rst #(DATA_LEN)  u_operand1        (clk,ID_reg_decode_enable&IF_ID_reg_inst_valid,operand1,ID_EX_reg_operand1);
+FF_D_without_asyn_rst #(DATA_LEN)  u_operand2        (clk,ID_reg_decode_enable&IF_ID_reg_inst_valid,operand2,ID_EX_reg_operand2);
+FF_D_without_asyn_rst #(DATA_LEN)  u_operand3        (clk,ID_reg_decode_enable&IF_ID_reg_inst_valid,operand3,ID_EX_reg_operand3);
+FF_D_without_asyn_rst #(DATA_LEN)  u_operand4        (clk,ID_reg_decode_enable&IF_ID_reg_inst_valid,operand4,ID_EX_reg_operand4);
+FF_D_without_asyn_rst #(DATA_LEN)  u_store_data      (clk,ID_reg_decode_enable&IF_ID_reg_inst_valid,src2,ID_EX_reg_store_data);
 
 endmodule //idu
 //the channel 1 is to GPR, channel 2 is to jump_pc

@@ -1,16 +1,16 @@
 `include "define.v"
 import "DPI-C" function void halt(byte code);
 
-`ifndef HAS_AXI_BUS
+// `ifndef HAS_AXI_BUS
 
-import "DPI-C" function void Log_mem_read(int unsigned addr);
-import "DPI-C" function void Log_mem_wirte(int unsigned addr, int unsigned data,byte wmask);
-import "DPI-C" function void pmem_read(
-  input int unsigned raddr, output int unsigned rdata);
-import "DPI-C" function void pmem_write(
-  input int unsigned waddr, input int unsigned wdata, input byte wmask);
+// import "DPI-C" function void Log_mem_read(int unsigned addr);
+// import "DPI-C" function void Log_mem_wirte(int unsigned addr, int unsigned data,byte wmask);
+// import "DPI-C" function void pmem_read(
+//   input int unsigned raddr, output int unsigned rdata);
+// import "DPI-C" function void pmem_write(
+//   input int unsigned waddr, input int unsigned wdata, input byte wmask);
 
-`endif
+// `endif
 
 module monitor(
     input                   clk,
@@ -22,7 +22,9 @@ module monitor(
     // input  [DATA_LEN-1:0]   PC_out,
     // output [DATA_LEN-1:0]   inst_in,
     // output [DATA_LEN-1:0]   pre_data,
-    input                   ebreak
+    // input                   ebreak,
+    input                  LS_WB_reg_ls_valid,
+    input                  LS_WB_reg_ebreak
 );
 // wire [DATA_LEN-1:0] pre_move_data_0;
 // wire [DATA_LEN-1:0] pre_move_data_1;
@@ -36,7 +38,7 @@ module monitor(
 // assign store_mask = store_addr[1:0];
 
 always @(posedge clk ) begin
-    if(ebreak)halt(0);
+    if(LS_WB_reg_ls_valid&LS_WB_reg_ebreak)halt(0);
 end
 
 // always @(negedge clk) begin

@@ -13,4 +13,6 @@ void get_rtc();
 void get_uptime();
 uint32_t get_timer_reg(int offest);
 
+extern void set_skip_ref_flag(void);
+
 #endif

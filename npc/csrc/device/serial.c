@@ -5,5 +5,6 @@ void serial_out(word_t ch){
     // putchar(ch);
     // fflush(stdout);
     fprintf(stderr, "%c", ch);
-    difftest_skip_ref();
+    set_skip_ref_flag();
+    // difftest_skip_ref();
 }

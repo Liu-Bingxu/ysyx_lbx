@@ -2,6 +2,7 @@
 #include "pmem.h"
 
 static REGS reg;
+#define nop 0x00000013
 
 const char *regs[] = {
     "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
@@ -10,15 +11,38 @@ const char *regs[] = {
     "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
 };
 
+static const uint32_t img[] = {
+    0x00000297, // auipc t0,0
+    // nop,
+    // nop,
+    // nop,
+    // nop,
+    0x00028A23, // sb  zero,20(t0)
+    0x00100513, // addi a0,zero,1
+    0x0142c503, // lbu a0,20(t0)
+    // 0x00c0006f, // j   0x8000002c
+    // 0x00100513, // addi a0,zero,1
+    // 0x4,
+    // 0x00000513, // addi a0,zero,0
+    0x00100073, // ebreak (used as nemu_trap)
+    0xdeadbeef, // some data
+};
+
 void init_gpr(Vtop *top){
     for (int i = 0; i < 32;i++){
-        reg.GPR[i] = (&(top->rootp->top__DOT__u_regs__DOT__riscv_reg[i]));
+        reg.GPR[i] = (&(top->rootp->top__DOT__u_gpr__DOT__riscv_reg[i]));
     }
-    reg.pc = (&top->rootp->top__DOT__u_ifu__DOT__PC_to_sram_reg);
-    reg.mcause = (&top->rootp->top__DOT__u_csr__DOT__MCAUSE__DOT__data_out_reg);
-    reg.mepc = (&top->rootp->top__DOT__u_csr__DOT__MEPC__DOT__data_out_reg);
-    reg.mstatus = (&top->rootp->top__DOT__u_csr__DOT__MSTATUS__DOT__data_out_reg);
-    reg.mtvec = (&top->rootp->top__DOT__u_csr__DOT__MTVEC__DOT__data_out_reg);
+    // reg.pc = (&top->rootp->top__DOT__u_ifu__DOT__PC_to_sram_reg);
+    reg.pc = PC_RST;
+    reg.mcause = (&top->rootp->top__DOT__u_csr__DOT__u_mcause__DOT__u_mcause__DOT__data_out_reg);
+    reg.mepc = (&top->rootp->top__DOT__u_csr__DOT__u_mepc__DOT__u_mepc__DOT__data_out_reg);
+    reg.mstatus = (&top->rootp->top__DOT__u_csr__DOT__u_mstatus__DOT__RV32_mstatus_init__DOT__u_mstatus__DOT__data_out_reg);
+    reg.mtvec = (&top->rootp->top__DOT__u_csr__DOT__u_mtvec__DOT__u_mtvec__DOT__data_out_reg);
+    memcpy(guest_to_host(PC_RST), img, sizeof(img));
+}
+
+void set_pc(word_t pc){
+    reg.pc = pc;
 }
 
 word_t get_gpr(int i)
@@ -27,7 +51,7 @@ word_t get_gpr(int i)
     if (i == 0)
         return 0;
     else if (i == 32)
-        return (*(reg.pc));
+        return ((reg.pc));
     else
         return (*(reg.GPR[i]));
 }

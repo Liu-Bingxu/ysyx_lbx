@@ -36,12 +36,16 @@ static void welcome() {
 static long load_img(){
     if (img_file == NULL){
         Log("No image is given. Use the default build-in image.");
-        exit(1);
+        // exit(1);
         return 4096; // built-in image size
     }
 
     FILE *fp = fopen(img_file, "rb");
-    Assert(fp, "Can not open '%s'", img_file);
+    // Assert(fp, "Can not open '%s'", img_file);
+    if(fp==NULL){
+        Log("No image is given. Use the default build-in image.");
+        return 4096; // built-in image size
+    }
 
     fseek(fp, 0, SEEK_END);
     long size = ftell(fp);
@@ -81,6 +85,7 @@ static void parse_args(int argc,char *argv[]){
             break;
         case 'l':
             log_file = optarg;
+            printf(ANSI_FMT("%s is log file\n", ANSI_FG_GREEN),log_file);
             break;
         case 'd':
             diff_so_file = optarg;
@@ -117,6 +122,7 @@ void init_monitor(Vtop *top, VerilatedVcdC *tfp, int argc, char *argv[]){
     init_sdb();
     init_disasm(MUXDEF(CONFIG_RV64, "riscv64", "riscv32") "-pc-linux-gnu");
     IFDEF(CONFIG_VCD_GET, tfp->open(wave_file));
+    // Log(ANSI_FMT("Hello\n", ANSI_FG_GREEN));
     sim_rst();
     // isa_reg_display();
     init_difftest(diff_so_file, img_size, difftest_port);

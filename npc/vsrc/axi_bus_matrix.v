@@ -99,3 +99,55 @@ assign lsu_bvalid = sram_bvalid;
 assign lsu_bresp = sram_bresp;
 
 endmodule //axi_bus_matrix
+
+/* verilator lint_off DECLFILENAME */
+module axi_arbiter#(parameter ARBITARTE_NUM=2)(
+    input                       clk,
+    input                       rst_n,
+    input   [ARBITARTE_NUM-1:0] avalid,
+    input   [ARBITARTE_NUM-1:0] valid,
+    input   [ARBITARTE_NUM-1:0] ready,
+    output  [ARBITARTE_NUM-1:0] sel
+);
+
+
+wire [ARBITARTE_NUM-1:0] sel_cascade;
+wire [ARBITARTE_NUM-2:0] sel_cascade_mask;
+genvar i;
+generate for(i = 0 ; i < ARBITARTE_NUM ; i = i + 1 )begin: sel_cascade_module
+    if(i==0)begin
+        assign sel_cascade[i] = avalid[i];
+        assign sel_cascade_mask[i] = (~avalid[i]);
+    end
+    else if(i==(ARBITARTE_NUM-1))begin
+        assign sel_cascade[i] = avalid[i]&sel_cascade_mask[i-1];
+    end
+    else begin
+        assign sel_cascade[i] = avalid[i]&sel_cascade_mask[i-1];
+        assign sel_cascade_mask[i] = (~avalid[i])&sel_cascade_mask[i];
+    end
+end
+endgenerate
+wire [ARBITARTE_NUM-1:0]    result;
+assign result = valid&ready;
+reg [ARBITARTE_NUM-1:0] sel_reg;
+always @(posedge clk or negedge rst_n) begin
+    if(!rst_n)begin
+        sel_reg<=0;
+    end
+    else begin
+        if(sel!=0)begin
+            if((sel&result)!=0)begin
+                sel_reg<=sel_cascade;
+            end
+        end
+        else begin
+            if(avalid!=0)begin
+                sel_reg<=sel_cascade;
+            end
+        end
+    end
+end
+assign sel = sel_reg;
+
+endmodule //axi_arbiter

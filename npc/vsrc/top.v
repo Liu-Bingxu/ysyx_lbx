@@ -6,20 +6,15 @@ module top#(parameter DATA_LEN=32) (
 `ifdef HAS_ICACHE
     output [1:0]            ifu_addr_offset,
 `endif
-// `ifdef HAS_DCACHE
-//     output [1:0]            lsu_read_addr_offset,
-//     output [1:0]            lsu_write_addr_offset,
-// `endif
+`ifdef SIM
+    output [DATA_LEN-1:0]     LS_WB_reg_PC,
+    output [31:0]             LS_WB_reg_inst,
+`endif
     input                   sys_clk,
     input                   sys_rst_n
-    // input  [DATA_LEN-1:0]   inst_in,
-    // output [DATA_LEN-1:0]   PC_out
 );
 
 localparam DATA_STROB_LEN = DATA_LEN/8;
-
-// wire [DATA_LEN-1:0] PC_out;
-wire [DATA_LEN-1:0] inst_in;
 
 reg  rst_n_s1, rst_n_s2;
 wire rst_n;
@@ -35,61 +30,69 @@ always @ (posedge sys_clk or negedge sys_rst_n) begin
 end
 assign rst_n = rst_n_s2;
 
-wire [DATA_LEN-1:0] 	src1;
-wire [DATA_LEN-1:0] 	src2;
-
-wire [4:0]  	        rs1;
-wire [4:0]  	        rs2;
-wire [4:0]  	        rd;
-wire [DATA_LEN-1:0] 	operand1;
-wire [DATA_LEN-1:0] 	operand2;
-wire [DATA_LEN-1:0] 	operand3;
-wire [DATA_LEN-1:0] 	operand4;
-wire [15:0]         	control_sign;
-wire [3:0]          	store_sign;
-wire                	inst_jump_flag;
-wire                    jump_without;
-wire                	ebreak;
-wire                	op;
-wire [11:0]         	CSR_addr;
-wire [2:0]          	csr_sign;
-wire                	CSR_ren;
-wire                	CSR_wen;
-wire                	inst_ready;
-wire                	decode_valid;
-wire [4:0]          	load_sign;
-
-// wire [DATA_LEN-1:0] 	PC_S;
-// wire [DATA_LEN-1:0] 	PC_D;
-wire [DATA_LEN-1:0] 	PC_now;
-wire [DATA_LEN-1:0] 	inst_fetch;
-wire [2:0]              ifu_rresp;
-wire                    ifu_arready;
-wire                    ifu_rvalid;
+// ifu outports wire
 wire                	ifu_arvalid;
-wire [DATA_LEN-1:0] 	PC_to_sram;
+wire [DATA_LEN-1:0] 	ifu_raddr;
 wire                	ifu_rready;
-wire                	inst_valid;
+wire                	IF_ID_reg_inst_valid;
+wire [DATA_LEN-1:0] 	IF_ID_reg_inst;
+wire [DATA_LEN-1:0] 	IF_ID_reg_PC;
 
-wire                	dest_wen;
-wire                	Jump_flag;
-wire [DATA_LEN-1:0] 	dest_data;
-wire [DATA_LEN-1:0] 	Jump_PC;
-wire [DATA_LEN-1:0] 	addr_load;
-// wire [DATA_LEN-1:0]     pre_data;
-wire [DATA_LEN-1:0]     csr_wdata;
-wire [DATA_LEN-1:0]     cause;
-wire                	unusual_flag;
+// idu outports wire
+wire                	ID_EX_reg_decode_valid;
+wire [4:0]          	rs1;
+wire [4:0]          	rs2;
+wire                    rs1_valid;
+wire                    rs2_valid;
+wire [4:0]          	ID_EX_reg_rd;
+wire [1:0]          	ID_EX_reg_csr_wfunc;
+wire [11:0]             ID_EX_reg_CSR_addr;
+wire [DATA_LEN-1:0] 	ID_EX_reg_operand1;
+wire [DATA_LEN-1:0] 	ID_EX_reg_operand2;
+wire [DATA_LEN-1:0] 	ID_EX_reg_operand3;
+wire [DATA_LEN-1:0] 	ID_EX_reg_operand4;
+wire [DATA_LEN-1:0] 	ID_EX_reg_store_data;
+wire [13:0]         	ID_EX_reg_control_sign;
+wire [1:0]          	ID_EX_reg_csr_sign;
+wire                	ID_EX_reg_inst_jump_flag;
+wire                	ID_EX_reg_jump_without;
+wire [4:0]          	ID_EX_reg_load_sign;
+wire [3:0]          	ID_EX_reg_store_sign;
+wire                	ID_EX_reg_ebreak;
+wire                	ID_EX_reg_op;
+wire                	ID_EX_reg_CSR_ren;
+wire                	ID_EX_reg_CSR_wen;
+wire                	ID_EX_reg_dest_wen;
+`ifdef SIM
+wire [DATA_LEN-1:0]     ID_EX_reg_PC  ;
+wire [31:0]             ID_EX_reg_inst;
+`endif
 
-wire                	decode_ready;
-wire                	ls_ready;
-wire [DATA_LEN-1:0] 	csr_rdata;
-wire [DATA_LEN-1:0] 	mepc;
-wire [DATA_LEN-1:0] 	mtvec;
+// exu outports wire
+wire                	EX_MON_reg_Jump_flag;
+wire [DATA_LEN-1:0] 	EX_IF_reg_Jump_PC;
+wire                	EX_LS_reg_execute_valid;
+wire [DATA_LEN-1:0] 	EX_LS_reg_dest_data;
+wire [DATA_LEN-1:0] 	EX_LS_reg_csr_wdata;
+wire [DATA_LEN-1:0] 	EX_LS_reg_addr_load;
+wire [DATA_LEN-1:0] 	EX_LS_reg_store_data;
+wire [DATA_LEN-1:0]     EX_LS_reg_cause;
+wire                    EX_LS_reg_unusual_flag;
+wire [4:0]          	EX_LS_reg_rd;
+wire [1:0]          	EX_LS_reg_csr_wfunc;
+wire [11:0]             EX_LS_reg_CSR_addr;
+wire [4:0]          	EX_LS_reg_load_sign;
+wire [3:0]          	EX_LS_reg_store_sign;
+wire                	EX_LS_reg_ebreak;
+wire                	EX_LS_reg_CSR_wen;
+wire                	EX_LS_reg_CSR_ren;
+wire                	EX_LS_reg_dest_wen;
+`ifdef SIM
+wire [DATA_LEN-1:0]     EX_LS_reg_PC  ;
+wire [31:0]             EX_LS_reg_inst;
+`endif
 
-wire                    	ls_valid;
-wire [DATA_LEN-1:0]     	load_data;
-wire                    	load_wen;
+// lsu outports wire
 wire                    	lsu_awvalid;
 wire [DATA_LEN-1:0]     	lsu_waddr;
 wire                    	lsu_wvalid;
@@ -99,6 +102,47 @@ wire                    	lsu_bready;
 wire                    	lsu_arvalid;
 wire [DATA_LEN-1:0]     	lsu_raddr;
 wire                    	lsu_rready;
+wire                    	LS_WB_reg_ls_valid;
+wire                        LS_MON_ls_valid;
+wire [DATA_LEN-1:0]     	LS_WB_reg_dest_data;
+wire [DATA_LEN-1:0]     	LS_WB_reg_csr_wdata;
+wire [4:0]              	LS_WB_reg_rd;
+wire [1:0]              	LS_WB_reg_csr_wfunc;
+wire [11:0]                 LS_WB_reg_CSR_addr;
+wire                    	LS_WB_reg_ebreak;
+wire [DATA_LEN-1:0]         LS_WB_reg_cause;
+wire                        LS_WB_reg_unusual_flag;
+wire                    	LS_WB_reg_CSR_wen;
+wire                	    LS_WB_reg_CSR_ren;
+wire                    	LS_WB_reg_dest_wen;
+
+// gpr outports wire
+wire [DATA_LEN-1:0] 	src1;
+wire [DATA_LEN-1:0] 	src2;
+
+// csr outports wire
+wire [DATA_LEN-1:0] 	csr_rdata;
+wire [DATA_LEN-1:0] 	mepc;
+wire [DATA_LEN-1:0] 	mtvec;
+
+//block monitor output wire
+wire IF_reg_inst_enable;
+wire ID_reg_decode_enable;
+wire EX_reg_execute_enable;
+wire LS_reg_load_store_enable;
+wire IF_reg_inst_flush;
+wire ID_reg_decode_flush;
+wire src1_bypass_flag;
+wire src2_bypass_flag;
+wire MON_ID_src_block_flag;
+
+//ifu sram output wire
+wire [2:0]              ifu_rresp;
+wire                    ifu_arready;
+wire                    ifu_rvalid;
+wire [DATA_LEN-1:0]     ifu_rdata;
+
+//lsu sram output wire
 wire [2:0]                  lsu_bresp;
 wire [2:0]                  lsu_rresp;
 wire [DATA_LEN-1:0]         lsu_rdata;
@@ -156,168 +200,261 @@ wire [2:0]                  sram_bresp;
 
 `endif
 
-// assign PC_out = PC_now;
-
-regs #(DATA_LEN)u_regs(
-    .clk       	( sys_clk               ),
-    .rst_n     	( rst_n                 ),
-    .dest_wen  	( dest_wen|load_wen     ),
-    .rs1       	( rs1                   ),
-    .rs2       	( rs2                   ),
-    .rd        	( rd                    ),
-    .dest_data 	( dest_data             ),
-    .src1      	( src1                  ),
-    .src2      	( src2                  )
+ifu u_ifu(
+    .clk                  	( sys_clk               ),
+    .rst_n                	( rst_n                 ),
+    .IF_reg_inst_flush      ( IF_reg_inst_flush     ),
+    .EX_IF_reg_Jump_PC    	( EX_IF_reg_Jump_PC     ),
+    .ifu_arvalid          	( ifu_arvalid           ),
+    .ifu_arready          	( ifu_arready           ),
+    .ifu_raddr            	( ifu_raddr             ),
+    .ifu_rdata            	( ifu_rdata             ),
+    .ifu_rvalid           	( ifu_rvalid            ),
+    .ifu_rresp            	( ifu_rresp             ),
+    .ifu_rready           	( ifu_rready            ),
+    .IF_ID_reg_inst_valid 	( IF_ID_reg_inst_valid  ),
+    .IF_reg_inst_enable   	( IF_reg_inst_enable    ),
+    .IF_ID_reg_inst 	    ( IF_ID_reg_inst        ),
+    .IF_ID_reg_PC     	    ( IF_ID_reg_PC          )
 );
 
-csr #(DATA_LEN)u_csr(
-    .clk          	( sys_clk       ),
-    .rst_n        	( rst_n         ),
-    .wen          	( CSR_wen       ),
-    .ren          	( CSR_ren       ),
-    .unusual_flag 	( unusual_flag  ),
-    .inst_valid     ( inst_valid    ),
-    .addr         	( CSR_addr      ),
-    .wdata        	( csr_wdata     ),
-    .PC           	( PC_now        ),
-    .cause        	( cause         ),
-    .rdata        	( csr_rdata     ),
-    .mepc           ( mepc          ),
-    .mtvec          ( mtvec         )
-);
-
+wire [DATA_LEN-1:0] dest_data_bypass;
+wire [DATA_LEN-1:0] decode_get_src1;
+wire [DATA_LEN-1:0] decode_get_src2;
+assign decode_get_src1 = (src1_bypass_flag)?dest_data_bypass:src1;
+assign decode_get_src2 = (src2_bypass_flag)?dest_data_bypass:src2;
 
 idu #(DATA_LEN)u_idu(
-    // .clk      	    ( sys_clk           ),
-    // .rst_n    	    ( rst_n             ),
-    .unusual_flag   ( unusual_flag      ),
-    .inst    	    ( inst_fetch        ),
-    .src1     	    ( src1              ),
-    .src2     	    ( src2              ),
-    // .PC             ( PC_S              ),
-    .PC             ( PC_now            ),
-    .inst_valid     ( inst_valid        ),
-    .inst_ready     ( inst_ready        ),
-    .decode_valid   ( decode_valid      ),
-    .decode_ready   ( decode_ready      ),
-    .rs1      	    ( rs1               ),
-    .rs2      	    ( rs2               ),
-    .rd       	    ( rd                ),
-    .csr_rdata      ( csr_rdata         ),
-    .CSR_addr       ( CSR_addr          ),
-    .operand1 	    ( operand1          ),
-    .operand2 	    ( operand2          ),
-    .operand3       ( operand3          ),
-    .operand4       ( operand4          ),
-    .control_sign   ( control_sign      ),
-    .csr_sign       ( csr_sign          ),
-    .inst_jump_flag ( inst_jump_flag    ),
-    .jump_without   ( jump_without      ),
-    .load_sign      ( load_sign         ),
-    .store_sign     ( store_sign        ),
-    .ebreak         ( ebreak            ),
-    .CSR_ren        ( CSR_ren           ),
-    .CSR_wen        ( CSR_wen           ),
-    .dest_wen       ( dest_wen          ),
-    .op             ( op                )
-);
-
-ifu #(DATA_LEN)u_ifu(
-    .clk        	( sys_clk     ),
-    .rst_n      	( rst_n       ),
-    .Jump_flag  	( Jump_flag   ),
-    .Jump_PC    	( Jump_PC     ),
-    .arvalid    	( ifu_arvalid ),
-    .arready    	( ifu_arready ),
-    .PC_to_sram 	( PC_to_sram  ),
-    .inst_in    	( inst_in     ),
-    .rvalid     	( ifu_rvalid  ),
-    .rresp      	( ifu_rresp   ),
-    .rready     	( ifu_rready  ),
-    .inst_valid 	( inst_valid  ),
-    .inst_ready 	( inst_ready  ),
-    // .PC_S       	( PC_S        ),
-    // .PC_D       	( PC_D        ),
-    .PC_now     	( PC_now      ),
-    .inst_fetch 	( inst_fetch  )
+    .clk                      	( sys_clk                   ),
+    .rst_n                    	( rst_n                     ),
+    .IF_ID_reg_inst           	( IF_ID_reg_inst            ),
+    .IF_ID_reg_PC             	( IF_ID_reg_PC              ),
+`ifdef SIM
+    .ID_EX_reg_PC               ( ID_EX_reg_PC              ),
+    .ID_EX_reg_inst             ( ID_EX_reg_inst            ),
+`endif
+    .IF_ID_reg_inst_valid     	( IF_ID_reg_inst_valid      ),
+    .MON_ID_src_block_flag      ( MON_ID_src_block_flag     ),
+    .ID_EX_reg_decode_valid   	( ID_EX_reg_decode_valid    ),
+    .ID_reg_decode_enable     	( ID_reg_decode_enable      ),
+    .EX_reg_execute_enable      ( EX_reg_execute_enable     ),
+    .ID_reg_decode_flush        ( ID_reg_decode_flush       ),
+    .src1                     	( decode_get_src1           ),
+    .src2                     	( decode_get_src2           ),
+    .rs1                      	( rs1                       ),
+    .rs2                      	( rs2                       ),
+    .rs1_valid                  ( rs1_valid                 ),
+    .rs2_valid                  ( rs2_valid                 ),
+    .ID_EX_reg_rd             	( ID_EX_reg_rd              ),
+    .ID_EX_reg_csr_wfunc      	( ID_EX_reg_csr_wfunc       ),
+    .ID_EX_reg_CSR_addr         ( ID_EX_reg_CSR_addr        ),
+    .ID_EX_reg_operand1       	( ID_EX_reg_operand1        ),
+    .ID_EX_reg_operand2       	( ID_EX_reg_operand2        ),
+    .ID_EX_reg_operand3       	( ID_EX_reg_operand3        ),
+    .ID_EX_reg_operand4       	( ID_EX_reg_operand4        ),
+    .ID_EX_reg_store_data     	( ID_EX_reg_store_data      ),
+    .ID_EX_reg_control_sign   	( ID_EX_reg_control_sign    ),
+    .ID_EX_reg_csr_sign       	( ID_EX_reg_csr_sign        ),
+    .ID_EX_reg_inst_jump_flag 	( ID_EX_reg_inst_jump_flag  ),
+    .ID_EX_reg_jump_without   	( ID_EX_reg_jump_without    ),
+    .ID_EX_reg_load_sign      	( ID_EX_reg_load_sign       ),
+    .ID_EX_reg_store_sign     	( ID_EX_reg_store_sign      ),
+    .ID_EX_reg_ebreak         	( ID_EX_reg_ebreak          ),
+    .ID_EX_reg_op             	( ID_EX_reg_op              ),
+    .ID_EX_reg_CSR_ren       	( ID_EX_reg_CSR_ren         ),
+    .ID_EX_reg_CSR_wen        	( ID_EX_reg_CSR_wen         ),
+    .ID_EX_reg_dest_wen       	( ID_EX_reg_dest_wen        )
 );
 
 exu #(DATA_LEN)u_exu(
-    // .clk                ( sys_clk           ),
-    // .rst_n              ( rst_n             ),
-    .decode_valid   	( decode_valid      ),
-    .decode_ready   	( decode_ready      ),
-    .operand1  	        ( operand1          ),
-    .operand2  	        ( operand2          ),
-    .operand3       	( operand3          ),
-    .operand4       	( operand4          ),
-    .mepc           	( mepc              ),
-    .mtvec          	( mtvec             ),
-    .op             	( op                ),
-    .csr_sign       	( csr_sign          ),
-    .inst_jump_flag 	( inst_jump_flag    ),
-    .jump_without       ( jump_without      ),
-    .Jump_flag 	        ( Jump_flag         ),
-    .addr_load      	( addr_load         ),
-    .ls_valid       	( ls_valid          ),
-    .ls_ready       	( ls_ready          ),
-    .load_data      	( load_data         ),
-    .Control_signal 	( control_sign      ),
-    // .pre_data       	( pre_data          ),
-    .unusual_flag   	( unusual_flag      ),
-    .dest_data 	        ( dest_data         ),
-    .Jump_PC   	        ( Jump_PC           ),
-    .csr_wdata          ( csr_wdata         ),
-    .cause              ( cause             )
+    .clk                      	( sys_clk                   ),
+    .rst_n                    	( rst_n                     ),
+    .mepc                     	( mepc                      ),
+    .mtvec                    	( mtvec                     ),
+    // .unusual_flag             	( unusual_flag              ),
+    // .cause                    	( cause                     ),
+    .ID_EX_reg_decode_valid   	( ID_EX_reg_decode_valid    ),
+    .ID_EX_reg_rd             	( ID_EX_reg_rd              ),
+    .ID_EX_reg_csr_wfunc      	( ID_EX_reg_csr_wfunc       ),
+    .ID_EX_reg_CSR_addr         ( ID_EX_reg_CSR_addr        ),
+`ifdef SIM
+    .ID_EX_reg_PC               ( ID_EX_reg_PC              ),
+    .EX_LS_reg_PC               ( EX_LS_reg_PC              ),
+    .ID_EX_reg_inst             ( ID_EX_reg_inst            ),
+    .EX_LS_reg_inst             ( EX_LS_reg_inst            ),
+`endif
+    .ID_EX_reg_operand1       	( ID_EX_reg_operand1        ),
+    .ID_EX_reg_operand2       	( ID_EX_reg_operand2        ),
+    .ID_EX_reg_operand3       	( ID_EX_reg_operand3        ),
+    .ID_EX_reg_operand4       	( ID_EX_reg_operand4        ),
+    .ID_EX_reg_store_data     	( ID_EX_reg_store_data      ),
+    .ID_EX_reg_control_sign   	( ID_EX_reg_control_sign    ),
+    .ID_EX_reg_csr_sign       	( ID_EX_reg_csr_sign        ),
+    .ID_EX_reg_inst_jump_flag 	( ID_EX_reg_inst_jump_flag  ),
+    .ID_EX_reg_jump_without   	( ID_EX_reg_jump_without    ),
+    .ID_EX_reg_op             	( ID_EX_reg_op              ),
+    .ID_EX_reg_load_sign      	( ID_EX_reg_load_sign       ),
+    .ID_EX_reg_store_sign     	( ID_EX_reg_store_sign      ),
+    .ID_EX_reg_ebreak         	( ID_EX_reg_ebreak          ),
+    .ID_EX_reg_CSR_wen        	( ID_EX_reg_CSR_wen         ),
+    .ID_EX_reg_CSR_ren       	( ID_EX_reg_CSR_ren         ),
+    .ID_EX_reg_dest_wen       	( ID_EX_reg_dest_wen        ),
+    .EX_MON_reg_Jump_flag      	( EX_MON_reg_Jump_flag      ),
+    .EX_IF_reg_Jump_PC        	( EX_IF_reg_Jump_PC         ),
+    .EX_LS_reg_execute_valid  	( EX_LS_reg_execute_valid   ),
+    .EX_reg_execute_enable    	( EX_reg_execute_enable     ),
+    .EX_LS_reg_dest_data      	( EX_LS_reg_dest_data       ),
+    .EX_LS_reg_csr_wdata      	( EX_LS_reg_csr_wdata       ),
+    .EX_LS_reg_addr_load      	( EX_LS_reg_addr_load       ),
+    .EX_LS_reg_store_data     	( EX_LS_reg_store_data      ),
+    .EX_LS_reg_rd             	( EX_LS_reg_rd              ),
+    .EX_LS_reg_csr_wfunc      	( EX_LS_reg_csr_wfunc       ),
+    .EX_LS_reg_CSR_addr         ( EX_LS_reg_CSR_addr        ),
+    .EX_LS_reg_load_sign      	( EX_LS_reg_load_sign       ),
+    .EX_LS_reg_store_sign     	( EX_LS_reg_store_sign      ),
+    .EX_LS_reg_ebreak         	( EX_LS_reg_ebreak          ),
+    .EX_LS_reg_unusual_flag     ( EX_LS_reg_unusual_flag    ),
+    .EX_LS_reg_cause            ( EX_LS_reg_cause           ),
+    .EX_LS_reg_CSR_wen        	( EX_LS_reg_CSR_wen         ),
+    .EX_LS_reg_CSR_ren       	( EX_LS_reg_CSR_ren         ),
+    .EX_LS_reg_dest_wen       	( EX_LS_reg_dest_wen        )
 );
+
 localparam  DATA_BIT_NUM = DATA_LEN/8;
 
-lsu_rv32 #(DATA_LEN,DATA_BIT_NUM)u_lsu(
-    .clk        	( sys_clk           ),
-    .rst_n      	( rst_n             ),
-    .ls_valid   	( ls_valid          ),
-    .ls_ready   	( ls_ready          ),
-    .load_sign  	( load_sign         ),
-    .store_sign 	( store_sign        ),
-    .load_data  	( load_data         ),
-    .load_wen   	( load_wen          ),
-    .awvalid    	( lsu_awvalid       ),
-    .awready    	( lsu_awready       ),
-    .waddr      	( lsu_waddr         ),
-    .store_addr 	( dest_data         ),
-    .wvalid     	( lsu_wvalid        ),
-    .wready     	( lsu_wready        ),
-    .wstrob     	( lsu_wstrob        ),
-    .wdata      	( lsu_wdata         ),
-    .store_data 	( src2              ),
-    .bvalid     	( lsu_bvalid        ),
-    .bready     	( lsu_bready        ),
-    .bresp      	( lsu_bresp         ),
-    .arvalid    	( lsu_arvalid       ),
-    .arready    	( lsu_arready       ),
-    .raddr      	( lsu_raddr         ),
-    .addr_load  	( addr_load         ),
-    .rvalid     	( lsu_rvalid        ),
-    .rresp      	( lsu_rresp         ),
-    .rready     	( lsu_rready        ),
-    .pre_data   	( lsu_rdata         )
+lsu_rv32 #(DATA_LEN,DATA_BIT_NUM)u_lsu_rv32(
+    .clk                     	( sys_clk                  ),
+    .rst_n                   	( rst_n                    ),
+    .lsu_awvalid             	( lsu_awvalid              ),
+    .lsu_awready             	( lsu_awready              ),
+    .lsu_waddr               	( lsu_waddr                ),
+    .lsu_wvalid              	( lsu_wvalid               ),
+    .lsu_wready              	( lsu_wready               ),
+    .lsu_wstrob              	( lsu_wstrob               ),
+    .lsu_wdata               	( lsu_wdata                ),
+    .lsu_bvalid              	( lsu_bvalid               ),
+    .lsu_bready              	( lsu_bready               ),
+    .lsu_bresp               	( lsu_bresp                ),
+    .lsu_arvalid             	( lsu_arvalid              ),
+    .lsu_arready             	( lsu_arready              ),
+    .lsu_raddr               	( lsu_raddr                ),
+    .lsu_rvalid              	( lsu_rvalid               ),
+    .lsu_rresp               	( lsu_rresp                ),
+    .lsu_rready              	( lsu_rready               ),
+    .lsu_rdata               	( lsu_rdata                ),
+    .EX_LS_reg_execute_valid 	( EX_LS_reg_execute_valid  ),
+    .EX_LS_reg_dest_data     	( EX_LS_reg_dest_data      ),
+    .EX_LS_reg_csr_wdata     	( EX_LS_reg_csr_wdata      ),
+    .EX_LS_reg_addr_load     	( EX_LS_reg_addr_load      ),
+    .EX_LS_reg_store_data    	( EX_LS_reg_store_data     ),
+    .EX_LS_reg_rd            	( EX_LS_reg_rd             ),
+    .EX_LS_reg_csr_wfunc     	( EX_LS_reg_csr_wfunc      ),
+    .EX_LS_reg_CSR_addr         ( EX_LS_reg_CSR_addr       ),
+    .EX_LS_reg_load_sign     	( EX_LS_reg_load_sign      ),
+    .EX_LS_reg_store_sign    	( EX_LS_reg_store_sign     ),
+    .EX_LS_reg_ebreak        	( EX_LS_reg_ebreak         ),
+    .EX_LS_reg_unusual_flag     ( EX_LS_reg_unusual_flag   ),
+    .EX_LS_reg_cause            ( EX_LS_reg_cause          ),
+    .EX_LS_reg_CSR_wen       	( EX_LS_reg_CSR_wen        ),
+    .EX_LS_reg_CSR_ren       	( EX_LS_reg_CSR_ren        ),
+    .EX_LS_reg_dest_wen      	( EX_LS_reg_dest_wen       ),
+    .LS_WB_reg_ls_valid      	( LS_WB_reg_ls_valid       ),
+    .LS_MON_ls_valid            ( LS_MON_ls_valid          ),
+    .LS_reg_load_store_enable   ( LS_reg_load_store_enable ),
+`ifdef SIM
+    .EX_LS_reg_PC               ( EX_LS_reg_PC              ),
+    .LS_WB_reg_PC               ( LS_WB_reg_PC              ),
+    .EX_LS_reg_inst             ( EX_LS_reg_inst            ),
+    .LS_WB_reg_inst             ( LS_WB_reg_inst            ),
+`endif
+    .LS_WB_reg_dest_data     	( LS_WB_reg_dest_data      ),
+    .LS_WB_reg_csr_wdata     	( LS_WB_reg_csr_wdata      ),
+    .LS_WB_reg_rd            	( LS_WB_reg_rd             ),
+    .LS_WB_reg_csr_wfunc     	( LS_WB_reg_csr_wfunc      ),
+    .LS_WB_reg_CSR_addr         ( LS_WB_reg_CSR_addr       ),
+    .LS_WB_reg_ebreak        	( LS_WB_reg_ebreak         ),
+    .LS_WB_reg_unusual_flag     ( LS_WB_reg_unusual_flag   ),
+    .LS_WB_reg_cause            ( LS_WB_reg_cause          ),
+    .LS_WB_reg_CSR_wen       	( LS_WB_reg_CSR_wen        ),
+    .LS_WB_reg_CSR_ren       	( LS_WB_reg_CSR_ren        ),
+    .LS_WB_reg_dest_wen      	( LS_WB_reg_dest_wen       )
 );
 
+
+wire [DATA_LEN-1:0] dest_data;
+assign dest_data = (LS_WB_reg_CSR_ren)?csr_rdata:LS_WB_reg_dest_data;
+assign dest_data_bypass = dest_data;
+gpr #(DATA_LEN)u_gpr(
+    .clk                 	( sys_clk              ),
+    .rst_n               	( rst_n                ),
+    .rs1                 	( rs1                  ),
+    .rs2                 	( rs2                  ),
+    .src1                	( src1                 ),
+    .src2                	( src2                 ),
+    .LS_WB_reg_ls_valid  	( LS_WB_reg_ls_valid   ),
+    .LS_WB_reg_dest_data 	( dest_data            ),
+    .LS_WB_reg_rd        	( LS_WB_reg_rd         ),
+    .LS_WB_reg_dest_wen  	( LS_WB_reg_dest_wen   )
+);
+
+csr #(DATA_LEN)u_csr(
+    .clk                 	( sys_clk               ),
+    .rst_n               	( rst_n                 ),
+    // .unusual_flag        	( unusual_flag         ),
+    // .PC                  	( {DATA_LEN{1'b0}}     ),
+    // .cause               	( cause                ),
+    .LS_WB_reg_unusual_flag ( LS_WB_reg_unusual_flag),
+    .LS_WB_reg_PC           ( LS_WB_reg_PC          ),
+    .LS_WB_reg_cause        ( LS_WB_reg_cause       ),
+    .csr_rdata            	( csr_rdata             ),
+    .mepc                	( mepc                  ),
+    .mtvec               	( mtvec                 ),
+    .LS_WB_reg_CSR_addr     ( LS_WB_reg_CSR_addr    ),
+    .LS_WB_reg_CSR_ren  	( LS_WB_reg_CSR_ren     ),
+    .LS_WB_reg_ls_valid  	( LS_WB_reg_ls_valid    ),
+    .LS_WB_reg_csr_wdata 	( LS_WB_reg_csr_wdata   ),
+    .LS_WB_reg_csr_wfunc 	( LS_WB_reg_csr_wfunc   ),
+    .LS_WB_reg_CSR_wen   	( LS_WB_reg_CSR_wen     )
+);
 
 monitor u_monitor(
-    .clk        	( sys_clk           ),
-    // .store_sign 	( store_sign        ),
-    // .store_addr 	( dest_data         ),
-    // .store_data 	( src2              ),
-    // .addr_load  	( addr_load         ),
-    // .PC_out     	( PC_out            ),
-    // .inst_in    	( inst_in           ),
-    // .pre_data   	( pre_data          ),
-    // .is_load        ( control_sign[14]  ),
-    .ebreak     	( ebreak            )
+    .clk                	( sys_clk             ),
+    .LS_WB_reg_ls_valid 	( LS_WB_reg_ls_valid  ),
+    .LS_WB_reg_ebreak   	( LS_WB_reg_ebreak    )
 );
+
+block_monitor u_block_monitor(
+    .rs1                        ( rs1                        ),
+    .rs2                        ( rs2                        ),
+    .rs1_valid                  ( rs1_valid                  ),
+    .rs2_valid                  ( rs2_valid                  ),
+    .ID_EX_reg_rd               ( ID_EX_reg_rd               ),
+    .ID_EX_reg_dest_wen         ( ID_EX_reg_dest_wen         ),
+    .EX_LS_reg_rd               ( EX_LS_reg_rd               ),
+    .EX_LS_reg_dest_wen         ( EX_LS_reg_dest_wen         ),
+    .LS_WB_reg_rd               ( LS_WB_reg_rd               ),
+    .LS_WB_reg_dest_wen         ( LS_WB_reg_dest_wen         ),
+    .EX_MON_reg_Jump_flag       ( EX_MON_reg_Jump_flag       ),
+    .IF_ID_reg_inst_valid 	    ( IF_ID_reg_inst_valid       ),
+    .ID_EX_reg_decode_valid   	( ID_EX_reg_decode_valid     ),
+    .EX_LS_reg_execute_valid   	( EX_LS_reg_execute_valid    ),
+    .LS_WB_reg_ls_valid         ( LS_WB_reg_ls_valid         ),
+    .EX_LS_reg_load_sign_flag  	( EX_LS_reg_load_sign[0]     ),
+    .EX_LS_reg_store_sign_flag 	( EX_LS_reg_store_sign[0]    ),
+    .LS_MON_ls_valid           	( LS_MON_ls_valid            ),
+    .IF_reg_inst_enable        	( IF_reg_inst_enable         ),
+    .ID_reg_decode_enable      	( ID_reg_decode_enable       ),
+    .EX_reg_execute_enable     	( EX_reg_execute_enable      ),
+    .LS_reg_load_store_enable  	( LS_reg_load_store_enable   ),
+    .IF_reg_inst_flush          ( IF_reg_inst_flush          ),
+    .ID_reg_decode_flush        ( ID_reg_decode_flush        ),
+    .src1_bypass_flag           ( src1_bypass_flag           ),
+    .src2_bypass_flag           ( src2_bypass_flag           ),
+    .MON_ID_src_block_flag      ( MON_ID_src_block_flag      )
+);
+
+
 `ifndef HAS_AXI_BUS_ARBITER
-// localparam DATA_STROB_LEN = DATA_LEN/8;
 wire ifu_awready,ifu_wready,ifu_bvalid;
 wire [2:0]  ifu_bresp;
 assign unuse = ifu_awready&ifu_wready&ifu_bvalid&(ifu_bresp==3'b000);
@@ -334,7 +471,6 @@ sram #(DATA_LEN,DATA_STROB_LEN,DATA_LEN)ifu_sram(
     .bvalid  	( ifu_bvalid                ),
     .bready  	( 1'b0                      ),
     .bresp   	( ifu_bresp                 ),
-
     .arvalid 	( icache_arvalid            ),
     .arready 	( icache_arready            ),
     .raddr   	( icache_raddr              ),
@@ -444,10 +580,10 @@ icache #(4,1,DATA_LEN)u_icache(
     .rst_n          	( rst_n                     ),
     .ifu_arvalid    	( ifu_arvalid               ),
     .ifu_arready    	( ifu_arready               ),
-    .ifu_raddr      	( PC_to_sram[DATA_LEN-1:2]  ),
+    .ifu_raddr      	( ifu_raddr[DATA_LEN-1:2]   ),
     .ifu_rvalid     	( ifu_rvalid                ),
     .ifu_rready     	( ifu_rready                ),
-    .ifu_rdata      	( inst_in                   ),
+    .ifu_rdata      	( ifu_rdata                 ),
     .ifu_rresp      	( ifu_rresp                 ),
     .icache_arvalid 	( icache_arvalid            ),
     .icache_arready 	( icache_arready            ),
@@ -458,16 +594,16 @@ icache #(4,1,DATA_LEN)u_icache(
     .icache_rdata   	( icache_rdata              )
 );
 
-assign ifu_addr_offset = PC_to_sram[1:0];
+assign ifu_addr_offset = ifu_raddr[1:0];
 
 `else
 
 assign icache_arvalid   = ifu_arvalid;
 assign ifu_arready      = icache_arready;
-assign icache_raddr     = PC_to_sram;
+assign icache_raddr     = ifu_raddr;
 assign ifu_rvalid       = icache_rvalid;
 assign icache_rready    = ifu_rready;
-assign inst_in          = icache_rdata;
+assign ifu_rdata        = icache_rdata;
 assign ifu_rresp        = icache_rresp;
 
 `endif
@@ -512,22 +648,6 @@ dcache #(4,1,DATA_LEN,DATA_BIT_NUM)u_dcache(
     .dcache_bready  	( dcache_bready ),
     .dcache_bresp   	( dcache_bresp  )
 );
-//debug temp
-// assign dcache_awvalid   = lsu_awvalid;
-// assign lsu_awready      = dcache_awready;
-// assign dcache_waddr     = lsu_waddr;
-
-// assign dcache_wvalid    = lsu_wvalid;
-// assign lsu_wready       = dcache_wready;
-// assign dcache_wdata     = lsu_wdata;
-// assign dcache_wstrob    = lsu_wstrob;
-
-// assign lsu_bvalid       = dcache_bvalid;
-// assign dcache_bready    = lsu_bready;
-// assign lsu_bresp        = dcache_bresp;
-//debug temp
-// assign lsu_read_addr_offset = lsu_raddr[1:0];
-// assign lsu_write_addr_offset = lsu_waddr[1:0];
 
 `else
 

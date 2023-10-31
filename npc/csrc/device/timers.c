@@ -6,7 +6,8 @@
 static word_t timer_reg[2];
 
 void get_rtc(){
-    difftest_skip_ref();
+    set_skip_ref_flag();
+    // difftest_skip_ref();
     static time_t now_time;
     static struct tm *now_time_rtc;
     now_time = time(NULL);
@@ -50,7 +51,8 @@ void get_rtc(){
 }
 
 void get_uptime(){
-    difftest_skip_ref();
+    set_skip_ref_flag();
+    // difftest_skip_ref();
     static uint64_t open_time=0;
     if(open_time==0)open_time=get_time();
     uint64_t now = get_time();
@@ -58,7 +60,8 @@ void get_uptime(){
 }
 
 uint32_t get_timer_reg(int offest){
-    difftest_skip_ref();
+    set_skip_ref_flag();
+    // difftest_skip_ref();
     if(offest==0)return timer_reg[0];
     else if(offest==1) return timer_reg[1];
     else assert(0);

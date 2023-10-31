@@ -6,6 +6,7 @@
 `define HAS_DCACHE
 // `define ICACHE_LINE_MULIT_SRAM
 // `define DCACHE_LINE_MULIT_SRAM
+`define SIM
 // `define ADD_USE_ADD_BASE
 // `define RTSCV32
 // `define DATA_LEN 32
