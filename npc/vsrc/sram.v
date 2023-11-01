@@ -165,7 +165,16 @@ always @(posedge clk or negedge rst_n) begin
         // read_lsfr<=1;
     end
     else begin
-        if(arvalid)begin
+        if(rvalid&rready&arvalid)begin
+            rvalid_reg<=1'b1;
+            pmem_read(raddr,rdata);
+            Log_mem_read(raddr);
+        end
+        else if(rvalid&(~rready)&arvalid)begin
+            rvalid_reg<=1'b1; 
+        end
+        else if(arvalid)begin
+            
             // repeat({24'h0,8'd30})begin
             //     @(posedge clk);
             // end

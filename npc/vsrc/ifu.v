@@ -31,7 +31,7 @@ module ifu#(parameter DATA_LEN=32) (
 localparam AXI_ADDR_IDLE                = 2'b00;
 localparam AXI_ADDR_WITE_arready        = 2'b01;
 localparam AXI_ADDR_WITE_enable         = 2'b11;
-localparam AXI_ADDR_FULL_WITE_arready   = 2'b10;
+// localparam AXI_ADDR_FULL_WITE_arready   = 2'b10;
 // localparam AXI_DATA_WITE_rvalid  = 1'b0;
 // localparam AXI_DATA_WITE_enable  = 1'b1;
 
@@ -283,7 +283,7 @@ always @(posedge clk or negedge rst_n) begin
             end
             AXI_ADDR_WITE_enable:begin
                 if(data_ready&IF_reg_inst_flush)begin
-                    IFU_FSM_STATUS_ADDR<=AXI_ADDR_FULL_WITE_arready;
+                    IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_arready;
                     ifu_arvalid_reg<=1'b1;
                     PC_to_sram_reg <= EX_IF_reg_Jump_PC;
                     // PC_to_sram_reg <= PC_S;
@@ -293,7 +293,7 @@ always @(posedge clk or negedge rst_n) begin
                     // PC_to_sram_reg <= (EX_IF_reg_Jump_flag) ? EX_IF_reg_Jump_PC : PC_S;
                 end
                 else if(data_ready)begin
-                    IFU_FSM_STATUS_ADDR<=AXI_ADDR_FULL_WITE_arready;
+                    IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_arready;
                     ifu_arvalid_reg<=1'b1;
                 end
                 else if(IF_reg_inst_flush)begin
@@ -301,48 +301,53 @@ always @(posedge clk or negedge rst_n) begin
                     PC_to_sram_reg <= EX_IF_reg_Jump_PC;
                 end
             end
-            AXI_ADDR_FULL_WITE_arready:begin
-                if(read_addr_handshake_flag&IF_reg_inst_flush&(~pc_full))begin
-                    IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_arready;
-                    PC_to_sram_reg <= EX_IF_reg_Jump_PC;
-                    // addr_ready_reg<=1'b1;
-                end
-                else if(read_addr_handshake_flag&IF_reg_inst_flush)begin
-                    if(data_ready)begin
-                        IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_arready;
-                        PC_to_sram_reg <= EX_IF_reg_Jump_PC;
-                    end
-                    else begin
-                        IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_enable;
-                        ifu_arvalid_reg<=1'b0;
-                        PC_to_sram_reg <= EX_IF_reg_Jump_PC;
-                    end
-                end
-                else if(IF_reg_inst_flush)begin
-                    IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_arready;
-                    PC_to_sram_reg <= EX_IF_reg_Jump_PC;
-                    // addr_ready_reg<=1'b0;
-                end
-                else if(read_addr_handshake_flag&(~pc_full))begin
-                    IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_arready;
-                    PC_to_sram_reg <= PC_S;
-                    // addr_ready_reg<=1'b1;
-                end
-                else if(read_addr_handshake_flag)begin
-                    if(data_ready)begin
-                        IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_arready;
-                        PC_to_sram_reg <= PC_S;
-                    end
-                    else begin
-                        IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_enable;
-                        ifu_arvalid_reg<=1'b0;
-                        PC_to_sram_reg <= PC_S;
-                    end
-                end
-                // if(read_addr_handshake_flag&)
-                // IFU_FSM_STATUS_ADDR<=AXI_ADDR_IDLE;
-                // ifu_arvalid_reg<=1'b0;
-                // PC_to_sram_reg<=`RST_PC;
+            // AXI_ADDR_FULL_WITE_arready:begin
+            //     if(read_addr_handshake_flag&IF_reg_inst_flush&(~pc_full))begin
+            //         IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_arready;
+            //         PC_to_sram_reg <= EX_IF_reg_Jump_PC;
+            //         // addr_ready_reg<=1'b1;
+            //     end
+            //     else if(read_addr_handshake_flag&IF_reg_inst_flush)begin
+            //         if(data_ready)begin
+            //             IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_arready;
+            //             PC_to_sram_reg <= EX_IF_reg_Jump_PC;
+            //         end
+            //         else begin
+            //             IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_enable;
+            //             ifu_arvalid_reg<=1'b0;
+            //             PC_to_sram_reg <= EX_IF_reg_Jump_PC;
+            //         end
+            //     end
+            //     else if(IF_reg_inst_flush)begin
+            //         IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_arready;
+            //         PC_to_sram_reg <= EX_IF_reg_Jump_PC;
+            //         // addr_ready_reg<=1'b0;
+            //     end
+            //     else if(read_addr_handshake_flag&(~pc_full))begin
+            //         IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_arready;
+            //         PC_to_sram_reg <= PC_S;
+            //         // addr_ready_reg<=1'b1;
+            //     end
+            //     else if(read_addr_handshake_flag)begin
+            //         if(data_ready)begin
+            //             IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_arready;
+            //             PC_to_sram_reg <= PC_S;
+            //         end
+            //         else begin
+            //             IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_enable;
+            //             ifu_arvalid_reg<=1'b0;
+            //             PC_to_sram_reg <= PC_S;
+            //         end
+            //     end
+            //     // if(read_addr_handshake_flag&)
+            //     // IFU_FSM_STATUS_ADDR<=AXI_ADDR_IDLE;
+            //     // ifu_arvalid_reg<=1'b0;
+            //     // PC_to_sram_reg<=`RST_PC;
+            // end
+            default:begin
+                IFU_FSM_STATUS_ADDR<=AXI_ADDR_IDLE;
+                ifu_arvalid_reg<=1'b0;
+                PC_to_sram_reg<=`RST_PC;
             end
         endcase
     end

@@ -237,7 +237,7 @@ assign mret     =   (IF_ID_reg_inst ==  32'h30200073) ? 1'b1 : 1'b0;
 assign ecall    =   (IF_ID_reg_inst ==  32'h00000073) ? 1'b1 : 1'b0;
 assign ebreak   =   (IF_ID_reg_inst ==  32'h00100073) ? 1'b1 : 1'b0;
 
-assign operand1 = ((csr_rw_flag)?CSR_operand1:((auipc|jalr|jal)?IF_ID_reg_PC:((J_flag|lui)?32'h0:src1)));
+assign operand1 = ((csr_rw_flag)?CSR_operand1:((auipc|jalr|jal)?IF_ID_reg_PC:((lui)?32'h0:src1)));
 assign operand2 = (jalr|jal)?4:((B_flag|R_flag)?src2:imm);
 assign op       = (B_flag|is_cmp|sub);
 
