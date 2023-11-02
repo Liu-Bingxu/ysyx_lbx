@@ -109,6 +109,8 @@ reg  [127:0]      	    BWEN_reg;
 reg  [WAY_NUM-1:0]      CEN_reg;
 reg                     WEN_reg;
 
+reg                     mmio_access_flag_reg;
+
 reg                     lsu_arready_reg;
 reg                     lsu_rvalid_reg;
 reg  [31:0]             lsu_rdata_reg;
@@ -221,6 +223,8 @@ always @(posedge clk or negedge rst_n) begin
         dcache_write_error<=1'b0;
 
         CEN_reg<={WAY_NUM{1'b1}};
+
+        mmio_access_flag_reg<=1'b0;
     end
     else begin
         case (dcache_fsm_status)
@@ -237,6 +241,7 @@ always @(posedge clk or negedge rst_n) begin
                         else if(lsu_read_addr_handshake_flag)begin
                             dcache_fsm_status<=DCACHE_MMIO_READ_ADDR;
                             dcache_arvalid_reg<=1'b1;
+                            mmio_access_flag_reg<=1'b1;
                             dcache_raddr_reg<=lsu_raddr;
                         end
                         mmio_access();
@@ -461,6 +466,7 @@ always @(posedge clk or negedge rst_n) begin
             DCACHE_GET_DATA:begin
                 if(lsu_read_data_handshake_flag)begin
                     dcache_fsm_status<=DCACHE_IDLE;
+                    mmio_access_flag_reg<=1'b0;
                     lsu_arready_reg<=1'b1;
                     lsu_awready_reg<=1'b1;
                     lsu_wready_reg<=1'b1;
@@ -641,7 +647,7 @@ assign dcache_write_back_handshake_flag = dcache_bvalid & dcache_bready;
 
 assign lsu_arready = lsu_arready_reg;
 assign lsu_rvalid = lsu_rvalid_reg;
-assign lsu_rdata = (mmio_access_flag)?data[DATA_LEN-1:0]:lsu_rdata_reg;
+assign lsu_rdata = (mmio_access_flag_reg)?data[127:128-DATA_LEN]:lsu_rdata_reg;
 assign lsu_rresp = lsu_rresp_reg;
 assign lsu_awready = lsu_awready_reg;
 assign lsu_wready = lsu_wready_reg;

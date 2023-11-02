@@ -212,6 +212,7 @@ static void exec_once(char *p, char *p2,paddr_t pc){
     if(strcmp(inst_asm,inst_asm2)!=0){
         npc_state.state = NPC_END;
         npc_state.halt_pc = get_gpr(32);
+        printf("%s\n", inst_asm2);
         npc_state.halt_ret = 0;
         Log(ANSI_FMT("inst error\n", ANSI_FG_RED));
         sim_exit();
@@ -364,6 +365,7 @@ static void execute(uint64_t n)
             npc_state.state = NPC_END;
             npc_state.halt_pc = get_gpr(32);
             npc_state.halt_ret = 0;
+            printf("\n");
         }
         IFDEF(CONFIG_DEVICE, device_update());
     }

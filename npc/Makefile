@@ -68,6 +68,15 @@ $(BUILD_DIR)/.stamp.verilate: $(MODULE_SRC) $(CSRC) $(HEAD_FILE)
 lint: $(MODULE_SRC) 
 	verilator --lint-only $(MODULE_SRC) -Ivsrc --top-module $(TOPNAME)
 
+WORK_PATH=$(shell echo $(PWD))
+SDC_FILE = $(shell find $(abspath ./) -name "*.sdc")
+.PHONY:sta
+sta:
+	@rm -rf $(WORK_PATH)/result
+	make clean -C ~/yosys-sta -f Makefile
+	make sta DESIGN=$(TOPNAME) SDC_FILE=$(SDC_FILE) RTL_FILES="$(MODULE_SRC)" CLK_FREQ_MHZ=100 -C ~/yosys-sta/ -f Makefile
+	@cp -r ~/yosys-sta/result/ $(WORK_PATH)/
+
 .PHONY: clean
 clean:
 	rm -rf .stamp.*;

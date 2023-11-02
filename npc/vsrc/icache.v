@@ -59,6 +59,7 @@ wire                    icache_addr_handshake_flag;
 wire                    icache_data_handshake_flag;
 
 reg   [WAY_NUM-1:0]     CEN_reg;
+reg                     cen_bypass_flag;
 reg                     WEN_reg;
 reg                     ifu_arready_reg;
 reg   [DATA_LEN-1:2]    ifu_raddr_reg;
@@ -103,8 +104,8 @@ generate
 endgenerate
 
 assign offset       = ifu_raddr_reg[3:2];
-assign A            = ifu_raddr_reg[(3+ADDR_LEN):4];
-assign target_tag   = ifu_raddr_reg[DATA_LEN-1:(4+ADDR_LEN)];
+assign A            = (ifu_addr_handshake_flag)?ifu_raddr[(3+ADDR_LEN):4]:ifu_raddr_reg[(3+ADDR_LEN):4];
+assign target_tag   = (ifu_addr_handshake_flag)?ifu_raddr[DATA_LEN-1:(4+ADDR_LEN)]:ifu_raddr_reg[DATA_LEN-1:(4+ADDR_LEN)];
 assign D            = data;
 assign tag_in       = target_tag;
 
@@ -132,15 +133,34 @@ always @(posedge clk or negedge rst_n) begin
         bypass_flag<=1'b0;
         icache_read_error<=1'b0;
         ifu_arready_reg<=1'b1;
+        cen_bypass_flag<=1'b0;
         // ifu_rresp_reg<=3'h0;
     end
     else begin
         case (icache_fsm_status)
             ICACHE_IDLE:begin
-                if(ifu_addr_handshake_flag)begin
+                if(ifu_addr_handshake_flag&(res!=0))begin
+                    icache_fsm_status<=ICACHE_GET_DATA;
+                        //
+                    ifu_rvalid_reg<=1'b1;
+                        //
+                    ifu_raddr_reg<=ifu_raddr;
+                    ifu_arready_reg<=1'b0;
+                    ifu_rresp_reg<=3'h0;
+                    bypass_flag<=1'b0;
+                    // CEN_reg<=~res;
+                    WEN_reg<=1'b1;
+                    hit_way_reg<=hit_way;
+                    icache_hit();
+                    icache_access();
+                end
+                else if(ifu_addr_handshake_flag)begin
                     icache_fsm_status<=ICACHE_CMP_TAG;
                     ifu_raddr_reg<=ifu_raddr;
                     ifu_arready_reg<=1'b0;
+        //
+        cen_bypass_flag<=1'b1;
+        //
                     icache_access();
                 end
             end
@@ -153,6 +173,9 @@ always @(posedge clk or negedge rst_n) begin
                 end
                 else begin
                     icache_fsm_status<=ICACHE_GET_DATA;
+                        //
+                    ifu_rvalid_reg<=1'b1;
+                        //
                     ifu_rresp_reg<=3'h0;
                     bypass_flag<=1'b0;
                     CEN_reg<=~res;
@@ -172,6 +195,9 @@ always @(posedge clk or negedge rst_n) begin
                 if(icache_data_handshake_flag&(icache_rresp==3'b000)&(~icache_read_error))begin
                     if(icache_read_cnt=={(STEP+1){1'b0}})begin
                         icache_fsm_status<=ICACHE_GET_DATA;
+                        //
+                    ifu_rvalid_reg<=1'b1;
+                        //
                         ifu_rresp_reg<=3'h0;
                         bypass_flag<=1'b1;
                         WEN_reg<=1'b0;
@@ -187,6 +213,9 @@ always @(posedge clk or negedge rst_n) begin
                 else if(icache_data_handshake_flag)begin
                     if(icache_read_cnt=={(STEP+1){1'b0}})begin
                         icache_fsm_status<=ICACHE_GET_DATA;
+                        //
+                    ifu_rvalid_reg<=1'b1;
+                        //
                         ifu_rresp_reg<=3'h2;
                         ifu_arready_reg<=1'b1;
                         icache_read_error<=1'b0;
@@ -210,13 +239,18 @@ always @(posedge clk or negedge rst_n) begin
                 // end
                 if(ifu_data_handshake_flag)begin
                     icache_fsm_status<=ICACHE_IDLE;
+        //
+        cen_bypass_flag<=1'b0;
+        WEN_reg<=1'b1;
+        //
                     ifu_arready_reg<=1'b1;
                     ifu_rvalid_reg<=1'b0;
-                end
-                else begin
                     CEN_reg<={WAY_NUM{1'b1}};
-                    ifu_rvalid_reg<=1'b1;
                 end
+                // else begin
+                //     CEN_reg<={WAY_NUM{1'b1}};
+                //     ifu_rvalid_reg<=1'b1;
+                // end
             end
             default:begin
                 icache_fsm_status<=ICACHE_IDLE;
@@ -266,7 +300,7 @@ always @(*) begin
 end
 
 assign WEN = WEN_reg;
-assign CEN = CEN_reg;
+assign CEN = (cen_bypass_flag)?CEN_reg:(~res);
 assign ifu_arready = ifu_arready_reg;
 assign ifu_rvalid = ifu_rvalid_reg;
 assign ifu_rdata = ifu_rdata_reg;
