@@ -155,9 +155,12 @@ always @(posedge clk or negedge rst_n) begin
                     icache_access();
                 end
                 else if(ifu_addr_handshake_flag)begin
-                    icache_fsm_status<=ICACHE_CMP_TAG;
+                    icache_fsm_status<=ICACHE_READ_ADDR;
                     ifu_raddr_reg<=ifu_raddr;
                     ifu_arready_reg<=1'b0;
+                    icache_arvalid_reg<=1'b1;
+                    icache_raddr_reg<={ifu_raddr[DATA_LEN-1:4],icache_read_cnt,{(DATA_LEN/32+1){1'b0}}};
+                    icache_read_cnt<=icache_read_cnt+1'b1;
         //
         cen_bypass_flag<=1'b1;
         //
