@@ -211,16 +211,18 @@ assign cause = 11;
 // assign ls_ready   = 1'b1|decode_valid;
 //短期
 
-wire valid_flush_flag;
-assign valid_flush_flag = EX_LS_reg_execute_valid&EX_MON_reg_Jump_flag;
+// wire valid_flush_flag;
+// assign valid_flush_flag = EX_LS_reg_execute_valid&EX_MON_reg_Jump_flag;
+assign EX_MON_reg_Jump_flag = Jump_flag&ID_EX_reg_decode_valid;
+assign EX_IF_reg_Jump_PC = Jump_PC;
 
-FF_D_with_syn_rst     #(1,0      )u_execute_valid (clk,rst_n,valid_flush_flag,EX_reg_execute_enable,ID_EX_reg_decode_valid,EX_LS_reg_execute_valid);
-FF_D                  #(1,0      )u_Jump_flag     (clk,rst_n,EX_reg_execute_enable,Jump_flag,EX_MON_reg_Jump_flag);
+FF_D                  #(1,0      )u_execute_valid (clk,rst_n,EX_reg_execute_enable,ID_EX_reg_decode_valid,EX_LS_reg_execute_valid);
+// FF_D                  #(1,0      )u_Jump_flag     (clk,rst_n,EX_reg_execute_enable,Jump_flag,EX_MON_reg_Jump_flag);
 `ifdef SIM
 FF_D_without_asyn_rst #(32       )u_inst          (clk,EX_reg_execute_enable&ID_EX_reg_decode_valid,ID_EX_reg_inst,EX_LS_reg_inst);
-FF_D_without_asyn_rst #(DATA_LEN )u_PC            (clk,EX_reg_execute_enable&ID_EX_reg_decode_valid,ID_EX_reg_PC,EX_LS_reg_PC);
 `endif
-FF_D_without_asyn_rst #(DATA_LEN )u_Jump_PC       (clk,EX_reg_execute_enable&ID_EX_reg_decode_valid,Jump_PC,EX_IF_reg_Jump_PC);
+FF_D_without_asyn_rst #(DATA_LEN )u_PC            (clk,EX_reg_execute_enable&ID_EX_reg_decode_valid,ID_EX_reg_PC,EX_LS_reg_PC);
+// FF_D_without_asyn_rst #(DATA_LEN )u_Jump_PC       (clk,EX_reg_execute_enable&ID_EX_reg_decode_valid,Jump_PC,EX_IF_reg_Jump_PC);
 FF_D_without_asyn_rst #(DATA_LEN )u_dest_data     (clk,EX_reg_execute_enable&ID_EX_reg_decode_valid,dest_data,EX_LS_reg_dest_data);
 FF_D_without_asyn_rst #(DATA_LEN )u_csr_wdata     (clk,EX_reg_execute_enable&ID_EX_reg_decode_valid,csr_wdata,EX_LS_reg_csr_wdata);
 FF_D_without_asyn_rst #(DATA_LEN )u_csr_cause     (clk,EX_reg_execute_enable&ID_EX_reg_decode_valid,cause,EX_LS_reg_cause);

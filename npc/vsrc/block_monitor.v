@@ -54,8 +54,8 @@ assign EX_reg_execute_enable = block_flag;
 assign ID_reg_decode_enable = (EX_reg_execute_enable|(~ID_EX_reg_decode_valid))&(~MON_ID_src_block_flag);
 assign IF_reg_inst_enable = ID_reg_decode_enable|(~IF_ID_reg_inst_valid);
 
-assign IF_reg_inst_flush = EX_LS_reg_execute_valid&EX_MON_reg_Jump_flag;
-assign ID_reg_decode_flush = EX_LS_reg_execute_valid&EX_MON_reg_Jump_flag;
+assign IF_reg_inst_flush = EX_MON_reg_Jump_flag&(LS_MON_ls_valid|(~EX_LS_reg_execute_valid));
+assign ID_reg_decode_flush = EX_MON_reg_Jump_flag&(LS_MON_ls_valid|(~EX_LS_reg_execute_valid));
 
 assign LS_reg_load_store_enable = 1'b1;
 
