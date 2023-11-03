@@ -4,6 +4,8 @@ import "DPI-C" function void icache_hit();
 module icache#(parameter WAY_NUM=4,SRAM_NUM=2,DATA_LEN=32)(
     input                   clk,
     input                   rst_n,
+//interface with control 
+    input                   IF_reg_inst_flush,
 //interface with ifu
     //channel one : pc input
     input                   ifu_arvalid,
@@ -139,11 +141,17 @@ always @(posedge clk or negedge rst_n) begin
     else begin
         case (icache_fsm_status)
             ICACHE_IDLE:begin
-                if(ifu_addr_handshake_flag&(res!=0))begin
+                if(ifu_addr_handshake_flag&IF_reg_inst_flush)begin
                     icache_fsm_status<=ICACHE_GET_DATA;
-                        //
                     ifu_rvalid_reg<=1'b1;
-                        //
+                    ifu_arready_reg<=1'b0;
+                    ifu_rresp_reg<=3'h0;
+                    bypass_flag<=1'b0;
+                    WEN_reg<=1'b1;
+                end
+                else if(ifu_addr_handshake_flag&(res!=0))begin
+                    icache_fsm_status<=ICACHE_GET_DATA;
+                    ifu_rvalid_reg<=1'b1;
                     ifu_raddr_reg<=ifu_raddr;
                     ifu_arready_reg<=1'b0;
                     ifu_rresp_reg<=3'h0;
@@ -161,9 +169,7 @@ always @(posedge clk or negedge rst_n) begin
                     icache_arvalid_reg<=1'b1;
                     icache_raddr_reg<={ifu_raddr[DATA_LEN-1:4],icache_read_cnt,{(DATA_LEN/32+1){1'b0}}};
                     icache_read_cnt<=icache_read_cnt+1'b1;
-        //
-        cen_bypass_flag<=1'b1;
-        //
+                    cen_bypass_flag<=1'b1;
                     icache_access();
                 end
             end
@@ -198,9 +204,7 @@ always @(posedge clk or negedge rst_n) begin
                 if(icache_data_handshake_flag&(icache_rresp==3'b000)&(~icache_read_error))begin
                     if(icache_read_cnt=={(STEP+1){1'b0}})begin
                         icache_fsm_status<=ICACHE_GET_DATA;
-                        //
-                    ifu_rvalid_reg<=1'b1;
-                        //
+                        ifu_rvalid_reg<=1'b1;
                         ifu_rresp_reg<=3'h0;
                         bypass_flag<=1'b1;
                         WEN_reg<=1'b0;
@@ -216,9 +220,7 @@ always @(posedge clk or negedge rst_n) begin
                 else if(icache_data_handshake_flag)begin
                     if(icache_read_cnt=={(STEP+1){1'b0}})begin
                         icache_fsm_status<=ICACHE_GET_DATA;
-                        //
-                    ifu_rvalid_reg<=1'b1;
-                        //
+                        ifu_rvalid_reg<=1'b1;
                         ifu_rresp_reg<=3'h2;
                         ifu_arready_reg<=1'b1;
                         icache_read_error<=1'b0;
@@ -242,10 +244,8 @@ always @(posedge clk or negedge rst_n) begin
                 // end
                 if(ifu_data_handshake_flag)begin
                     icache_fsm_status<=ICACHE_IDLE;
-        //
-        cen_bypass_flag<=1'b0;
-        WEN_reg<=1'b1;
-        //
+                    cen_bypass_flag<=1'b0;
+                    WEN_reg<=1'b1;
                     ifu_arready_reg<=1'b1;
                     ifu_rvalid_reg<=1'b0;
                     CEN_reg<={WAY_NUM{1'b1}};

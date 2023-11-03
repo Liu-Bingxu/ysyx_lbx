@@ -585,6 +585,7 @@ sram #(DATA_LEN,DATA_STROB_LEN,DATA_LEN)u_sram(
 icache #(4,1,DATA_LEN)u_icache(
     .clk            	( sys_clk                   ),
     .rst_n          	( rst_n                     ),
+    .IF_reg_inst_flush  ( IF_reg_inst_flush         ),
     .ifu_arvalid    	( ifu_arvalid               ),
     .ifu_arready    	( ifu_arready               ),
     .ifu_raddr      	( ifu_raddr[DATA_LEN-1:2]   ),

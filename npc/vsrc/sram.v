@@ -92,8 +92,8 @@ always @(posedge clk or negedge rst_n) begin
     else begin
         if(awvalid&wvalid)begin
             if(~((bvalid)&(~bready)))begin
-                // repeat({24'b0,write_lsfr})begin
-                    // @(posedge clk);
+                // repeat({24'b0,8'd30})begin
+                //     @(posedge clk);
                 // end
                 // write_lsfr<={(write_lsfr[4]^write_lsfr[3]^write_lsfr[2]^write_lsfr[0]),write_lsfr[7:1]};
                 bvalid_reg<=1'b1;
