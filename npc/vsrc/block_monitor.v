@@ -9,6 +9,7 @@ module block_monitor (
     input       EX_LS_reg_dest_wen,
     input [4:0] LS_WB_reg_rd,
     input       LS_WB_reg_dest_wen,
+    input       EX_LS_reg_CSR_ren,
     input       rs1_valid,
     input       rs2_valid,
     //to block by jump
@@ -28,8 +29,10 @@ module block_monitor (
     output      LS_reg_load_store_enable,
     output      IF_reg_inst_flush,
     output      ID_reg_decode_flush,
-    output      src1_bypass_flag,
-    output      src2_bypass_flag,
+    output      src1_bypass_LS_flag,
+    output      src2_bypass_LS_flag,
+    output      src1_bypass_WB_flag,
+    output      src2_bypass_WB_flag,
     output      MON_ID_src_block_flag
 );
 
@@ -42,11 +45,14 @@ assign block_flag = (~load_store_flag)|LS_MON_ls_valid;
 wire src1_block_flag;
 wire src2_block_flag;
 
-assign src1_block_flag = ((rs1==ID_EX_reg_rd)&ID_EX_reg_decode_valid&ID_EX_reg_dest_wen)|((rs1==EX_LS_reg_rd)&EX_LS_reg_execute_valid&EX_LS_reg_dest_wen);
-assign src2_block_flag = ((rs2==ID_EX_reg_rd)&ID_EX_reg_decode_valid&ID_EX_reg_dest_wen)|((rs2==EX_LS_reg_rd)&EX_LS_reg_execute_valid&EX_LS_reg_dest_wen);
+assign src1_block_flag = ((rs1==ID_EX_reg_rd)&ID_EX_reg_decode_valid&ID_EX_reg_dest_wen)|((rs1==EX_LS_reg_rd)&EX_LS_reg_execute_valid&EX_LS_reg_dest_wen&(EX_LS_reg_load_sign_flag|EX_LS_reg_CSR_ren));
+assign src2_block_flag = ((rs2==ID_EX_reg_rd)&ID_EX_reg_decode_valid&ID_EX_reg_dest_wen)|((rs2==EX_LS_reg_rd)&EX_LS_reg_execute_valid&EX_LS_reg_dest_wen&(EX_LS_reg_load_sign_flag|EX_LS_reg_CSR_ren));
 
-assign src1_bypass_flag = (rs1==LS_WB_reg_rd)&LS_WB_reg_ls_valid&LS_WB_reg_dest_wen;
-assign src2_bypass_flag = (rs2==LS_WB_reg_rd)&LS_WB_reg_ls_valid&LS_WB_reg_dest_wen;
+assign src1_bypass_LS_flag = (rs1==EX_LS_reg_rd)&EX_LS_reg_execute_valid&EX_LS_reg_dest_wen;
+assign src2_bypass_LS_flag = (rs2==EX_LS_reg_rd)&EX_LS_reg_execute_valid&EX_LS_reg_dest_wen;
+
+assign src1_bypass_WB_flag = (rs1==LS_WB_reg_rd)&LS_WB_reg_ls_valid&LS_WB_reg_dest_wen;
+assign src2_bypass_WB_flag = (rs2==LS_WB_reg_rd)&LS_WB_reg_ls_valid&LS_WB_reg_dest_wen;
 
 assign MON_ID_src_block_flag = (src1_block_flag&rs1_valid)|(src2_block_flag&rs2_valid);
 

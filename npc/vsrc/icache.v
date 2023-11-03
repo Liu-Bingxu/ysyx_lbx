@@ -32,7 +32,7 @@ localparam WAY_ADDR_LEN = $clog2(WAY_NUM);
 localparam STEP = 2-DATA_LEN/32;
 
 localparam ICACHE_IDLE      = 3'b000;
-localparam ICACHE_CMP_TAG   = 3'b001;
+// localparam ICACHE_CMP_TAG   = 3'b001;
 localparam ICACHE_READ_ADDR = 3'b011;
 localparam ICACHE_READ_DATA = 3'b111;
 localparam ICACHE_GET_DATA  = 3'b010;
@@ -167,27 +167,27 @@ always @(posedge clk or negedge rst_n) begin
                     icache_access();
                 end
             end
-            ICACHE_CMP_TAG:begin
-                if(res==0)begin
-                    icache_fsm_status<=ICACHE_READ_ADDR;
-                    icache_arvalid_reg<=1'b1;
-                    icache_raddr_reg<={ifu_raddr_reg[DATA_LEN-1:4],icache_read_cnt,{(DATA_LEN/32+1){1'b0}}};
-                    icache_read_cnt<=icache_read_cnt+1'b1;
-                end
-                else begin
-                    icache_fsm_status<=ICACHE_GET_DATA;
-                        //
-                    ifu_rvalid_reg<=1'b1;
-                        //
-                    ifu_rresp_reg<=3'h0;
-                    bypass_flag<=1'b0;
-                    CEN_reg<=~res;
-                    WEN_reg<=1'b1;
-                    hit_way_reg<=hit_way;
-                    icache_hit();
-                end
-                ifu_arready_reg<=1'b0;
-            end
+            // ICACHE_CMP_TAG:begin
+            //     if(res==0)begin
+            //         icache_fsm_status<=ICACHE_READ_ADDR;
+            //         icache_arvalid_reg<=1'b1;
+            //         icache_raddr_reg<={ifu_raddr_reg[DATA_LEN-1:4],icache_read_cnt,{(DATA_LEN/32+1){1'b0}}};
+            //         icache_read_cnt<=icache_read_cnt+1'b1;
+            //     end
+            //     else begin
+            //         icache_fsm_status<=ICACHE_GET_DATA;
+            //             //
+            //         ifu_rvalid_reg<=1'b1;
+            //             //
+            //         ifu_rresp_reg<=3'h0;
+            //         bypass_flag<=1'b0;
+            //         CEN_reg<=~res;
+            //         WEN_reg<=1'b1;
+            //         hit_way_reg<=hit_way;
+            //         icache_hit();
+            //     end
+            //     ifu_arready_reg<=1'b0;
+            // end
             ICACHE_READ_ADDR:begin
                 if(icache_addr_handshake_flag)begin
                     icache_fsm_status<=ICACHE_READ_DATA;

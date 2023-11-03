@@ -132,8 +132,10 @@ wire EX_reg_execute_enable;
 wire LS_reg_load_store_enable;
 wire IF_reg_inst_flush;
 wire ID_reg_decode_flush;
-wire src1_bypass_flag;
-wire src2_bypass_flag;
+wire src1_bypass_LS_flag;
+wire src2_bypass_LS_flag;
+wire src1_bypass_WB_flag;
+wire src2_bypass_WB_flag;
 wire MON_ID_src_block_flag;
 
 //ifu sram output wire
@@ -218,11 +220,12 @@ ifu u_ifu(
     .IF_ID_reg_PC     	    ( IF_ID_reg_PC          )
 );
 
-wire [DATA_LEN-1:0] dest_data_bypass;
+wire [DATA_LEN-1:0] dest_data_bypass_WB;
+wire [DATA_LEN-1:0] dest_data_bypass_LS;
 wire [DATA_LEN-1:0] decode_get_src1;
 wire [DATA_LEN-1:0] decode_get_src2;
-assign decode_get_src1 = (src1_bypass_flag)?dest_data_bypass:src1;
-assign decode_get_src2 = (src2_bypass_flag)?dest_data_bypass:src2;
+assign decode_get_src1 = (src1_bypass_LS_flag)?dest_data_bypass_LS:((src1_bypass_WB_flag)?dest_data_bypass_WB:src1);
+assign decode_get_src2 = (src2_bypass_LS_flag)?dest_data_bypass_LS:((src2_bypass_WB_flag)?dest_data_bypass_WB:src2);
 
 idu #(DATA_LEN)u_idu(
     .clk                      	( sys_clk                   ),
@@ -266,6 +269,7 @@ idu #(DATA_LEN)u_idu(
     .ID_EX_reg_dest_wen       	( ID_EX_reg_dest_wen        )
 );
 
+assign dest_data_bypass_LS = EX_LS_reg_dest_data;
 exu #(DATA_LEN)u_exu(
     .clk                      	( sys_clk                   ),
     .rst_n                    	( rst_n                     ),
@@ -383,7 +387,7 @@ lsu_rv32 #(DATA_LEN,DATA_BIT_NUM)u_lsu_rv32(
 
 wire [DATA_LEN-1:0] dest_data;
 assign dest_data = (LS_WB_reg_CSR_ren)?csr_rdata:LS_WB_reg_dest_data;
-assign dest_data_bypass = dest_data;
+assign dest_data_bypass_WB = dest_data;
 gpr #(DATA_LEN)u_gpr(
     .clk                 	( sys_clk              ),
     .rst_n               	( rst_n                ),
@@ -434,6 +438,7 @@ block_monitor u_block_monitor(
     .EX_LS_reg_dest_wen         ( EX_LS_reg_dest_wen         ),
     .LS_WB_reg_rd               ( LS_WB_reg_rd               ),
     .LS_WB_reg_dest_wen         ( LS_WB_reg_dest_wen         ),
+    .EX_LS_reg_CSR_ren       	( EX_LS_reg_CSR_ren          ),
     .EX_MON_reg_Jump_flag       ( EX_MON_reg_Jump_flag       ),
     .IF_ID_reg_inst_valid 	    ( IF_ID_reg_inst_valid       ),
     .ID_EX_reg_decode_valid   	( ID_EX_reg_decode_valid     ),
@@ -448,8 +453,10 @@ block_monitor u_block_monitor(
     .LS_reg_load_store_enable  	( LS_reg_load_store_enable   ),
     .IF_reg_inst_flush          ( IF_reg_inst_flush          ),
     .ID_reg_decode_flush        ( ID_reg_decode_flush        ),
-    .src1_bypass_flag           ( src1_bypass_flag           ),
-    .src2_bypass_flag           ( src2_bypass_flag           ),
+    .src1_bypass_LS_flag        ( src1_bypass_LS_flag        ),
+    .src2_bypass_LS_flag        ( src2_bypass_LS_flag        ),
+    .src1_bypass_WB_flag        ( src1_bypass_WB_flag        ),
+    .src2_bypass_WB_flag        ( src2_bypass_WB_flag        ),
     .MON_ID_src_block_flag      ( MON_ID_src_block_flag      )
 );
 
