@@ -1,4 +1,5 @@
-`include "define.v"
+`include "./define.v"
+`ifdef DPI_C
 import "DPI-C" function void halt(byte code);
 
 // `ifndef HAS_AXI_BUS
@@ -102,3 +103,4 @@ end
 
 endmodule //monitor
 
+`endif

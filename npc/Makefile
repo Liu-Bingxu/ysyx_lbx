@@ -74,7 +74,7 @@ SDC_FILE = $(shell find $(abspath ./) -name "*.sdc")
 sta:
 	@rm -rf $(WORK_PATH)/result
 	make clean -C ~/yosys-sta -f Makefile
-	make sta DESIGN=$(TOPNAME) SDC_FILE=$(SDC_FILE) RTL_FILES="$(MODULE_SRC)" CLK_FREQ_MHZ=100 -C ~/yosys-sta/ -f Makefile
+	make sta DESIGN=core SDC_FILE=$(SDC_FILE) RTL_FILES="$(MODULE_SRC)" CLK_FREQ_MHZ=100 -C ~/yosys-sta/ -f Makefile
 	@cp -r ~/yosys-sta/result/ $(WORK_PATH)/
 
 .PHONY: clean

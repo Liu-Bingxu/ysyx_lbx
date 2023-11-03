@@ -1,3 +1,5 @@
+`include "./define.v"
+`ifdef DPI_C
 import "DPI-C" function void Log_mem_read(int unsigned addr);
 import "DPI-C" function void Log_mem_wirte(int unsigned addr, int unsigned data,byte wmask);
 import "DPI-C" function void pmem_read(
@@ -192,3 +194,5 @@ assign arready  = 1'b1;
 assign rresp    = 3'b000;
 
 endmodule //sram
+
+`endif

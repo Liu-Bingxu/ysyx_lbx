@@ -1,7 +1,9 @@
 `include "./define.v"
+`ifdef DPI_C
 import "DPI-C" function void dcache_access();
 import "DPI-C" function void dcache_hit();
 import "DPI-C" function void mmio_access();
+`endif
 module dcache#(parameter WAY_NUM=4,SRAM_NUM=2,DATA_LEN=32,DATA_BIT_NUM=4,ADDR_LSB=DATA_LEN/32+1)(
     input                           clk,
     input                           rst_n,
@@ -244,11 +246,15 @@ always @(posedge clk or negedge rst_n) begin
                             mmio_access_flag_reg<=1'b1;
                             dcache_raddr_reg<=lsu_raddr;
                         end
+                        `ifdef DPI_C
                         mmio_access();
+                        `endif
                     end
                     else begin
                         dcache_fsm_status<=DCACHE_CMP_TAG;
+                        `ifdef DPI_C
                         dcache_access();
+                        `endif
                     end
                     addr_reg<=addr;
                     lsu_arready_reg<=1'b0;
@@ -312,7 +318,9 @@ always @(posedge clk or negedge rst_n) begin
                         BWEN_reg<=~bwen;
                     end
                     CEN_reg<=~res;
+                    `ifdef DPI_C
                     dcache_hit();
+                    `endif
                 end
             end
             DCACHE_READ_ADDR:begin

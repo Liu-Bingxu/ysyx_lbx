@@ -1,6 +1,8 @@
 `include "define.v"
+`ifdef DPI_C
 import "DPI-C" function void icache_access();
 import "DPI-C" function void icache_hit();
+`endif
 module icache#(parameter WAY_NUM=4,SRAM_NUM=2,DATA_LEN=32)(
     input                   clk,
     input                   rst_n,
@@ -159,8 +161,10 @@ always @(posedge clk or negedge rst_n) begin
                     // CEN_reg<=~res;
                     WEN_reg<=1'b1;
                     hit_way_reg<=hit_way;
+                    `ifdef DPI_C
                     icache_hit();
                     icache_access();
+                    `endif
                 end
                 else if(ifu_addr_handshake_flag)begin
                     icache_fsm_status<=ICACHE_READ_ADDR;
@@ -170,7 +174,9 @@ always @(posedge clk or negedge rst_n) begin
                     icache_raddr_reg<={ifu_raddr[DATA_LEN-1:4],icache_read_cnt,{(DATA_LEN/32+1){1'b0}}};
                     icache_read_cnt<=icache_read_cnt+1'b1;
                     cen_bypass_flag<=1'b1;
+                    `ifdef DPI_C
                     icache_access();
+                    `endif
                 end
             end
             // ICACHE_CMP_TAG:begin
