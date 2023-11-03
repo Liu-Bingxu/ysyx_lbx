@@ -61,7 +61,7 @@ localparam WAY_ADDR_LEN = $clog2(WAY_NUM);
 localparam STEP = 2-DATA_LEN/32;
 
 localparam DCACHE_IDLE                      = 4'b0000;
-localparam DCACHE_CMP_TAG                   = 4'b0001;
+// localparam DCACHE_CMP_TAG                   = 4'b0001;
 localparam DCACHE_READ_ADDR                 = 4'b0011;
 localparam DCACHE_READ_DATA                 = 4'b0111;
 localparam DCACHE_WRITE_WAIT_ADDR_DATA      = 4'b1111;
@@ -138,7 +138,7 @@ reg  [127:0]            data_reg;
 reg  [DATA_LEN-1:0]     write_data_reg;
 
 wire [DATA_LEN-1:ADDR_LSB]     addr;
-reg  [DATA_LEN-1:ADDR_LSB]     addr_reg;
+// reg  [DATA_LEN-1:ADDR_LSB]     addr_reg;
 reg                     bypass_flag;
 // reg                     data_bypass_flag;
 reg  [DATA_LEN-1:0]     wdata;
@@ -188,9 +188,9 @@ generate
     end
 endgenerate
 
-assign offset       = addr_reg[3:2];
-assign A            = addr_reg[(3+ADDR_LEN):4];
-assign target_tag   = addr_reg[31:(4+ADDR_LEN)];
+assign offset       = addr[3:2];
+assign A            = addr[(3+ADDR_LEN):4];
+assign target_tag   = addr[31:(4+ADDR_LEN)];
 assign D            = D_reg;
 assign tag_in       = target_tag;
 assign bypass_data  = {(128/DATA_LEN){wdata}};
@@ -251,12 +251,42 @@ always @(posedge clk or negedge rst_n) begin
                         `endif
                     end
                     else begin
-                        dcache_fsm_status<=DCACHE_CMP_TAG;
-                        `ifdef DPI_C
-                        dcache_access();
-                        `endif
+                        // dcache_fsm_status<=DCACHE_CMP_TAG;
+                        // `ifdef DPI_C
+                        // dcache_access();
+                        // `endif
+                        if(res==0)begin
+                            dcache_fsm_status<=DCACHE_READ_ADDR;
+                            dcache_arvalid_reg<=1'b1;
+                            dcache_raddr_reg<={addr[DATA_LEN-1:4],dcache_cnt,{(DATA_LEN/32+1){1'b0}}};
+                            dcache_cnt<=dcache_cnt+1'b1;
+                            rand_way_reg<=rand_way;
+                            WEN_reg<=1'b1;
+                            CEN_reg[rand_way]<=1'b0;
+                        end
+                        else begin
+                            if(lsu_read_addr_handshake_flag)begin
+                                dcache_fsm_status<=DCACHE_GET_DATA;
+                                lsu_rresp_reg<=3'h0;
+                                bypass_flag<=1'b0;
+                                WEN_reg<=1'b1;
+                                hit_way_reg<=hit_way;
+                            end
+                            else begin
+                                dcache_fsm_status<=DCACHE_WRITE_DATA;
+                                lsu_bresp_reg<=3'h0;
+                                WEN_reg<=1'b0;
+                                dirty_flag_reg<=1'b1;
+                                D_reg<={(128/DATA_LEN){lsu_wdata}};
+                                BWEN_reg<=~bwen;
+                            end
+                            CEN_reg<=~res;
+                            `ifdef DPI_C
+                            dcache_hit();
+                            `endif
+                        end
                     end
-                    addr_reg<=addr;
+                    // addr_reg<=addr;
                     lsu_arready_reg<=1'b0;
                     lsu_awready_reg<=1'b0;
                     lsu_wready_reg<=1'b0;
@@ -269,60 +299,60 @@ always @(posedge clk or negedge rst_n) begin
                     lsu_write_flag<=1'b0;
                 end
             end
-            DCACHE_CMP_TAG:begin
-                if(res==0)begin
-                    //temp
-                    // if(lsu_write_flag)begin
-                    //     dcache_fsm_status<=DCACHE_IDLE;
-                    //     lsu_arready_reg<=1'b1;
-                    //     lsu_awready_reg<=1'b1;
-                    //     lsu_wready_reg<=1'b1;
-                    // end
-                    // else begin
-                    //     dcache_fsm_status<=DCACHE_READ_ADDR;
-                    //     dcache_arvalid_reg<=1'b1;
-                    //     dcache_raddr_reg<={addr_reg[DATA_LEN-1:4],dcache_cnt,{(DATA_LEN/32+1){1'b0}}};
-                    //     dcache_cnt<=dcache_cnt+1'b1;
-                    //     rand_way_reg<=rand_way;
-                    //     WEN_reg<=1'b1;
-                    //     CEN_reg[rand_way]<=1'b0;
-                    // end
-                    //temp
-                    dcache_fsm_status<=DCACHE_READ_ADDR;
-                    dcache_arvalid_reg<=1'b1;
-                    dcache_raddr_reg<={addr_reg[DATA_LEN-1:4],dcache_cnt,{(DATA_LEN/32+1){1'b0}}};
-                    dcache_cnt<=dcache_cnt+1'b1;
-                    rand_way_reg<=rand_way;
-                    WEN_reg<=1'b1;
-                    CEN_reg[rand_way]<=1'b0;
-                end
-                else begin
-                    if(lsu_write_flag==0)begin
-                        dcache_fsm_status<=DCACHE_GET_DATA;
-                        lsu_rresp_reg<=3'h0;
-                        bypass_flag<=1'b0;
-                        WEN_reg<=1'b1;
-                        hit_way_reg<=hit_way;
-                    end
-                    else begin
-                        // dcache_fsm_status<=DCACHE_WRITE_DATA;
-                        // WEN_reg<=1'b0;
-                        // BWEN_reg<={128{1'b1}};
-                        // dirty_flag_reg<=1'b0;
-                        // valid_falg<=1'b0;
-                        dcache_fsm_status<=DCACHE_WRITE_DATA;
-                        lsu_bresp_reg<=3'h0;
-                        WEN_reg<=1'b0;
-                        dirty_flag_reg<=1'b1;
-                        D_reg<=bypass_data;
-                        BWEN_reg<=~bwen;
-                    end
-                    CEN_reg<=~res;
-                    `ifdef DPI_C
-                    dcache_hit();
-                    `endif
-                end
-            end
+            // DCACHE_CMP_TAG:begin
+            //     if(res==0)begin
+            //         //temp
+            //         // if(lsu_write_flag)begin
+            //         //     dcache_fsm_status<=DCACHE_IDLE;
+            //         //     lsu_arready_reg<=1'b1;
+            //         //     lsu_awready_reg<=1'b1;
+            //         //     lsu_wready_reg<=1'b1;
+            //         // end
+            //         // else begin
+            //         //     dcache_fsm_status<=DCACHE_READ_ADDR;
+            //         //     dcache_arvalid_reg<=1'b1;
+            //         //     dcache_raddr_reg<={addr_reg[DATA_LEN-1:4],dcache_cnt,{(DATA_LEN/32+1){1'b0}}};
+            //         //     dcache_cnt<=dcache_cnt+1'b1;
+            //         //     rand_way_reg<=rand_way;
+            //         //     WEN_reg<=1'b1;
+            //         //     CEN_reg[rand_way]<=1'b0;
+            //         // end
+            //         //temp
+            //         dcache_fsm_status<=DCACHE_READ_ADDR;
+            //         dcache_arvalid_reg<=1'b1;
+            //         dcache_raddr_reg<={addr[DATA_LEN-1:4],dcache_cnt,{(DATA_LEN/32+1){1'b0}}};
+            //         dcache_cnt<=dcache_cnt+1'b1;
+            //         rand_way_reg<=rand_way;
+            //         WEN_reg<=1'b1;
+            //         CEN_reg[rand_way]<=1'b0;
+            //     end
+            //     else begin
+            //         if(lsu_write_flag==0)begin
+            //             dcache_fsm_status<=DCACHE_GET_DATA;
+            //             lsu_rresp_reg<=3'h0;
+            //             bypass_flag<=1'b0;
+            //             WEN_reg<=1'b1;
+            //             hit_way_reg<=hit_way;
+            //         end
+            //         else begin
+            //             // dcache_fsm_status<=DCACHE_WRITE_DATA;
+            //             // WEN_reg<=1'b0;
+            //             // BWEN_reg<={128{1'b1}};
+            //             // dirty_flag_reg<=1'b0;
+            //             // valid_falg<=1'b0;
+            //             dcache_fsm_status<=DCACHE_WRITE_DATA;
+            //             lsu_bresp_reg<=3'h0;
+            //             WEN_reg<=1'b0;
+            //             dirty_flag_reg<=1'b1;
+            //             D_reg<=bypass_data;
+            //             BWEN_reg<=~bwen;
+            //         end
+            //         CEN_reg<=~res;
+            //         `ifdef DPI_C
+            //         dcache_hit();
+            //         `endif
+            //     end
+            // end
             DCACHE_READ_ADDR:begin
                 if(dcache_read_addr_handshake_flag)begin
                     dcache_fsm_status<=DCACHE_READ_DATA;
@@ -365,7 +395,7 @@ always @(posedge clk or negedge rst_n) begin
                         dcache_fsm_status<=DCACHE_READ_ADDR;
                         dcache_arvalid_reg<=1'b1;
                         dcache_cnt<=dcache_cnt+1'b1;
-                        dcache_raddr_reg<={addr_reg[DATA_LEN-1:4],dcache_cnt,{(DATA_LEN/32+1){1'b0}}};
+                        dcache_raddr_reg<={addr[DATA_LEN-1:4],dcache_cnt,{(DATA_LEN/32+1){1'b0}}};
                     end
                 end
                 else if(dcache_read_data_handshake_flag)begin
@@ -385,7 +415,7 @@ always @(posedge clk or negedge rst_n) begin
                         dcache_fsm_status<=DCACHE_READ_ADDR;
                         dcache_arvalid_reg<=1'b1;
                         dcache_cnt<=dcache_cnt+1'b1;
-                        dcache_raddr_reg<={addr_reg[DATA_LEN-1:4],dcache_cnt,{(DATA_LEN/32+1){1'b0}}};
+                        dcache_raddr_reg<={addr[DATA_LEN-1:4],dcache_cnt,{(DATA_LEN/32+1){1'b0}}};
                         dcache_read_error<=1'b1;
                     end
                 end

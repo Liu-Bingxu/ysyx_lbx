@@ -1,4 +1,4 @@
-module fifo_with_flush#(parameter DATA_LEN=32,AddR_Width=6,FLUSH_DATA=0)(
+module fifo_with_flush#(parameter DATA_LEN=32,AddR_Width=6)(
     input clk,rstn,Wready,Rready,flush,
     input [DATA_LEN-1:0] wdata,
     output full,empty,
@@ -6,7 +6,7 @@ module fifo_with_flush#(parameter DATA_LEN=32,AddR_Width=6,FLUSH_DATA=0)(
 );
 
 parameter Word_Depth = 2** AddR_Width;
-integer i;
+// integer i;
 
 reg [AddR_Width:0] wdata_poi,rdata_poi;
 reg [DATA_LEN-1:0] fifo_sram[0:Word_Depth-1];
@@ -47,22 +47,23 @@ always @(posedge clk or negedge rstn) begin
     end
     else begin
         if(flush)begin
-            for(i=0;i<Word_Depth;i=i+1)begin
-                fifo_sram[i]<=FLUSH_DATA;
-            end
-            case ({Wready,Rready})
-                2'b11:begin
-                    wdata_poi<=wdata_poi+1'b1;
-                    rdata_poi<=rdata_poi+1'b1;
-                end
-                2'b10:begin
-                    wdata_poi<=wdata_poi+1'b1;
-                end
-                2'b01:begin
-                    rdata_poi<=rdata_poi+1'b1;
-                end
-                default ;
-            endcase
+            // for(i=0;i<Word_Depth;i=i+1)begin
+            //     fifo_sram[i]<=FLUSH_DATA;
+            // end
+            // case ({Wready,Rready})
+            //     2'b11:begin
+            //         wdata_poi<=wdata_poi+1'b1;
+            //         rdata_poi<=rdata_poi+1'b1;
+            //     end
+            //     2'b10:begin
+            //         wdata_poi<=wdata_poi+1'b1;
+            //     end
+            //     2'b01:begin
+            //         rdata_poi<=rdata_poi+1'b1;
+            //     end
+            //     default ;
+            // endcase
+            wdata_poi<=rdata_poi;
         end
         else begin
             case ({Wready,Rready})

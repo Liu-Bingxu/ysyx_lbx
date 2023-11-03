@@ -1,5 +1,5 @@
 module fifo#(parameter DATA_LEN=32,AddR_Width=6)(
-    input clk,rstn,Wready,Rready,
+    input clk,rstn,Wready,Rready,flush,
     input [DATA_LEN-1:0] wdata,
     output empty,
     output [DATA_LEN-1:0] rdata
@@ -17,21 +17,26 @@ always @(posedge clk or negedge rstn) begin
         rdata_poi<={(AddR_Width+1){1'b0}};
     end
     else begin
-        case ({Wready,Rready})
-            2'b11:begin
-                fifo_sram[wdata_poi[AddR_Width-1:0]]<=wdata;
-                wdata_poi<=wdata_poi+1'b1;
-                rdata_poi<=rdata_poi+1'b1;
-            end
-            2'b10:begin
-                fifo_sram[wdata_poi[AddR_Width-1:0]]<=wdata;
-                wdata_poi<=wdata_poi+1'b1;
-            end
-            2'b01:begin
-                rdata_poi<=rdata_poi+1'b1;
-            end
-            default ;
-        endcase
+        if(flush)begin
+            wdata_poi<=rdata_poi;
+        end
+        else begin
+            case ({Wready,Rready})
+                2'b11:begin
+                    fifo_sram[wdata_poi[AddR_Width-1:0]]<=wdata;
+                    wdata_poi<=wdata_poi+1'b1;
+                    rdata_poi<=rdata_poi+1'b1;
+                end
+                2'b10:begin
+                    fifo_sram[wdata_poi[AddR_Width-1:0]]<=wdata;
+                    wdata_poi<=wdata_poi+1'b1;
+                end
+                2'b01:begin
+                    rdata_poi<=rdata_poi+1'b1;
+                end
+                default ;
+            endcase
+        end
     end
 end
 

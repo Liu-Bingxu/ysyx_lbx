@@ -248,10 +248,11 @@ static void exec_once(char *p, char *p2,paddr_t pc){
     step_and_dump_wave();
     clock_cnt++;
     while (ls_valid_flag == 0){
-        // if (get_time() >= 80000){
+        // if (get_time() >= 800000){
         //     npc_state.state = NPC_END;
         //     npc_state.halt_pc = get_gpr(32);
         //     npc_state.halt_ret = 0;
+        //     sim_exit();
         // }
         top->sys_clk = !top->sys_clk;
         step_and_dump_wave();
@@ -361,12 +362,12 @@ static void execute(uint64_t n)
         trace_and_difftest(p, pc, dnpc);
         if (npc_state.state != NPC_RUNNING)
             break;
-        if (get_time() >= 2000000){
-            npc_state.state = NPC_END;
-            npc_state.halt_pc = get_gpr(32);
-            npc_state.halt_ret = 0;
-            printf("\n");
-        }
+        // if (get_time() >= 1090000){
+        //     npc_state.state = NPC_END;
+        //     npc_state.halt_pc = get_gpr(32);
+        //     npc_state.halt_ret = 0;
+        //     printf("\n");
+        // }
         IFDEF(CONFIG_DEVICE, device_update());
     }
 }

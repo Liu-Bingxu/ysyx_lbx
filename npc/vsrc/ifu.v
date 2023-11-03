@@ -240,23 +240,28 @@ always @(posedge clk or negedge rst_n) begin
                 // addr_ready_reg<=1'b1;
             end
             AXI_ADDR_WITE_arready:begin
-                if(read_addr_handshake_flag&IF_reg_inst_flush&(~pc_full))begin
-                    IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_arready;
-                    PC_to_sram_reg <= EX_IF_reg_Jump_PC;
-                    // addr_ready_reg<=1'b1;
-                end
-                else if(read_addr_handshake_flag&IF_reg_inst_flush)begin
-                    if(data_ready)begin
-                        IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_arready;
-                        PC_to_sram_reg <= EX_IF_reg_Jump_PC;
-                    end
-                    else begin
-                        IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_enable;
-                        ifu_arvalid_reg<=1'b0;
-                        PC_to_sram_reg <= EX_IF_reg_Jump_PC;
-                    end
-                end
-                else if(IF_reg_inst_flush)begin
+                // if(read_addr_handshake_flag&IF_reg_inst_flush&(~pc_full))begin
+                //     IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_arready;
+                //     PC_to_sram_reg <= EX_IF_reg_Jump_PC;
+                //     // addr_ready_reg<=1'b1;
+                // end
+                // else if(read_addr_handshake_flag&IF_reg_inst_flush)begin
+                //     if(data_ready)begin
+                //         IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_arready;
+                //         PC_to_sram_reg <= EX_IF_reg_Jump_PC;
+                //     end
+                //     else begin
+                //         IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_enable;
+                //         ifu_arvalid_reg<=1'b0;
+                //         PC_to_sram_reg <= EX_IF_reg_Jump_PC;
+                //     end
+                // end
+                // else if(IF_reg_inst_flush)begin
+                //     IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_arready;
+                //     PC_to_sram_reg <= EX_IF_reg_Jump_PC;
+                //     // addr_ready_reg<=1'b0;
+                // end
+                if(IF_reg_inst_flush)begin
                     IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_arready;
                     PC_to_sram_reg <= EX_IF_reg_Jump_PC;
                     // addr_ready_reg<=1'b0;
@@ -282,23 +287,24 @@ always @(posedge clk or negedge rst_n) begin
                 // end
             end
             AXI_ADDR_WITE_enable:begin
-                if(data_ready&IF_reg_inst_flush)begin
-                    IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_arready;
-                    ifu_arvalid_reg<=1'b1;
-                    PC_to_sram_reg <= EX_IF_reg_Jump_PC;
-                    // PC_to_sram_reg <= PC_S;
-                    // addr_ready_reg<=1'b1;
-                    // IF_IF2_reg_inst_valid<=1'b1;
-                    // IF_IF2_reg_PC<=PC_to_sram_reg;
-                    // PC_to_sram_reg <= (EX_IF_reg_Jump_flag) ? EX_IF_reg_Jump_PC : PC_S;
-                end
-                else if(data_ready)begin
+                // if(data_ready&IF_reg_inst_flush)begin
+                //     IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_arready;
+                //     ifu_arvalid_reg<=1'b1;
+                //     PC_to_sram_reg <= EX_IF_reg_Jump_PC;
+                //     // PC_to_sram_reg <= PC_S;
+                //     // addr_ready_reg<=1'b1;
+                //     // IF_IF2_reg_inst_valid<=1'b1;
+                //     // IF_IF2_reg_PC<=PC_to_sram_reg;
+                //     // PC_to_sram_reg <= (EX_IF_reg_Jump_flag) ? EX_IF_reg_Jump_PC : PC_S;
+                // end
+                if(data_ready)begin
                     IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_arready;
                     ifu_arvalid_reg<=1'b1;
                 end
                 else if(IF_reg_inst_flush)begin
-                    IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_enable;
+                    IFU_FSM_STATUS_ADDR<=AXI_ADDR_WITE_arready;
                     PC_to_sram_reg <= EX_IF_reg_Jump_PC;
+                    ifu_arvalid_reg<=1'b1;
                 end
             end
             // AXI_ADDR_FULL_WITE_arready:begin
@@ -469,7 +475,7 @@ assign ifu_rready       = 1'b1;
 // FF_D_without_asyn_rst #(DATA_LEN) u_inst_fetch	(clk,read_data_handshake_flag_success&IF_reg_inst_enable, ifu_rdata,IF_ID_reg_inst   );
 // FF_D_without_asyn_rst #(DATA_LEN) u_PC_now	    (clk,read_data_handshake_flag_success&IF_reg_inst_enable, PC_to_sram_reg,IF_ID_reg_PC);
 
-fifo_with_flush #(DATA_LEN+1,2,0)valid_pc_fifo_with_flush(
+fifo_with_flush #(DATA_LEN+1,2)valid_pc_fifo_with_flush(
     .clk    	( clk                       ),
     .rstn   	( rst_n                     ),
     .Wready 	( read_addr_handshake_flag  ),
@@ -501,17 +507,18 @@ fifo_with_flush #(DATA_LEN+1,2,0)valid_pc_fifo_with_flush(
 //     .empty      ( pc_empty      ),
 //     .rdata  	( pc_rdata      )
 // );  
-
+wire inst_fifo_wready;
 fifo #(32,2)inst_fifo(
-    .clk    	( clk                               ),
-    .rstn   	( rst_n                             ),
-    .Wready 	( read_data_handshake_flag_success  ),
-    .Rready 	( data_ready                        ),
-    .wdata  	( ifu_rdata                         ),
-    .empty      ( inst_empty                        ),
-    .rdata  	( inst_rdata                        )
+    .clk    	( clk               ),
+    .rstn   	( rst_n             ),
+    .Wready 	( inst_fifo_wready  ),
+    .Rready 	( data_ready        ),
+    .flush  	( IF_reg_inst_flush ),
+    .wdata  	( ifu_rdata         ),
+    .empty      ( inst_empty        ),
+    .rdata  	( inst_rdata        )
 );  
-
+assign inst_fifo_wready = read_data_handshake_flag_success&(~pc_empty);
 // assign addr_ready = addr_ready_reg;
 // assign data_ready = data_ready_reg;
 assign data_ready = (~IF_reg_inst_flush)&IF_reg_inst_data_enable&(~inst_empty)&(~pc_empty);

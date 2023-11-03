@@ -74,6 +74,8 @@ reg                     icache_arvalid_reg;
 reg  [DATA_LEN-1:0]     icache_raddr_reg;
 wire [127:0]            data;
 
+// reg                     flush_flag_reg;
+
 reg                     bypass_flag;
 reg                     icache_read_error;
 wire [127:0]            data_sel;
@@ -138,15 +140,20 @@ always @(posedge clk or negedge rst_n) begin
         icache_read_error<=1'b0;
         ifu_arready_reg<=1'b1;
         cen_bypass_flag<=1'b0;
+        // flush_flag_reg<=1'b0;
         // ifu_rresp_reg<=3'h0;
     end
     else begin
+        // if(IF_reg_inst_flush&(~ifu_addr_handshake_flag)&(~icache_data_handshake_flag))begin
+        //     flush_flag_reg<=1'b1;
+        // end
         case (icache_fsm_status)
             ICACHE_IDLE:begin
                 if(ifu_addr_handshake_flag&IF_reg_inst_flush)begin
                     icache_fsm_status<=ICACHE_GET_DATA;
                     ifu_rvalid_reg<=1'b1;
                     ifu_arready_reg<=1'b0;
+                    // flush_flag_reg<=1'b0;
                     ifu_rresp_reg<=3'h0;
                     bypass_flag<=1'b0;
                     WEN_reg<=1'b1;
@@ -170,6 +177,7 @@ always @(posedge clk or negedge rst_n) begin
                     icache_fsm_status<=ICACHE_READ_ADDR;
                     ifu_raddr_reg<=ifu_raddr;
                     ifu_arready_reg<=1'b0;
+                    // flush_flag_reg<=1'b0;
                     icache_arvalid_reg<=1'b1;
                     icache_raddr_reg<={ifu_raddr[DATA_LEN-1:4],icache_read_cnt,{(DATA_LEN/32+1){1'b0}}};
                     icache_read_cnt<=icache_read_cnt+1'b1;
@@ -215,6 +223,13 @@ always @(posedge clk or negedge rst_n) begin
                         bypass_flag<=1'b1;
                         WEN_reg<=1'b0;
                         CEN_reg[rand_way]<=1'b0;
+                    end
+                    else if(IF_reg_inst_flush/* |flush_flag_reg */)begin
+                        icache_fsm_status<=ICACHE_GET_DATA;
+                        icache_read_cnt<={(STEP+1){1'b0}};
+                        ifu_rvalid_reg<=1'b1;
+                        // flush_flag_reg<=1'b0;
+                        ifu_rresp_reg<=3'h0;
                     end
                     else begin
                         icache_fsm_status<=ICACHE_READ_ADDR;
