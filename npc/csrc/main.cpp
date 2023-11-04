@@ -362,7 +362,7 @@ static void execute(uint64_t n)
         trace_and_difftest(p, pc, dnpc);
         if (npc_state.state != NPC_RUNNING)
             break;
-        // if (get_time() >= 1090000){
+        // if (get_time() >= 1900000){
         //     npc_state.state = NPC_END;
         //     npc_state.halt_pc = get_gpr(32);
         //     npc_state.halt_ret = 0;

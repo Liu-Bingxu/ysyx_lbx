@@ -53,6 +53,7 @@ wire [WAY_NUM-1:0]      valid;
 
 wire [3:2]              offset;
 wire [TAG_LEN-1:0]      target_tag;
+reg  [TAG_LEN-1:0]      tag_in_reg;
 
 wire  [WAY_NUM-1:0]     tag_res;
 wire  [WAY_NUM-1:0]     res;
@@ -77,6 +78,7 @@ wire [127:0]            data;
 // reg                     flush_flag_reg;
 
 reg                     bypass_flag;
+reg                     addr_bypass_flag;
 reg                     icache_read_error;
 wire [127:0]            data_sel;
 
@@ -93,7 +95,7 @@ generate
         icache_way #(.DATA_LEN(DATA_LEN),.SRAM_NUM(SRAM_NUM))u_icache_way(
             .clk          	( clk                       ),
             .rst_n        	( rst_n                     ),
-            .tag_in       	( tag_in                    ),
+            .tag_in       	( tag_in_reg                ),
             // .addr_valid     ( ifu_addr_handshake_flag   ),
             .valid        	( valid[i]                  ),
             .tag          	( tag[i]                    ),
@@ -110,8 +112,10 @@ generate
 endgenerate
 
 assign offset       = ifu_raddr_reg[3:2];
-assign A            = (ifu_addr_handshake_flag)?ifu_raddr[(3+ADDR_LEN):4]:ifu_raddr_reg[(3+ADDR_LEN):4];
-assign target_tag   = (ifu_addr_handshake_flag)?ifu_raddr[DATA_LEN-1:(4+ADDR_LEN)]:ifu_raddr_reg[DATA_LEN-1:(4+ADDR_LEN)];
+// assign A            = (ifu_addr_handshake_flag)?ifu_raddr[(3+ADDR_LEN):4]:ifu_raddr_reg[(3+ADDR_LEN):4];
+// assign target_tag   = (ifu_addr_handshake_flag)?ifu_raddr[DATA_LEN-1:(4+ADDR_LEN)]:ifu_raddr_reg[DATA_LEN-1:(4+ADDR_LEN)];
+assign A            = (addr_bypass_flag)?ifu_raddr_reg[(3+ADDR_LEN):4]:ifu_raddr[(3+ADDR_LEN):4];
+assign target_tag   = ifu_raddr[DATA_LEN-1:(4+ADDR_LEN)];
 assign D            = data;
 assign tag_in       = target_tag;
 
@@ -140,6 +144,7 @@ always @(posedge clk or negedge rst_n) begin
         icache_read_error<=1'b0;
         ifu_arready_reg<=1'b1;
         cen_bypass_flag<=1'b0;
+        addr_bypass_flag<=1'b0;
         // flush_flag_reg<=1'b0;
         // ifu_rresp_reg<=3'h0;
     end
@@ -150,19 +155,21 @@ always @(posedge clk or negedge rst_n) begin
         case (icache_fsm_status)
             ICACHE_IDLE:begin
                 if(ifu_addr_handshake_flag&IF_reg_inst_flush)begin
-                    icache_fsm_status<=ICACHE_GET_DATA;
+                    // icache_fsm_status<=ICACHE_GET_DATA;
+                    icache_fsm_status<=ICACHE_IDLE;
                     ifu_rvalid_reg<=1'b1;
-                    ifu_arready_reg<=1'b0;
+                    // ifu_arready_reg<=1'b0;
                     // flush_flag_reg<=1'b0;
                     ifu_rresp_reg<=3'h0;
                     bypass_flag<=1'b0;
                     WEN_reg<=1'b1;
                 end
                 else if(ifu_addr_handshake_flag&(res!=0))begin
-                    icache_fsm_status<=ICACHE_GET_DATA;
+                    // icache_fsm_status<=ICACHE_GET_DATA;
+                    icache_fsm_status<=ICACHE_IDLE;
                     ifu_rvalid_reg<=1'b1;
                     ifu_raddr_reg<=ifu_raddr;
-                    ifu_arready_reg<=1'b0;
+                    // ifu_arready_reg<=1'b0;
                     ifu_rresp_reg<=3'h0;
                     bypass_flag<=1'b0;
                     // CEN_reg<=~res;
@@ -177,6 +184,9 @@ always @(posedge clk or negedge rst_n) begin
                     icache_fsm_status<=ICACHE_READ_ADDR;
                     ifu_raddr_reg<=ifu_raddr;
                     ifu_arready_reg<=1'b0;
+                    ifu_rvalid_reg<=1'b0;
+                    tag_in_reg<=tag_in;
+                    addr_bypass_flag<=1'b1;
                     // flush_flag_reg<=1'b0;
                     icache_arvalid_reg<=1'b1;
                     icache_raddr_reg<={ifu_raddr[DATA_LEN-1:4],icache_read_cnt,{(DATA_LEN/32+1){1'b0}}};
@@ -185,6 +195,9 @@ always @(posedge clk or negedge rst_n) begin
                     `ifdef DPI_C
                     icache_access();
                     `endif
+                end
+                else begin
+                    ifu_rvalid_reg<=1'b0;
                 end
             end
             // ICACHE_CMP_TAG:begin
@@ -267,6 +280,7 @@ always @(posedge clk or negedge rst_n) begin
                     icache_fsm_status<=ICACHE_IDLE;
                     cen_bypass_flag<=1'b0;
                     WEN_reg<=1'b1;
+                    addr_bypass_flag<=1'b0;
                     ifu_arready_reg<=1'b1;
                     ifu_rvalid_reg<=1'b0;
                     CEN_reg<={WAY_NUM{1'b1}};
