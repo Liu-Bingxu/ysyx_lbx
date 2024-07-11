@@ -44,13 +44,15 @@ static void cpu_check_watchpoint(){
 #endif
 
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
+    if(nemu_state.state != NEMU_STOP){
 #ifdef CONFIG_ITRACE_COND
-  if (ITRACE_COND) { log_write("%s\n", _this->logbuf); }
+        { log_write("%s\n", _this->logbuf); }
 #endif
-  if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
-  IFDEF(CONFIG_ITRACE, irangbuf_write(_this));
-  IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
-  IFDEF(CONFIG_WATCHPOINT, cpu_check_watchpoint());
+        if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
+        IFDEF(CONFIG_ITRACE, irangbuf_write(_this));
+        IFDEF(CONFIG_WATCHPOINT, cpu_check_watchpoint());
+    }
+    IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
 }
 
 static void exec_once(Decode *s, vaddr_t pc) {
@@ -88,14 +90,17 @@ static void execute(uint64_t n) {
   Decode s;
   for (;n > 0; n --) {
 	exec_once(&s, cpu.pc);
-	g_nr_guest_inst ++;
-	trace_and_difftest(&s, cpu.pc);
-	if (nemu_state.state != NEMU_RUNNING) break;
+    if (s.pc != s.dnpc)
+        g_nr_guest_inst++;
+    if ((cpu.pc != cpu.mtvec) && (cpu.pc != cpu.stvec) && (s.pc != s.dnpc))
+        cpu.minstret++;
+    trace_and_difftest(&s, cpu.pc);
+    if (nemu_state.state != NEMU_RUNNING) break;
 	IFDEF(CONFIG_DEVICE, device_update());
   }
 }
 
-static void statistic() {
+void statistic() {
     // IFDEF(CONFIG_ITRACE, irangbuf_printf());
     IFNDEF(CONFIG_TARGET_AM, setlocale(LC_NUMERIC, ""));
 #define NUMBERIC_FMT MUXDEF(CONFIG_TARGET_AM, "%", "%'") PRIu64

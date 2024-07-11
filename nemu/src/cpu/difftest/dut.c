@@ -139,6 +139,9 @@ void difftest_step(vaddr_t pc, vaddr_t npc) {
     // to skip the checking of an instruction, just copy the reg state to reference design
     ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
     is_skip_ref = false;
+    // if(pc > 0x8000c000){
+    //     printf("now sikp the pc is 0x%08x\n", (uint32_t)pc);
+    // }
     return;
   }
 

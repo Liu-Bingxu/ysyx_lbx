@@ -13,30 +13,31 @@ void set_func(int code){
 
 // myitrace
 #ifdef CONFIG_ITRACE
+#define ITRACE_SIZE 50
 typedef struct{
-    char *myinst[20];
+    char *myinst[ITRACE_SIZE];
     int mypoint_to_myinst;
 }irangbuf_struct;
 static irangbuf_struct irangbuf;
-static char itrace[128 * 20];
+static char itrace[128 * ITRACE_SIZE];
 
 void init_itrace(){
-    printf("Hello\n");
-    for (int i = 0; i < 20;i++){
+    printf("itrace Hello\n");
+    for (int i = 0; i < ITRACE_SIZE;i++){
         irangbuf.myinst[i] = (itrace + (128 * i));
     }
-    memset(itrace, '\0', (128 * 20));
-    irangbuf.mypoint_to_myinst = 19;
+    memset(itrace, '\0', (128 * ITRACE_SIZE));
+    irangbuf.mypoint_to_myinst = (ITRACE_SIZE - 1);
 }
 
 void irangbuf_write(Decode *s){
-    irangbuf.mypoint_to_myinst = ((irangbuf.mypoint_to_myinst + 1) % 20);
+    irangbuf.mypoint_to_myinst = ((irangbuf.mypoint_to_myinst + 1) % ITRACE_SIZE);
     // memset(irangbuf.myinst[irangbuf.mypoint_to_myinst], '\0', 128);
     strcpy(irangbuf.myinst[irangbuf.mypoint_to_myinst], s->logbuf);
 }
 
 void irangbuf_printf(){
-    for (int i = 0; i < 20;i++){
+    for (int i = 0; i < ITRACE_SIZE;i++){
         if(i!=irangbuf.mypoint_to_myinst){
             printf("    ");
         }

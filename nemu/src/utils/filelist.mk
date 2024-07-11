@@ -15,6 +15,8 @@
 
 ifneq ($(CONFIG_ITRACE)$(CONFIG_IQUEUE),)
 CXXSRC = src/utils/disasm.cc
-CXXFLAGS += $(shell llvm-config --cxxflags) -fPIE
-LIBS += $(shell llvm-config --libs)
+CXXFLAGS += $(shell /usr/lib/llvm-14/bin/llvm-config --cxxflags) -fPIE
+# CXXFLAGS += I/usr/include/llvm-14 -std=c++17 -fno-exceptions -funwind-tables -fno-rtti -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -fPIE
+# CXXFLAGS+=-I/usr/lib/llvm-14/include -std=c++14   -fno-exceptions -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -fPIE
+LIBS += $(shell /usr/lib/llvm-14/bin/llvm-config --libs)
 endif

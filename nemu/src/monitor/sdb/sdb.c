@@ -15,6 +15,7 @@
 
 #include <isa.h>
 #include <cpu/cpu.h>
+#include <cpu/difftest.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "sdb.h"
@@ -115,14 +116,16 @@ static int cmd_x(char *args){
 		return 0;
 	}
 	else{
+        char *vp = strtok(NULL, " ");
         char *mode = strtok(NULL, " ");
         char *N = strtok(NULL, " ");
         char *ADDR = strtok(NULL, " ");
-        if (N == NULL || ADDR == NULL){
+        if (N == NULL || ADDR == NULL || vp == NULL){
             return 0;
         }
         else{
             long n = my_atoi(N);
+            long using_virtaddr = my_atoi(vp);
             // uint32_t addr = my_atoi(ADDR);
             bool text = true;
             word_t addr = expr(ADDR, &text,false,0,NULL);
@@ -137,7 +140,8 @@ static int cmd_x(char *args){
                 // printf("Now addr is %ld\n", addr);
                 if((*mode)=='x'){
                     for (int y = 0; y < n; y++){
-                        printf("0x%08x ", vaddr_read(addr, 4));
+                        uint32_t data = (using_virtaddr) ? (uint32_t)vaddr_read(addr, 4) : (uint32_t)paddr_read(addr, 4);
+                        printf("0x%08x ", data);
                         addr += 4;
                         if((y+1)%4==0)
                             printf("\n");
@@ -146,7 +150,8 @@ static int cmd_x(char *args){
                 }
                 else if((*mode)=='s'){
                     for (int y = 0; y < n; y++){
-                        printf("%c", vaddr_read(addr, 1));
+                        char data = (using_virtaddr) ? (char)vaddr_read(addr, 1) : (char)paddr_read(addr, 1);
+                        printf("%c", data);
                         addr += 1;
                         if((y+1)%100==0)
                             printf("\n");
@@ -223,6 +228,9 @@ static int cmd_attch(char *args){
 }
 
 static int cmd_save(char *args){
+    if (!args){
+        return 0;
+    }
     FILE *save_fp = NULL;
     save_fp = fopen(args, "wb");
     assert(save_fp);
@@ -238,6 +246,9 @@ static int cmd_save(char *args){
 }
 
 static int cmd_load(char *args){
+    if(!args){
+        return 0;
+    }
     FILE *load_fp = NULL;
     load_fp = fopen(args, "rb");
     assert(load_fp);
@@ -252,6 +263,55 @@ static int cmd_load(char *args){
     printf("load the status from %s\n", args);
     set_difftest_mode(false);
     set_difftest_mode(true);
+    return 0;
+}
+
+static int cmd_eq(char *args){
+    nemu_state.state = NEMU_END;
+    Log("nemu: %s at pc = " FMT_WORD,
+        (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) : ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED)),
+        nemu_state.halt_pc);
+    statistic();
+    return -1;
+}
+
+static int cmd_pc(char *args){
+    if(!args){
+        return 0;
+    }
+    long long imm = atoll(args);
+    cpu.pc += imm;
+    if (ref_difftest_regcpy)
+        ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
+    return 0;
+}
+
+static uint32_t inst;
+static int cmd_b(char *args){
+    char *ex = strtok(NULL, " ");
+    if (ex == NULL){
+        return 0;
+    }
+    bool text = true;
+    long addr = expr(ex, &text, false, 0, NULL);
+    if(text != true){
+        assert(0);
+    }
+    inst = paddr_read(addr, 4);
+    paddr_write(addr, 4, 0x100073);
+    return 0;
+}
+static int cmd_bq(char *args){
+    char *ex = strtok(NULL, " ");
+    if (ex == NULL){
+        return 0;
+    }
+    bool text = true;
+    long addr = expr(ex, &text, false, 0, NULL);
+    if(text != true){
+        assert(0);
+    }
+    paddr_write(addr, 4, inst);
     return 0;
 }
 
@@ -277,6 +337,10 @@ static struct {
     {"attch","To enter the difftest mode",cmd_attch},
     {"save","To save the status",cmd_save},
     {"load","To load the status",cmd_load},
+    {"eq","To quit when ebreak",cmd_eq},
+    {"pc","To add the pc to jump",cmd_pc},
+    {"b","To make a ebreak point",cmd_b},
+    {"bq","To make a ebreak point quit",cmd_bq},
 };
 
 #define NR_CMD ARRLEN(cmd_table)
@@ -310,11 +374,18 @@ void sdb_set_batch_mode() {
 
 void sdb_mainloop() {
   if (is_batch_mode){
-      int cnt = 0;
+    //   int cnt = 0;
       if (nemu_state.state == NEMU_STOP){
           cmd_c(NULL);
-          printf("Hello %d\n", cnt);
-          cnt++;
+        //   printf("Hello %d\n", cnt);
+        //   cnt++;
+        if(nemu_state.state == NEMU_STOP){
+            nemu_state.state = NEMU_END;
+            Log("nemu: %s at pc = " FMT_WORD,
+                (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) : ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED)),
+                nemu_state.halt_pc);
+            statistic();
+        }
       }
       return;
   }

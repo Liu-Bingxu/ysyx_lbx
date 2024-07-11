@@ -40,4 +40,19 @@
 
 #define TODO() panic("please implement me")
 
+// myself
+
+#define assert_my(expr)         \
+    do                          \
+    {                           \
+        void assert_fail_msg(); \
+        if (!(expr))            \
+        {                       \
+            assert_fail_msg();  \
+            assert(0);          \
+        }                       \
+    } while (0)
+
+//myself
+
 #endif

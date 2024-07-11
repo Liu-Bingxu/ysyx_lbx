@@ -124,10 +124,10 @@ static bool make_token(char *e) {
          * of tokens, some extra actions should be performed.
          */
 
+        assert(nr_token < 100);
         tokens[nr_token].type = rules[i].token_type;
 		strcp(tokens[nr_token].str, NULL, substr_len);
 		strcp(tokens[nr_token].str, e + position, substr_len);
-		assert(nr_token < 320);
 		nr_token++;
 
 		position += substr_len;

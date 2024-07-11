@@ -18,11 +18,42 @@
 
 #include <common.h>
 
-typedef struct {
-  word_t gpr[MUXDEF(CONFIG_RVE, 16, 32)];
-// word_t gpr[32];
-vaddr_t pc;
-word_t mtvec, mstatus, mcause, mepc;
+typedef enum
+{
+    PRV_U = 0,
+    PRV_S = 1,
+    PRV_M = 3
+}privileged;
+
+typedef struct
+{
+    word_t gpr[MUXDEF(CONFIG_RVE, 16, 32)];
+    // word_t gpr[32];
+    vaddr_t pc;
+    privileged privilege;
+    word_t mtvec,mstatus, mcause, mepc, mtval;
+    word_t stvec, sepc, scause, stval;
+    word_t medeleg, mideleg;
+    word_t mip, mie;
+    word_t mcycle, minstret, mhpmcounter[29], mhpmevent[29];
+    uint32_t mcountinhibit;
+    word_t mscratch;
+    word_t sscratch;
+    word_t satp;
+#ifndef CONFIG_RV64
+    word_t mcycleh, minstreth, mhpmcounterh[29];
+#endif
+    //? RW but RO in imp
+    word_t misa, menvcfg, mseccfg;
+    word_t senvcfg;
+    uint32_t mcounteren;
+    uint32_t scounteren;
+#ifndef CONFIG_RV64
+    word_t mstatush;
+    word_t menvcfgh, mseccfgh;
+#endif
+    //? RO reg
+    word_t mvendorid, marchid, mimpid, mhartid, mconfigptr;
 } MUXDEF(CONFIG_RV64, riscv64_CPU_state, riscv32_CPU_state);
 
 // decode
@@ -32,6 +63,6 @@ typedef struct {
   } inst;
 } MUXDEF(CONFIG_RV64, riscv64_ISADecodeInfo, riscv32_ISADecodeInfo);
 
-#define isa_mmu_check(vaddr, len, type) (MMU_DIRECT)
+// #define isa_mmu_check(vaddr, len, type) (MMU_DIRECT)
 
 #endif

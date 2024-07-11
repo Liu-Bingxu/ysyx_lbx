@@ -33,7 +33,27 @@ static void restart() {
   /* The zero register is always 0. */
   cpu.gpr[0] = 0;
 
-  cpu.mstatus = 0x1800;
+  cpu.mstatus = MUXDEF(CONFIG_ISA64, 0xa00001800, 0x1800);
+
+  cpu.mvendorid = (word_t)0x79737978;
+  cpu.marchid =  (word_t)23060081;
+  cpu.mimpid = (word_t)0x797379786C627800;
+  cpu.mhartid = 0;
+  cpu.mconfigptr = 0;
+  cpu.menvcfg = 0;
+  cpu.mseccfg = 0;
+  cpu.senvcfg = 0;
+  cpu.mcounteren = 0xfffffffd;
+  cpu.scounteren = 0x0;
+  cpu.misa = MUXDEF(CONFIG_ISA64, 0x8000000000141105, 0x80141105);
+#ifndef CONFIG_RV64
+  cpu.mstatush = 0;
+  cpu.mstatush = 0;
+  cpu.menvcfgh = 0;
+  cpu.mseccfgh = 0;
+#endif
+
+  cpu.privilege = PRV_M;
 }
 
 void init_isa() {

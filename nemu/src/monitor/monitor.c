@@ -50,6 +50,8 @@ static int difftest_port = 1234;
 //myftrace
 static char *ELF_FILE = NULL;
 extern void init_ftrace(const char *ELF_FILE);
+static char *disk_img_file = NULL;
+extern void init_sbi_disk_img(const char *disk_img_file);
 // myftrace
 
 static long load_img() {
@@ -81,17 +83,19 @@ static int parse_args(int argc, char *argv[]) {
     {"diff"     , required_argument, NULL, 'd'},
     {"port"     , required_argument, NULL, 'p'},
     {"elf"      , required_argument, NULL, 'e'},
+    {"img"      , required_argument, NULL, 'i'},
     {"help"     , no_argument      , NULL, 'h'},
     {0          , 0                , NULL,  0 },
   };
   int o;
-  while ( (o = getopt_long(argc, argv, "-bhl:d:p:e:", table, NULL)) != -1) {
+  while ( (o = getopt_long(argc, argv, "-bhi:l:d:p:e:", table, NULL)) != -1) {
     switch (o) {
       case 'b': sdb_set_batch_mode(); break;
       case 'p': sscanf(optarg, "%d", &difftest_port); break;
       case 'l': log_file = optarg; break;
       case 'd': diff_so_file = optarg; break;
       case 'e': ELF_FILE=optarg;break;
+      case 'i': disk_img_file=optarg;break;
       case 1: img_file = optarg; return 0;
       default:
         printf("Usage: %s [OPTION...] IMAGE [args]\n\n", argv[0]);
@@ -141,6 +145,9 @@ void init_monitor(int argc, char *argv[]) {
 
     //ftrace init
     IFDEF(CONFIG_FTRACE, init_ftrace(ELF_FILE));
+
+    //mmap the disk_img
+    IFDEF(CONFIG_HAS_SBI_DISK, init_sbi_disk_img(disk_img_file));
     init_fsming_path();
 
 #ifndef CONFIG_ISA_loongarch32r

@@ -23,6 +23,11 @@ SRCS-$(CONFIG_HAS_AUDIO) += src/device/audio.c
 SRCS-$(CONFIG_HAS_DISK) += src/device/disk.c
 SRCS-$(CONFIG_HAS_SDCARD) += src/device/sdcard.c
 
+SRCS-$(CONFIG_HAS_SBI_SERIAL) += src/device/sbi_serial.c
+SRCS-$(CONFIG_HAS_SBI_CLINT) += src/device/sbi_clint.c
+SRCS-$(CONFIG_HAS_SBI_PLIC) += src/device/sbi_plic.c
+SRCS-$(CONFIG_HAS_SBI_DISK) += src/device/sbi_disk.c
+
 SRCS-BLACKLIST-$(CONFIG_TARGET_AM) += src/device/alarm.c
 
 ifdef CONFIG_DEVICE

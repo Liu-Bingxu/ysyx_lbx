@@ -12,6 +12,55 @@ config HAS_PORT_IO
   default y if ISA_x86
   default n
 
+menuconfig HAS_SBI_SERIAL
+  bool "Enable sbi serial"
+  default y
+
+if HAS_SBI_SERIAL
+config SBI_SERIAL_MMIO
+  hex "MMIO address of the sbi serial controller"
+  default 0x10000000
+endif # HAS_SBI_SERIAL
+
+menuconfig HAS_SBI_CLINT
+  bool "Enable sbi clint"
+  default y
+
+if HAS_SBI_CLINT
+config SBI_CLINT_MMIO
+  hex "MMIO address of the sbi clint controller"
+  default 0x2000000
+config SBI_CLINT_HART_COUNT
+  int "use hart number of the sbi clint controller"
+  default 1
+endif # HAS_SBI_CLINT
+
+menuconfig HAS_SBI_PLIC
+  bool "Enable sbi plic"
+  default y
+
+if HAS_SBI_PLIC
+config SBI_PLIC_MMIO
+  hex "MMIO address of the sbi plic controller"
+  default 0xc000000
+config SBI_PLIC_INT_SOURCE_COUNT
+  int "use interrupt source number of the sbi plic controller"
+  default 35
+config SBI_PLIC_CONTEXT_COUNT
+  int "use context number of the sbi plic controller"
+  default 2
+endif # HAS_SBI_PLIC
+
+menuconfig HAS_SBI_DISK
+  bool "Enable sbi disk"
+  default y
+
+if HAS_SBI_DISK
+config SBI_DISK_MMIO
+  hex "MMIO address of the sbi disk controller"
+  default 0x10100000
+endif # HAS_SBI_DISK
+
 menuconfig HAS_SERIAL
   bool "Enable serial"
   default y
