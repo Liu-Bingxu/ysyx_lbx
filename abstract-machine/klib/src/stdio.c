@@ -200,9 +200,9 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
     //   panic("Not implemented");
 }
 
-int printf(const char *fmt, ...) {
+int printf(const char *fmt, ...){
+    static char buf[1024 * 2];
     assert(fmt != NULL);
-    char buf[1024*2];
     va_list ap;
     va_start(ap, fmt);
     int res = vsprintf(buf, fmt, ap);

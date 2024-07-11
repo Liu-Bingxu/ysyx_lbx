@@ -45,7 +45,7 @@ bool cte_init(Context*(*handler)(Event, Context*)) {
 }
 
 #if __riscv_xlen == 64
-#define RST_STATUS 0xa0001800
+#define RST_STATUS 0xa00001800
 #define XLEN 8
 #else
 #define RST_STATUS 0x1800

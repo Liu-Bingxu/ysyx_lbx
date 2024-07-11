@@ -39,13 +39,19 @@ void *malloc(size_t size) {
     if(start_flag==0){
         next_addr=heap.start;
         start_flag = 1;
+        printf("init malloc, start addr is 0x%016llx\n", (uint64_t)next_addr);
     }
     if(size==0)return NULL;
     void *return_addr = next_addr;
     next_addr += size;
-    if((uint32_t)next_addr%0x7!=0){
-        next_addr -= ((uint32_t)next_addr & 0x7);
-        next_addr += 0x8;
+// #ifdef RV64_LBX
+//     if((uint64_t)next_addr%0xf!=0){
+//         next_addr -= ((uint64_t)next_addr & 0xf);
+// #else
+    if ((uintptr_t)next_addr % 0xf != 0){
+        next_addr -= ((uintptr_t)next_addr & 0xf);
+// #endif
+        next_addr += 0x10;
     }
     // printf("addr is %x\n", return_addr);
     return return_addr;
