@@ -252,9 +252,9 @@ always @(posedge clk or negedge rst_n) begin
                     end
                     else begin
                         // dcache_fsm_status<=DCACHE_CMP_TAG;
-                        // `ifdef DPI_C
-                        // dcache_access();
-                        // `endif
+                        `ifdef DPI_C
+                        dcache_access();
+                        `endif
                         if(res==0)begin
                             dcache_fsm_status<=DCACHE_READ_ADDR;
                             dcache_arvalid_reg<=1'b1;

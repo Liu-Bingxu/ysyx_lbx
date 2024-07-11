@@ -14,7 +14,7 @@ void *guest_to_host(paddr_t addr){
 void pmem_read(uint32_t raddr,uint32_t *rdata){
     if(raddr==TIMER_ADDR){(*rdata)=get_timer_reg(0);return;}
     if(raddr==(TIMER_ADDR+4)){(*rdata)=get_timer_reg(1);return;}
-    raddr &= (~0x80000003U);
+    raddr &= (~0x20000000U);
     // assert(raddr < PMEM_SIZE);
     if(raddr>=PMEM_SIZE){
         printf("raddr >= PMEM_SIZE\n");
@@ -58,4 +58,20 @@ void pmem_write(uint32_t waddr, uint32_t wdata,char wmask){
     else assert(0);
     // else sdb_mainloop();
     return;
+}
+
+extern "C" void flash_read(int32_t addr, int32_t *data) { assert(0); }
+extern "C" void mrom_read(int32_t addr, int32_t *data) {
+    // *data = 0x100073;
+    addr &= (~0x3U);
+    // assert(raddr < PMEM_SIZE);
+    if ((addr - PC_RST) >= PMEM_SIZE)
+    {
+        printf("raddr >= PMEM_SIZE, addr is " FMT_PADDR "\n", addr);
+        npc_state.state = NPC_END;
+        npc_state.halt_pc = get_gpr(32);
+        npc_state.halt_ret = 0;
+        sim_exit();
+    }
+    (*data) = *(int32_t *)(guest_to_host(addr));
 }

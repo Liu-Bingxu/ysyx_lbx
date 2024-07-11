@@ -28,16 +28,16 @@ static const uint32_t img[] = {
     0xdeadbeef, // some data
 };
 
-void init_gpr(Vtop *top){
-    for (int i = 0; i < 32;i++){
-        reg.GPR[i] = (&(top->rootp->top__DOT__u_gpr__DOT__riscv_reg[i]));
+void init_gpr(VysyxSoCFull *top){
+    for (int i = 1; i < 32;i++){
+        reg.GPR[i] = ((word_t *)&(top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__u_core_top__DOT__u_wbu__DOT__u_gpr__DOT__riscv_reg[i - 1]));
     }
     // reg.pc = (&top->rootp->top__DOT__u_ifu__DOT__PC_to_sram_reg);
     reg.pc = PC_RST;
-    reg.mcause = (&top->rootp->top__DOT__u_csr__DOT__u_mcause__DOT__u_mcause__DOT__data_out_reg);
-    reg.mepc = (&top->rootp->top__DOT__u_csr__DOT__u_mepc__DOT__u_mepc__DOT__data_out_reg);
-    reg.mstatus = (&top->rootp->top__DOT__u_csr__DOT__u_mstatus__DOT__RV32_mstatus_init__DOT__u_mstatus__DOT__data_out_reg);
-    reg.mtvec = (&top->rootp->top__DOT__u_csr__DOT__u_mtvec__DOT__u_mtvec__DOT__data_out_reg);
+    reg.mcause = ((word_t *)&top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__u_core_top__DOT__u_wbu__DOT__u_csr__DOT__u_csr_mcause__DOT__mcause_reg);
+    reg.mepc = ((word_t *)&top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__u_core_top__DOT__u_wbu__DOT__u_csr__DOT__u_csr_mepc__DOT__mepc_reg);
+    reg.mstatus = ((word_t *)&top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__u_core_top__DOT__u_wbu__DOT__u_csr__DOT__mstatus);
+    reg.mtvec = ((word_t *)&top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__u_core_top__DOT__u_wbu__DOT__u_csr__DOT__u_csr_mtvec__DOT__mtvec_reg);
     memcpy(guest_to_host(PC_RST), img, sizeof(img));
 }
 

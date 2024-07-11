@@ -6,7 +6,7 @@
 #include "debug.h"
 #include "verilated.h"
 #include "verilated_vcd_c.h"
-#include "Vtop.h"
+#include "VysyxSoCFull.h"
 #include "regs.h"
 
 static char *log_file = NULL;
@@ -55,6 +55,7 @@ static long load_img(){
     fseek(fp, 0, SEEK_SET);
     int ret = fread(guest_to_host(PC_RST), size, 1, fp);
     assert(ret == 1);
+    Log("successful read img\n");
 
     fclose(fp);
     return size;
@@ -113,19 +114,23 @@ static void parse_args(int argc,char *argv[]){
   return;
 }
 
-void init_monitor(Vtop *top, VerilatedVcdC *tfp, int argc, char *argv[]){
+void init_monitor(VysyxSoCFull *top, VerilatedVcdC *tfp, int argc, char *argv[]){
     IFDEF(CONFIG_ITRACE, init_itrace());
     parse_args(argc, argv);
     init_log(log_file);
     IFDEF(CONFIG_FTRACE, init_ftrace(ELF_FILE));
     long img_size=load_img();
     init_sdb();
+    Log("successful init sdb\n");
     init_disasm(MUXDEF(CONFIG_RV64, "riscv64", "riscv32") "-pc-linux-gnu");
+    Log("successful init disasm\n");
     IFDEF(CONFIG_VCD_GET, tfp->open(wave_file));
     // Log(ANSI_FMT("Hello\n", ANSI_FG_GREEN));
     sim_rst();
+    Log("successful sim rst\n");
     // isa_reg_display();
     init_difftest(diff_so_file, img_size, difftest_port);
+    Log("successful init difftest\n");
     welcome();
     return;
 }

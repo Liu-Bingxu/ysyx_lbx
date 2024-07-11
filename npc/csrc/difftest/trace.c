@@ -1,7 +1,6 @@
 #include "elf.h"
 #include "utils.h"
 #include "pmem.h"
-#include "Vtop__Dpi.h"
 #include "debug.h"
 #include "regs.h"
 

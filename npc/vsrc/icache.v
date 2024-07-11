@@ -237,13 +237,13 @@ always @(posedge clk or negedge rst_n) begin
                         WEN_reg<=1'b0;
                         CEN_reg[rand_way]<=1'b0;
                     end
-                    else if(IF_reg_inst_flush/* |flush_flag_reg */)begin
-                        icache_fsm_status<=ICACHE_GET_DATA;
-                        icache_read_cnt<={(STEP+1){1'b0}};
-                        ifu_rvalid_reg<=1'b1;
-                        // flush_flag_reg<=1'b0;
-                        ifu_rresp_reg<=3'h0;
-                    end
+                    // else if(IF_reg_inst_flush/* |flush_flag_reg */)begin
+                    //     icache_fsm_status<=ICACHE_GET_DATA;
+                    //     icache_read_cnt<={(STEP+1){1'b0}};
+                    //     ifu_rvalid_reg<=1'b1;
+                    //     // flush_flag_reg<=1'b0;
+                    //     ifu_rresp_reg<=3'h0;
+                    // end
                     else begin
                         icache_fsm_status<=ICACHE_READ_ADDR;
                         icache_arvalid_reg<=1'b1;
@@ -361,6 +361,8 @@ module icache_way#(parameter DATA_LEN=32,TAG_LEN=DATA_LEN-10-$clog2(SRAM_NUM),SR
     input                   rst_n,
 //interface with cache to get the flag
     input  [TAG_LEN-1:0]    tag_in,
+    // input  [ADDR_LEN-1:0]   raddr,
+    // input  [ADDR_LEN-1:0]   waddr,
     // input                   addr_valid,
     output                  valid,
     output [TAG_LEN-1:0]    tag,

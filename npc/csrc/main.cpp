@@ -1,8 +1,8 @@
 #include "verilated.h"
 #include "verilated_vcd_c.h"
-#include "Vtop.h"
+#include "VysyxSoCFull.h"
 #include <iostream>
-#include "Vtop__Dpi.h"
+#include "VysyxSoCFull__Dpi.h"
 #include "pmem.h"
 #include "common.h"
 #include "utils.h"
@@ -14,10 +14,10 @@ using namespace std;
 
 #define MAX_INST_TO_PRINT 10
 
-#define PC_now top->rootp->
-#define DUT_inst top->rootp->top__DOT__u_ifu__DOT__inst_reg
-#define npc_ifu_status top->rootp->top__DOT__u_ifu__DOT__IFU_FSM_STATUS_ADDR
-#define ls_valid_flag top->rootp->top__DOT__u_lsu_rv32__DOT__u_LS_WB_reg_ls_valid__DOT__data_out_reg
+// #define PC_now top->rootp->
+// #define DUT_inst top->rootp->top__DOT__u_ifu__DOT__inst_reg
+// #define npc_ifu_status top->rootp->top__DOT__u_ifu__DOT__IFU_FSM_STATUS_ADDR
+#define ls_valid_flag top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__u_core_top__DOT__u_lsu__DOT__u_ls_valid__DOT__data_out_reg
 
 VerilatedContext* contextp = NULL;
 VerilatedVcdC* tfp = NULL;
@@ -30,12 +30,12 @@ void set_skip_ref_flag(void){
 
 extern void sdb_mainloop();
 
-static Vtop *top;
+static VysyxSoCFull *top;
 uint64_t g_nr_guest_inst = 0;
 static uint64_t g_timer = 0; // unit: us
 static bool g_print_step = false;
 
-extern void init_monitor(Vtop *top, VerilatedVcdC *tfp,int argc, char *argv[]);
+extern void init_monitor(VysyxSoCFull *top, VerilatedVcdC *tfp, int argc, char *argv[]);
 extern void irangbuf_printf();
 extern void irangbuf_write(const char *buf);
 extern void ftrace_watch(paddr_t pc,paddr_t pc_jump);
@@ -120,24 +120,24 @@ void assert_fail_msg(){
 void sim_init(int argc, char *argv[]){
     contextp = new VerilatedContext;
     IFDEF(CONFIG_VCD_GET, tfp = new VerilatedVcdC);
-    top = new Vtop;
+    top = new VysyxSoCFull;
     contextp->traceEverOn(true);
     contextp->commandArgs(argc, argv);
     IFDEF(CONFIG_VCD_GET, top->trace(tfp, 0));
     init_gpr(top);
-    top->sys_clk = 0;
-    top->sys_rst_n = 1;
+    top->clock = 0;
+    top->reset = 0;
     // pmem_read(top->PC_out, &top->inst_in);
     init_monitor(top,tfp,argc, argv);
 }
 
 
 void sim_rst(){
-    top->sys_rst_n = 0;
+    top->reset = 1;
     for (int i = 0; i < 10;i++){
-        top->sys_clk = !top->sys_clk;
+        top->clock = !top->clock;
         if(i==9)
-            top->sys_rst_n = 1;
+            top->reset = 0;
         step_and_dump_wave();
     }
     // top->sys_clk = !top->sys_clk;
@@ -149,11 +149,17 @@ void sim_rst(){
     //     step_and_dump_wave();
     // }
     while (ls_valid_flag == 0){
-        top->sys_clk = !top->sys_clk;
+        top->clock = !top->clock;
         step_and_dump_wave();
-        top->sys_clk = !top->sys_clk;
+        top->clock = !top->clock;
         step_and_dump_wave();
         clock_cnt++;
+        if(clock_cnt == 40){
+            isa_reg_display();
+            IFDEF(CONFIG_ITRACE, irangbuf_printf());
+            set_npc_state(NPC_END, get_gpr(32), 0);
+            sim_exit();
+        }
     }
     // top->sys_clk = !top->sys_clk;
     // step_and_dump_wave();
@@ -189,13 +195,13 @@ static void exec_once(char *p, char *p2,paddr_t pc){
     memset(p, ' ', space_len);
     p += space_len;
     disassemble(p, p + 128 - p,pc, (uint8_t *)&val, ilen);
-    printf("%s\n", inst_asm);
+    printf("ASM1: %s\n", inst_asm);
 
     char *inst_asm2 = p2;
     p2 += snprintf(p2, 128, FMT_WORD ":", (pc));
     int ilen2 = 4;
     int i2;
-    word_t val2 = top->rootp->LS_WB_reg_inst;
+    word_t val2 = top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__u_core_top__DOT__u_lsu__DOT__u_inst__DOT__data_out_reg;
     uint8_t *inst2 = (uint8_t *)&val2;
     for (i2 = ilen2 - 1; i2 >= 0; i2--){
         p2 += snprintf(p2, 4, " %02x", inst2[i2]);
@@ -208,15 +214,15 @@ static void exec_once(char *p, char *p2,paddr_t pc){
     memset(p2, ' ', space_len2);
     p2 += space_len2;
     disassemble(p2, p2 + 128 - p2, pc, (uint8_t *)&val2, ilen2);
-    // printf("%s\n", inst_asm2);
-    if(strcmp(inst_asm,inst_asm2)!=0){
-        npc_state.state = NPC_END;
-        npc_state.halt_pc = get_gpr(32);
-        printf("%s\n", inst_asm2);
-        npc_state.halt_ret = 0;
-        Log(ANSI_FMT("inst error\n", ANSI_FG_RED));
-        sim_exit();
-    }
+    printf("ASM2: %s\n", inst_asm2);
+    // if(strcmp(inst_asm,inst_asm2)!=0){
+    //     npc_state.state = NPC_END;
+    //     npc_state.halt_pc = get_gpr(32);
+    //     printf("%s\n", inst_asm2);
+    //     npc_state.halt_ret = 0;
+    //     Log(ANSI_FMT("inst error\n", ANSI_FG_RED));
+    //     sim_exit();
+    // }
 #endif
     // pmem_read(top->PC_out, &top->inst_in);
     // printf("%d\n", g_nr_guest_inst);
@@ -242,11 +248,18 @@ static void exec_once(char *p, char *p2,paddr_t pc){
     //     clock_cnt++;
     // }
 
-    top->sys_clk = !top->sys_clk;
+    if ((top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__u_core_top__DOT__u_lsu__DOT__u_inst__DOT__data_out_reg)==0x100073){
+        set_npc_state(NPC_END, get_gpr(32), get_gpr(10));
+        return;
+    }
+    // fflush(stdout);
+
+    top->clock = !top->clock;
     step_and_dump_wave();
-    top->sys_clk = !top->sys_clk;
+    top->clock = !top->clock;
     step_and_dump_wave();
     clock_cnt++;
+    int cnt_now = 0;
     while (ls_valid_flag == 0){
         // if (get_time() >= 800000){
         //     npc_state.state = NPC_END;
@@ -254,11 +267,18 @@ static void exec_once(char *p, char *p2,paddr_t pc){
         //     npc_state.halt_ret = 0;
         //     sim_exit();
         // }
-        top->sys_clk = !top->sys_clk;
+        top->clock = !top->clock;
         step_and_dump_wave();
-        top->sys_clk = !top->sys_clk;
+        top->clock = !top->clock;
         step_and_dump_wave();
         clock_cnt++;
+        cnt_now++;
+        if (cnt_now == 100000){
+            isa_reg_display();
+            IFDEF(CONFIG_ITRACE, irangbuf_printf());
+            set_npc_state(NPC_END, get_gpr(32), 0);
+            sim_exit();
+        }
     }
 
     //debug icache mutil sram in a way 2023.10.26
@@ -350,10 +370,10 @@ static void execute(uint64_t n)
             skip_ref_flag = false;
             difftest_skip_ref();
         }
-        paddr_t pc = top->LS_WB_reg_PC;
+        paddr_t pc = top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__u_core_top__DOT__u_lsu__DOT__u_PC__DOT__data_out_reg;
         exec_once(p, p2, pc);
         g_nr_guest_inst++;
-        paddr_t dnpc = top->LS_WB_reg_PC;
+        paddr_t dnpc = top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__u_core_top__DOT__u_lsu__DOT__u_PC__DOT__data_out_reg;
         set_pc(dnpc);
         // Log("dnpc: 0x%08x\n", dnpc);
         // if((g_nr_guest_inst%1000)==0){

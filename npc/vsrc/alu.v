@@ -1,9 +1,13 @@
+`include "./define.v"
 module alu#(parameter DATA_LEN = 32) (
     input  [DATA_LEN-1:0]   NUM_A,
     input  [DATA_LEN-1:0]   NUM_B,
     input                   OP,
     input                   LR,
     input                   AL,
+`ifdef RISCV64
+    input                   is_word,
+`endif
     input                   is_or,
     input                   is_xor,
     input                   is_and,
@@ -63,7 +67,11 @@ buck_shift #(DATA_LEN,SHAMT_LEN)u_buck_shift(
     .LR       	( LR                    ),
     .AL       	( AL                    ),
     .shamt    	( NUM_B[SHAMT_LEN-1:0]  ),
-    .data_in  	( NUM_A                 ),
+`ifdef RISCV64
+    .data_in  	( (is_word&(~AL))?{{(DATA_LEN-32){1'b0}},NUM_A[31:0]}:NUM_A                 ),
+`else
+    .data_in    ( NUM_A                 ),
+`endif
     .data_out 	( res_shift             )
 );
 

@@ -1,5 +1,5 @@
 `include "./define.v"
-module idu#(parameter DATA_LEN=32) (
+module idu#(parameter DATA_LEN=64) (
     input                   clk,
     input                   rst_n,
     // input                   unusual_flag,
@@ -28,6 +28,9 @@ module idu#(parameter DATA_LEN=32) (
     output [DATA_LEN-1:0]   ID_EX_reg_PC,
 `ifdef SIM
     output  [31:0]          ID_EX_reg_inst,
+`endif
+`ifdef RISCV64
+    output [2:0]            ID_EX_reg_control_sign_word,
 `endif
     output [DATA_LEN-1:0]   ID_EX_reg_operand1,   
     output [DATA_LEN-1:0]   ID_EX_reg_operand2, 
@@ -157,11 +160,11 @@ assign rd  = IF_ID_reg_inst[11:7 ];
 assign funct3 = IF_ID_reg_inst[14:12];
 assign funct7 = IF_ID_reg_inst[31:25];
 
-assign imm_I = {{20{IF_ID_reg_inst[31]}},IF_ID_reg_inst[31:20]};
-assign imm_S = {{20{IF_ID_reg_inst[31]}},IF_ID_reg_inst[31:25],IF_ID_reg_inst[11:7]};
-assign imm_B = {{20{IF_ID_reg_inst[31]}},IF_ID_reg_inst[7],IF_ID_reg_inst[30:25],IF_ID_reg_inst[11:8],1'b0};
-assign imm_U = {IF_ID_reg_inst[31:12],12'h0};
-assign imm_J = {{12{IF_ID_reg_inst[31]}},IF_ID_reg_inst[19:12],IF_ID_reg_inst[20],IF_ID_reg_inst[30:21],1'b0};
+assign imm_I = {{(DATA_LEN-12){IF_ID_reg_inst[31]}},IF_ID_reg_inst[31:20]};
+assign imm_S = {{(DATA_LEN-12){IF_ID_reg_inst[31]}},IF_ID_reg_inst[31:25],IF_ID_reg_inst[11:7]};
+assign imm_B = {{(DATA_LEN-12){IF_ID_reg_inst[31]}},IF_ID_reg_inst[7],IF_ID_reg_inst[30:25],IF_ID_reg_inst[11:8],1'b0};
+assign imm_U = {{(DATA_LEN-31){IF_ID_reg_inst[31]}},IF_ID_reg_inst[30:12],12'h0};
+assign imm_J = {{(DATA_LEN-20){IF_ID_reg_inst[31]}},IF_ID_reg_inst[19:12],IF_ID_reg_inst[20],IF_ID_reg_inst[30:21],1'b0};
 assign CSR_imm = {{CSR_FILLER_LEN{1'b0}},rs1};
 // 
 assign R_flag   = (IF_ID_reg_inst[6:0]==7'b0110011)?1'b1:1'b0;
@@ -237,17 +240,66 @@ assign mret     =   (IF_ID_reg_inst ==  32'h30200073) ? 1'b1 : 1'b0;
 assign ecall    =   (IF_ID_reg_inst ==  32'h00000073) ? 1'b1 : 1'b0;
 assign ebreak   =   (IF_ID_reg_inst ==  32'h00100073) ? 1'b1 : 1'b0;
 
-assign operand1 = ((csr_rw_flag)?CSR_operand1:((auipc|jalr|jal)?IF_ID_reg_PC:((lui)?32'h0:src1)));
+`ifdef RISCV64
+
+wire IW_flag;
+wire RW_flag;
+assign IW_flag   = (IF_ID_reg_inst[6:0]==7'b0011011)?1'b1:1'b0;
+assign RW_flag   = (IF_ID_reg_inst[6:0]==7'b0111011)?1'b1:1'b0;
+
+wire ld,lwu,sd;
+wire slliw,srliw,sraiw;
+wire subw,sllw,srlw,sraw;
+wire is_word;
+
+wire [2:0] control_sign_word;
+
+assign lwu      =   (load_flag&(funct3==3'b110))?1'b1:1'b0;
+assign ld       =   (load_flag&(funct3==3'b011))?1'b1:1'b0;
+assign sd       =   (S_flag   &(funct3==3'b011))?1'b1:1'b0;
+
+assign sllw     =   (RW_flag&({funct7,funct3}==10'h001 ))?1'b1:1'b0;
+assign slliw    =   (IW_flag&({funct7,funct3}==10'h001 ))?1'b1:1'b0;
+assign srlw     =   (RW_flag&({funct7,funct3}==10'h005 ))?1'b1:1'b0;
+assign srliw    =   (IW_flag&({funct7,funct3}==10'h005 ))?1'b1:1'b0;
+assign sraw     =   (RW_flag&({funct7,funct3}==10'h105 ))?1'b1:1'b0;
+assign sraiw    =   (IW_flag&({funct7,funct3}==10'h105 ))?1'b1:1'b0;
+
+assign subw     =   (RW_flag&({funct3,funct7}==10'h20))?1'b1:1'b0;
+
+assign is_word  =   RW_flag|IW_flag;
+
+assign control_sign_word = {is_word,ld,sd};
+
+assign operand1 = ((csr_rw_flag)?CSR_operand1:((auipc|jalr|jal)?IF_ID_reg_PC:((lui)?{DATA_LEN{1'b0}}:src1)));
+assign operand2 = (jalr|jal)?4:((B_flag|R_flag|RW_flag)?src2:imm);
+assign op       = (B_flag|is_cmp|sub|subw);
+
+assign is_or    = OR    |   ori |   csrrc   |   csrrci  |   csrrs   |   csrrsi;
+assign is_xor   = XOR   |   xori;
+assign is_and   = AND   |   andi;
+assign is_cmp   = slt|slti|sltiu|sltu;
+assign is_unsign= sltiu|sltu|lbu|lhu|lwu;
+assign is_store = S_flag;
+assign is_load  = load_flag;
+assign is_beq   = beq;
+assign is_bne   = bne;
+assign is_blt   = blt;
+assign is_bge   = bge;
+assign is_bltu  = bltu;
+assign is_bgeu  = bgeu;
+assign is_byte  = lb|lbu;
+assign is_half  = lh|lhu;
+assign is_word  = lw|lwu;
+assign is_shift = sll|slli|srl|srli|sra|srai|sllw|slliw|srlw|srliw|sraw|sraiw;
+assign LR       = sll|slli|sllw|slliw;
+assign AL       = IF_ID_reg_inst[30];
+
+`else
+
+assign operand1 = ((csr_rw_flag)?CSR_operand1:((auipc|jalr|jal)?IF_ID_reg_PC:((lui)?{DATA_LEN{1'b0}}:src1)));
 assign operand2 = (jalr|jal)?4:((B_flag|R_flag)?src2:imm);
 assign op       = (B_flag|is_cmp|sub);
-
-assign operand3 = (jalr)?src1:IF_ID_reg_PC;
-assign operand4 = imm;
-
-assign inst_jump_flag = (B_flag);
-assign jump_without   = (jal|jalr);
-
-assign dest_wen = ((!(B_flag|S_flag|(CSR_flag&(~CSR_ren))|ebreak|mret)));
 
 assign is_or    = OR    |   ori |   csrrc   |   csrrci  |   csrrs   |   csrrsi;
 assign is_xor   = XOR   |   xori;
@@ -268,6 +320,16 @@ assign is_word  = lw;
 assign is_shift = sll|slli|srl|srli|sra|srai;
 assign LR       = sll|slli;
 assign AL       = IF_ID_reg_inst[30];
+
+`endif
+
+assign operand3 = (jalr)?src1:IF_ID_reg_PC;
+assign operand4 = imm;
+
+assign inst_jump_flag = (B_flag);
+assign jump_without   = (jal|jalr);
+
+assign dest_wen = ((!(B_flag|S_flag|(CSR_flag&(~CSR_ren))|ebreak|mret)));
 
 assign control_sign = {is_bgeu,is_bge,is_bne,is_beq,is_bltu,is_blt,
                         is_cmp,is_unsign,is_shift,AL,LR,is_and,is_xor,is_or};          
@@ -321,6 +383,12 @@ FF_D_without_asyn_rst #(DATA_LEN)  u_operand2        (clk,ID_reg_decode_enable&I
 FF_D_without_asyn_rst #(DATA_LEN)  u_operand3        (clk,ID_reg_decode_enable&IF_ID_reg_inst_valid,operand3,ID_EX_reg_operand3);
 FF_D_without_asyn_rst #(DATA_LEN)  u_operand4        (clk,ID_reg_decode_enable&IF_ID_reg_inst_valid,operand4,ID_EX_reg_operand4);
 FF_D_without_asyn_rst #(DATA_LEN)  u_store_data      (clk,ID_reg_decode_enable&IF_ID_reg_inst_valid,src2,ID_EX_reg_store_data);
+
+`ifdef RISCV64
+
+FF_D_without_asyn_rst #(3)         u_control_sign_word(clk,ID_reg_decode_enable&IF_ID_reg_inst_valid,control_sign_word,ID_EX_reg_control_sign_word);
+
+`endif
 
 endmodule //idu
 //the channel 1 is to GPR, channel 2 is to jump_pc

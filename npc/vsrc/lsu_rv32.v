@@ -49,6 +49,9 @@ module lsu_rv32 #(parameter DATA_LEN=32,DATA_BIT_NUM=4)(
     input  [4:0]            EX_LS_reg_load_sign,
     input  [3:0]            EX_LS_reg_store_sign,
     input                   EX_LS_reg_unusual_flag,
+`ifdef RISCV64
+    input  [1:0]            EX_LS_reg_control_sign_word,
+`endif
     input                   EX_LS_reg_ebreak,
     input                   EX_LS_reg_CSR_ren,
     input                   EX_LS_reg_CSR_wen,
@@ -120,13 +123,16 @@ always @(*) begin
 end
 //get the truly load data 
 wire [DATA_LEN-1:0]       load_data;
-memory_load_rv32 #(DATA_LEN)u_memory_load_rv32(
-    .pre_data 	( pre_data_reg  ),
-    .is_byte  	( is_load_byte  ),
-    .is_half  	( is_load_half  ),
-    .is_word    ( is_load_word  ),
-    .is_sign  	( is_load_sign  ),
-    .data     	( load_data     )
+memory_load #(DATA_LEN)u_memory_load(
+    .pre_data 	( pre_data_reg                      ),
+    .is_byte  	( is_load_byte                      ),
+    .is_half  	( is_load_half                      ),
+    .is_word    ( is_load_word                      ),
+`ifdef RISCV64
+    .is_double  ( EX_LS_reg_control_sign_word[1]    ),
+`endif
+    .is_sign  	( is_load_sign                      ),
+    .data     	( load_data                         )
 );
 
 //AXI load FSM
@@ -416,17 +422,23 @@ FF_D_without_asyn_rst #(DATA_LEN) u_LS_WB_reg_dest_data  (clk,LS_reg_load_store_
 endmodule //lsu_rv32
 
 /* verilator lint_off DECLFILENAME */
-module memory_load_rv32#(parameter DATA_LEN = 32)(
+module memory_load#(parameter DATA_LEN = 32)(
     input   [DATA_LEN-1:0]  pre_data,
     input                   is_byte,
     input                   is_half,
     input                   is_word,
+`ifdef RISCV64
+    input                   is_double,
+`endif
     input                   is_sign,
     output  [DATA_LEN-1:0]  data
 );
 
 localparam FILLER_LEN_BYTE = DATA_LEN-8 ;
 localparam FILLER_LEN_HALF = DATA_LEN-16;
+`ifdef RISCV64
+    localparam FILLER_LEN_DOUBLE = DATA_LEN-32;
+`endif
 
 wire [DATA_LEN-1:0] data_byte;
 wire [DATA_LEN-1:0] data_half;
@@ -435,6 +447,11 @@ wire [DATA_LEN-1:0] data_signed_byte;
 wire [DATA_LEN-1:0] data_signed_half;
 wire [DATA_LEN-1:0] data_unsigned_byte;
 wire [DATA_LEN-1:0] data_unsigned_half;
+`ifdef RISCV64
+    wire [DATA_LEN-1:0] data_double;
+    wire [DATA_LEN-1:0] data_signed_double;
+    wire [DATA_LEN-1:0] data_unsigned_double;
+`endif
 
 assign data_signed_byte = {{FILLER_LEN_BYTE{pre_data[7]} },pre_data[7:0] };
 assign data_signed_half = {{FILLER_LEN_HALF{pre_data[15]}},pre_data[15:0]};
@@ -442,11 +459,25 @@ assign data_signed_half = {{FILLER_LEN_HALF{pre_data[15]}},pre_data[15:0]};
 assign data_unsigned_byte = {{FILLER_LEN_BYTE{1'b0}},pre_data[7:0] };
 assign data_unsigned_half = {{FILLER_LEN_HALF{1'b0}},pre_data[15:0]};
 
-assign data_word = pre_data;
+`ifdef RISCV64
+    assign data_signed_double = {{FILLER_LEN_DOUBLE{pre_data[31]}},pre_data[31:0] };
+    assign data_unsigned_double = {{FILLER_LEN_DOUBLE{1'b0}},pre_data[31:0]};
+`endif
+
 assign data_byte = (is_sign)?data_signed_byte:data_unsigned_byte;
 assign data_half = (is_sign)?data_signed_half:data_unsigned_half;
+`ifdef RISCV64
+    assign data_word    = (is_sign)?data_signed_double:data_unsigned_double;
+    assign data_double  = pre_data;
+`else
+    assign data_word = pre_data;
+`endif
 
-assign data = (is_byte)?data_byte:((is_half)?data_half:((is_word)?data_word:{DATA_LEN{1'b0}}));
+`ifdef RISCV64
+    assign data = (is_byte)?data_byte:((is_half)?data_half:((is_word)?data_word:((is_double)?data_double:{DATA_LEN{1'b0}})));
+`else
+    assign data = (is_byte)?data_byte:((is_half)?data_half:((is_word)?data_word:{DATA_LEN{1'b0}}));
+`endif
 
 endmodule //memory_load
 

@@ -1,5 +1,5 @@
 `include "define.v"
-module top#(parameter DATA_LEN=32) (
+module top#(parameter DATA_LEN=`DATA_LEN) (
 `ifndef HAS_AXI_BUS_ARBITER
     output                  unuse,
 `endif
@@ -428,6 +428,8 @@ monitor u_monitor(
 );
 
 block_monitor u_block_monitor(
+    // .clk                        ( sys_clk                    ),
+    // .rst_n                      ( rst_n                      ),    
     .rs1                        ( rs1                        ),
     .rs2                        ( rs2                        ),
     .rs1_valid                  ( rs1_valid                  ),

@@ -26,6 +26,9 @@ module exu#(parameter DATA_LEN=32) (
     // output                  unusual_flag,
 //interface with idu    
     input                   ID_EX_reg_decode_valid,
+`ifdef RISCV64
+    input [2:0]             ID_EX_reg_control_sign_word,
+`endif
     input [4 :0]            ID_EX_reg_rd,
     input [1 :0]            ID_EX_reg_csr_wfunc,
     input [11:0]            ID_EX_reg_CSR_addr,
@@ -67,6 +70,9 @@ module exu#(parameter DATA_LEN=32) (
     output [DATA_LEN-1:0]   EX_LS_reg_cause,
     output [4:0]            EX_LS_reg_load_sign,
     output [3:0]            EX_LS_reg_store_sign,
+`ifdef RISCV64
+    output [1:0]            EX_LS_reg_control_sign_word,
+`endif
     output                  EX_LS_reg_unusual_flag,
     output                  EX_LS_reg_ebreak,
     output                  EX_LS_reg_CSR_ren,
@@ -151,24 +157,32 @@ assign is_bgeu  = ID_EX_reg_control_sign[13];
 // assign is_word  = ID_EX_reg_control_sign[17];
 
 alu #(DATA_LEN)u_alu(
-    .NUM_A    	( ID_EX_reg_operand1    ),
-    .NUM_B    	( ID_EX_reg_operand2    ),
-    .OP       	( ID_EX_reg_op          ),
-    .LR       	( LR                    ),
-    .AL         ( AL                    ),
-    .is_or    	( is_or                 ),
-    .is_xor   	( is_xor                ),
-    .is_and   	( is_and                ),
-    .is_cmp   	( is_cmp                ),
-    .is_sign  	( is_sign               ),
-    .is_shift 	( is_shift              ),
-    .out_eq   	( out_eq                ),
-    .out_ge   	( out_ge                ),
-    .out_lt     ( out_lt                ),
-    .out_ltu    ( out_ltu               ),
-    .out_neq  	( out_neq               ),
-    .out_geu  	( out_geu               ),
-    .res      	( res_alu               )
+`ifdef RISCV64
+    .NUM_A    	( (ID_EX_reg_control_sign_word[2])?{{(DATA_LEN-31){ID_EX_reg_operand1[31]}},ID_EX_reg_operand1[30:0]}:ID_EX_reg_operand1                ),
+    .NUM_B    	( (ID_EX_reg_control_sign_word[2])?{{(DATA_LEN-31){ID_EX_reg_operand2[31]}},ID_EX_reg_operand2[30:0]}:ID_EX_reg_operand2                ),
+`else
+    .NUM_A    	( ID_EX_reg_operand1                ),
+    .NUM_B    	( ID_EX_reg_operand2                ),
+`endif
+    .OP       	( ID_EX_reg_op                      ),
+    .LR       	( LR                                ),
+    .AL         ( AL                                ),
+`ifdef RISCV64
+    .is_word    ( ID_EX_reg_control_sign_word[2]    ),
+`endif
+    .is_or    	( is_or                             ),
+    .is_xor   	( is_xor                            ),
+    .is_and   	( is_and                            ),
+    .is_cmp   	( is_cmp                            ),
+    .is_sign  	( is_sign                           ),
+    .is_shift 	( is_shift                          ),
+    .out_eq   	( out_eq                            ),
+    .out_ge   	( out_ge                            ),
+    .out_lt     ( out_lt                            ),
+    .out_ltu    ( out_ltu                           ),
+    .out_neq  	( out_neq                           ),
+    .out_geu  	( out_geu                           ),
+    .res      	( res_alu                           )
 );
 
 // memory_load_rv32 #(DATA_LEN)u_memory_load_rv32(
@@ -238,6 +252,12 @@ FF_D_without_asyn_rst #(1        )u_CSR_ren       (clk,EX_reg_execute_enable&ID_
 FF_D_without_asyn_rst #(1        )u_CSR_wen       (clk,EX_reg_execute_enable&ID_EX_reg_decode_valid,ID_EX_reg_CSR_wen,EX_LS_reg_CSR_wen);
 FF_D_without_asyn_rst #(1        )u_dest_wen      (clk,EX_reg_execute_enable&ID_EX_reg_decode_valid,ID_EX_reg_dest_wen,EX_LS_reg_dest_wen);
 FF_D_without_asyn_rst #(DATA_LEN )u_store_data    (clk,EX_reg_execute_enable&ID_EX_reg_decode_valid,ID_EX_reg_store_data,EX_LS_reg_store_data);
+
+`ifdef RISCV64
+
+FF_D_without_asyn_rst #(2)         u_control_sign_word(clk,EX_reg_execute_enable&ID_EX_reg_decode_valid,ID_EX_reg_control_sign_word[1:0],EX_LS_reg_control_sign_word);
+
+`endif
 
 endmodule //exu
 

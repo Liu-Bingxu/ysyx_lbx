@@ -9,5 +9,9 @@
 `define SIM
 `define DPI_C
 // `define ADD_USE_ADD_BASE
-// `define RTSCV32
-// `define DATA_LEN 32
+// `define RISCV64
+`ifdef RISCV64
+    `define DATA_LEN 64
+`else
+    `define DATA_LEN 32
+`endif

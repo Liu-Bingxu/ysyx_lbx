@@ -2,8 +2,8 @@
 #define __REGS_H__
 
 #include "difftest.h"
-#include "Vtop.h"
-#include "Vtop___024root.h"
+#include "VysyxSoCFull.h"
+#include "VysyxSoCFull___024root.h"
 
 typedef struct{
     word_t *GPR[32];
@@ -15,7 +15,7 @@ typedef struct{
 } REGS;
 
 // extern REGS reg;
-void init_gpr(Vtop *top);
+void init_gpr(VysyxSoCFull *top);
 word_t get_gpr(int i);
 void set_pc(word_t pc);
 word_t isa_reg_str2val(const char *name, bool *test);
