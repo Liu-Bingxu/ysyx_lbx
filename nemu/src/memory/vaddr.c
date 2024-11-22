@@ -28,7 +28,7 @@ word_t vaddr_ifetch(vaddr_t addr, int len){
             }
             inst = paddr_read(paddr, 2);
             if (isa_mmu_translate(&paddr, addr + 2, 2, MEM_TYPE_IFETCH) == MEM_RET_FAIL){
-                isa_page_fault(MEM_TYPE_IFETCH, addr);
+                isa_page_fault(MEM_TYPE_IFETCH, addr + 2);
                 return 0;
             }
             // printf("%s-%d:0x%08lx get a virtaddr 0x%08x\n", __func__, __LINE__, addr, paddr);

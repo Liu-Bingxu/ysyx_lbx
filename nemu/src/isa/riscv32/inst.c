@@ -210,76 +210,79 @@ static int decode_exec(Decode *s) {
         s->dnpc -= 2;
         INSTPAT_INST(s) &= 0xffff;
         uint16_t c_inst = INSTPAT_INST(s);
-        INSTPAT("000 000 000 00 000 00", Illegal_instruction,   N,  INV(s->pc));
-        INSTPAT("000 000 000 00 ??? 00", C.ADDI4SPN_res,        N,  INV(s->pc));
-        INSTPAT("000 ??? ??? ?? ??? 00", C.ADDI4SPN,            CIW,R(rd) = R(2) + c_addi4spn_imm);
-        INSTPAT("010 ??? ??? ?? ??? 00", c.lw,                  CL, gpr_temp = R(rd);R(rd) = SEXT(Mr(src1 + c_lsw_imm, 4), 32));
-        INSTPAT("110 ??? ??? ?? ??? 00", c.sw,                  CS, Mw(src1 + c_lsw_imm, 4, src2));
-
-        // INSTPAT("000 000 000 00 000 01", c.nop_hint,            N);
-        INSTPAT("000 ?00 000 ?? ??? 01", c.nop,                 N);
-        // INSTPAT("000 0?? ??? 00 000 01", c.addi_hint,           N);
-        INSTPAT("000 ??? ??? ?? ??? 01", c.addi,                CI, R(rd) = src1 + c_addi_addiw_andi_li_imm);
-        // INSTPAT("010 ?00 000 ?? ??? 01", c.li_hint,             N);
-        INSTPAT("010 ??? ??? ?? ??? 01", c.li,                  CI, R(rd) = c_addi_addiw_andi_li_imm);
-        // INSTPAT("011 ?00 000 ?? ??? 01", c.lui_hint,            N);
-        INSTPAT("011 000 010 00 000 01", c.addi16sp_res,        N, INV(s->pc));
-        INSTPAT("011 ?00 010 ?? ??? 01", c.addi16sp,            CI, R(rd) = src1 + c_addi16sp_imm);
-        INSTPAT("011 0?? ??? 00 000 01", c.lui_res,             N, INV(s->pc));
-        INSTPAT("011 ??? ??? ?? ??? 01", c.lui,                 CI, R(rd) = c_lui_imm);
-        INSTPAT("100 ?10 ??? ?? ??? 01", c.andi,                CA, R(rd) = src1 & c_addi_addiw_andi_li_imm);
-        INSTPAT("100 011 ??? 00 ??? 01", c.sub,                 CA, R(rd) = src1 - src2);
-        INSTPAT("100 011 ??? 01 ??? 01", c.xor,                 CA, R(rd) = src1 ^ src2);
-        INSTPAT("100 011 ??? 10 ??? 01", c.or,                  CA, R(rd) = src1 | src2);
-        INSTPAT("100 011 ??? 11 ??? 01", c.and,                 CA, R(rd) = src1 & src2);
-        INSTPAT("101 ??? ??? ?? ??? 01", c.j,                   N, s->dnpc = s->pc + c_j_jal_imm);
-        INSTPAT("110 ??? ??? ?? ??? 01", c.beqz,                CB, if (src1 == 0) s->dnpc = s->pc + c_b_imm);
-        INSTPAT("111 ??? ??? ?? ??? 01", c.bnez,                CB, if (src1 != 0) s->dnpc = s->pc + c_b_imm);
-
-        INSTPAT("010 ?00 000 ?? ??? 10", c.lwsp_res,            N, INV(s->pc));
-        INSTPAT("010 ??? ??? ?? ??? 10", c.lwsp,                CI, gpr_temp = R(rd);R(rd) = SEXT(Mr(R(2) + c_lwsp_imm, 4), 32));
-        INSTPAT("100 000 000 00 000 10", c.jr_res,              N, INV(s->pc));
-        INSTPAT("100 0?? ??? 00 000 10", c.jr,                  CI, s->dnpc = src1);
-        // INSTPAT("100 000 000 ?? ??? 10", c.mv_hint,             N);
-        INSTPAT("100 0?? ??? ?? ??? 10", c.mv,                  CR, R(rd) = src2);
-        INSTPAT("100 100 000 00 000 10", c.ebreak,              N, s->dnpc=s->pc;NEMUBREAK(s->pc, R(10)));
-        INSTPAT("100 1?? ??? 00 000 10", c.jalr,                CR, R(1) = s->dnpc; s->dnpc = src1);
-        // INSTPAT("100 100 000 ?? ??? 10", c.add_hint,            N);
-        INSTPAT("100 1?? ??? ?? ??? 10", c.add,                 CR, R(rd) = src1 + src2);
-        INSTPAT("110 ??? ??? ?? ??? 10", c.swsp,                CSS, Mw(R(2) + c_swsp_imm, 4, src2));
+        if((INSTPAT_INST(s) & 0x3) == 0x0){
+            INSTPAT("000 000 000 00 000 00", Illegal_instruction,   N,  INV(s->pc));
+            INSTPAT("000 000 000 00 ??? 00", C.ADDI4SPN_res,        N,  INV(s->pc));
+            INSTPAT("000 ??? ??? ?? ??? 00", C.ADDI4SPN,            CIW,R(rd) = R(2) + c_addi4spn_imm);
+            INSTPAT("010 ??? ??? ?? ??? 00", c.lw,                  CL, gpr_temp = R(rd);R(rd) = SEXT(Mr(src1 + c_lsw_imm, 4), 32));
+            INSTPAT("110 ??? ??? ?? ??? 00", c.sw,                  CS, Mw(src1 + c_lsw_imm, 4, src2));
 #ifdef CONFIG_RV64
-        INSTPAT("011 ??? ??? ?? ??? 00", c.ld,                  CL, gpr_temp = R(rd);R(rd) = Mr(src1 + c_lsd_imm, 8));
-        INSTPAT("111 ??? ??? ?? ??? 00", c.sd,                  CS, Mw(src1 + c_lsd_imm, 8, src2));
-
-        INSTPAT("001 ?00 000 ?? ??? 01", c.addiw_res,           N, INV(s->pc));
-        INSTPAT("001 ??? ??? ?? ??? 01", c.addiw,               CI, R(rd) = SEXT((src1 + c_addi_addiw_andi_li_imm), 32));
-        // INSTPAT("100 000 ??? 00 000 01", c.srli_hint,           N);
-        INSTPAT("100 ?00 ??? ?? ??? 01", c.srli,                CA, R(rd) = src1 >> c_srli_srai_slli_imm);
-        // INSTPAT("100 001 ??? 00 000 01", c.srai_hint,           N);
-        INSTPAT("100 ?01 ??? ?? ??? 01", c.srai,                CA, R(rd) = (sword_t)src1 >> c_srli_srai_slli_imm);
-        INSTPAT("100 111 ??? 00 ??? 01", c.subw,                CA, R(rd) = (int32_t)((uint32_t)src1 - (uint32_t)src2));
-        INSTPAT("100 111 ??? 01 ??? 01", c.addw,                CA, R(rd) = (int32_t)((uint32_t)src1 + (uint32_t)src2));
-
-        // INSTPAT("000 0?? ??? 00 000 10", c.slli64_hint, N);
-        // INSTPAT("000 ?00 000 ?? ??? 10", c.slli_hint, N);
-        INSTPAT("000 ??? ??? ?? ??? 10", c.slli,                CI, R(rd) = src1 << c_srli_srai_slli_imm);
-        INSTPAT("011 ?00 000 ?? ??? 10", c.ldsp_res,            N, INV(s->pc));
-        INSTPAT("011 ??? ??? ?? ??? 10", c.ldsp,                CI, gpr_temp = R(rd);R(rd) = Mr(R(2) + c_ldsp_imm, 8));
-        INSTPAT("111 ??? ??? ?? ??? 10", c.sdsp,                CSS, Mw(R(2) + c_sdsp_imm, 8, src2));
+            INSTPAT("011 ??? ??? ?? ??? 00", c.ld, CL, gpr_temp = R(rd); R(rd) = Mr(src1 + c_lsd_imm, 8));
+            INSTPAT("111 ??? ??? ?? ??? 00", c.sd, CS, Mw(src1 + c_lsd_imm, 8, src2));
+#endif
+        }
+        if((INSTPAT_INST(s) & 0x3) == 0x1){
+            // INSTPAT("000 000 000 00 000 01", c.nop_hint,            N);
+            INSTPAT("000 ?00 000 ?? ??? 01", c.nop,                 N);
+            // INSTPAT("000 0?? ??? 00 000 01", c.addi_hint,           N);
+            INSTPAT("000 ??? ??? ?? ??? 01", c.addi,                CI, R(rd) = src1 + c_addi_addiw_andi_li_imm);
+            // INSTPAT("010 ?00 000 ?? ??? 01", c.li_hint,             N);
+            INSTPAT("010 ??? ??? ?? ??? 01", c.li,                  CI, R(rd) = c_addi_addiw_andi_li_imm);
+            // INSTPAT("011 ?00 000 ?? ??? 01", c.lui_hint,            N);
+            INSTPAT("011 000 010 00 000 01", c.addi16sp_res,        N, INV(s->pc));
+            INSTPAT("011 ?00 010 ?? ??? 01", c.addi16sp,            CI, R(rd) = src1 + c_addi16sp_imm);
+            INSTPAT("011 0?? ??? 00 000 01", c.lui_res,             N, INV(s->pc));
+            INSTPAT("011 ??? ??? ?? ??? 01", c.lui,                 CI, R(rd) = c_lui_imm);
+            INSTPAT("100 ?10 ??? ?? ??? 01", c.andi,                CA, R(rd) = src1 & c_addi_addiw_andi_li_imm);
+            INSTPAT("100 011 ??? 00 ??? 01", c.sub,                 CA, R(rd) = src1 - src2);
+            INSTPAT("100 011 ??? 01 ??? 01", c.xor,                 CA, R(rd) = src1 ^ src2);
+            INSTPAT("100 011 ??? 10 ??? 01", c.or,                  CA, R(rd) = src1 | src2);
+            INSTPAT("100 011 ??? 11 ??? 01", c.and,                 CA, R(rd) = src1 & src2);
+            INSTPAT("101 ??? ??? ?? ??? 01", c.j,                   N, s->dnpc = s->pc + c_j_jal_imm);
+            INSTPAT("110 ??? ??? ?? ??? 01", c.beqz,                CB, if (src1 == 0) s->dnpc = s->pc + c_b_imm);
+            INSTPAT("111 ??? ??? ?? ??? 01", c.bnez,                CB, if (src1 != 0) s->dnpc = s->pc + c_b_imm);
+#ifdef CONFIG_RV64
+            INSTPAT("001 ?00 000 ?? ??? 01", c.addiw_res,           N, INV(s->pc));
+            INSTPAT("001 ??? ??? ?? ??? 01", c.addiw,               CI, R(rd) = SEXT((src1 + c_addi_addiw_andi_li_imm), 32));
+            // INSTPAT("100 000 ??? 00 000 01", c.srli_hint,           N);
+            INSTPAT("100 ?00 ??? ?? ??? 01", c.srli,                CA, R(rd) = src1 >> c_srli_srai_slli_imm);
+            // INSTPAT("100 001 ??? 00 000 01", c.srai_hint,           N);
+            INSTPAT("100 ?01 ??? ?? ??? 01", c.srai,                CA, R(rd) = (sword_t)src1 >> c_srli_srai_slli_imm);
+            INSTPAT("100 111 ??? 00 ??? 01", c.subw,                CA, R(rd) = (int32_t)((uint32_t)src1 - (uint32_t)src2));
+            INSTPAT("100 111 ??? 01 ??? 01", c.addw,                CA, R(rd) = (int32_t)((uint32_t)src1 + (uint32_t)src2));
 #else
-        INSTPAT("001 ??? ??? ?? ??? 01", c.jal,                 N, R(1) = s->dnpc; s->dnpc = s->pc + c_j_jal_imm);
-        // INSTPAT("100 000 ??? 00 000 01", c.srli_hint,           N);
-        INSTPAT("100 000 ??? ?? ??? 01", c.srli,                CA, R(rd) = src1 >> c_srli_srai_slli_imm);
-        // INSTPAT("100 001 ??? 00 000 01", c.srai_hint,           N);
-        INSTPAT("100 001 ??? ?? ??? 01", c.srai,                CA, R(rd) = (sword_t)src1 >> c_srli_srai_slli_imm);
-
-        // INSTPAT("000 0?? ??? 00 000 10", c.slli64_hint,         N);
-        // INSTPAT("000 ?00 000 ?? ??? 10", c.slli_hint,           N);
-        INSTPAT("000 0?? ??? ?? ??? 10", c.slli,                CI, R(rd) = src1 << c_srli_srai_slli_imm);
+            INSTPAT("001 ??? ??? ?? ??? 01", c.jal,                 N, R(1) = s->dnpc; s->dnpc = s->pc + c_j_jal_imm);
+            // INSTPAT("100 000 ??? 00 000 01", c.srli_hint,           N);
+            INSTPAT("100 000 ??? ?? ??? 01", c.srli,                CA, R(rd) = src1 >> c_srli_srai_slli_imm);
+            // INSTPAT("100 001 ??? 00 000 01", c.srai_hint,           N);
+            INSTPAT("100 001 ??? ?? ??? 01", c.srai,                CA, R(rd) = (sword_t)src1 >> c_srli_srai_slli_imm);
 #endif
-
+        }
+        if((INSTPAT_INST(s) & 0x3) == 0x2){
+            INSTPAT("010 ?00 000 ?? ??? 10", c.lwsp_res,            N, INV(s->pc));
+            INSTPAT("010 ??? ??? ?? ??? 10", c.lwsp,                CI, gpr_temp = R(rd);R(rd) = SEXT(Mr(R(2) + c_lwsp_imm, 4), 32));
+            INSTPAT("100 000 000 00 000 10", c.jr_res,              N, INV(s->pc));
+            INSTPAT("100 0?? ??? 00 000 10", c.jr,                  CI, s->dnpc = src1);
+            // INSTPAT("100 000 000 ?? ??? 10", c.mv_hint,             N);
+            INSTPAT("100 0?? ??? ?? ??? 10", c.mv,                  CR, R(rd) = src2);
+            INSTPAT("100 100 000 00 000 10", c.ebreak,              N, s->dnpc=s->pc;NEMUBREAK(s->pc, R(10)));
+            INSTPAT("100 1?? ??? 00 000 10", c.jalr,                CR, R(1) = s->dnpc; s->dnpc = src1);
+            // INSTPAT("100 100 000 ?? ??? 10", c.add_hint,            N);
+            INSTPAT("100 1?? ??? ?? ??? 10", c.add,                 CR, R(rd) = src1 + src2);
+            INSTPAT("110 ??? ??? ?? ??? 10", c.swsp,                CSS, Mw(R(2) + c_swsp_imm, 4, src2));
 #ifdef CONFIG_RV64
+            // INSTPAT("000 0?? ??? 00 000 10", c.slli64_hint, N);
+            // INSTPAT("000 ?00 000 ?? ??? 10", c.slli_hint, N);
+            INSTPAT("000 ??? ??? ?? ??? 10", c.slli,                CI, R(rd) = src1 << c_srli_srai_slli_imm);
+            INSTPAT("011 ?00 000 ?? ??? 10", c.ldsp_res,            N, INV(s->pc));
+            INSTPAT("011 ??? ??? ?? ??? 10", c.ldsp,                CI, gpr_temp = R(rd);R(rd) = Mr(R(2) + c_ldsp_imm, 8));
+            INSTPAT("111 ??? ??? ?? ??? 10", c.sdsp,                CSS, Mw(R(2) + c_sdsp_imm, 8, src2));
+#else
+            // INSTPAT("000 0?? ??? 00 000 10", c.slli64_hint,         N);
+            // INSTPAT("000 ?00 000 ?? ??? 10", c.slli_hint,           N);
+            INSTPAT("000 0?? ??? ?? ??? 10", c.slli,                CI, R(rd) = src1 << c_srli_srai_slli_imm);
 #endif
+        }
         INSTPAT("??? ??? ??? ?? ??? ??", Illegal_instruction,   N,  INV(s->pc));
     }
     // myself
@@ -398,8 +401,7 @@ static int decode_exec(Decode *s) {
 
     INSTPAT("0011000 00010 00000 000 00000 11100 11", mret,     N, mret(s));
     INSTPAT("0001000 00010 00000 000 00000 11100 11", sret,     N, sret(s));
-    //! sret & sfence.vma 
-    INSTPAT("0001000 00101 00000 000 00000 11100 11", wfi,      N);
+    INSTPAT("0001000 00101 00000 000 00000 11100 11", wfi,      N, difftest_skip_ref(););
     INSTPAT("0001001 ????? ????? 000 00000 11100 11", sfence.vma,N);
 
     // INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall, N, char _path[500]; if (gpr(GPR1_name) != -2) s->dnpc = isa_raise_intr(11, s->pc); else {sprintf(_path,"%s%s", fsming_path,(char *)guest_to_host(gpr(5)));difftest_skip_ref();IFDEF(CONFIG_FTRACE,init_ftrace(_path)); });
@@ -449,7 +451,7 @@ out:
                 Assert(0, "%s-%d:unkown type %d\n", __func__, __LINE__, page_fault_type);
                 break;
         }
-        // printf("%s-%d:now have a %ld page fault trap happend\nnow pc is "FMT_WORD"\n", __func__, __LINE__, NO, cpu.pc);
+        debug_info("%s-%d:now have a %ld page fault trap happend\nnow pc is "FMT_WORD"\n", __func__, __LINE__, NO, cpu.pc);
         isa_raise_intr(s, NO, s->pc, error_vaddr);
     }
     if(misalign_fault_flag){
@@ -471,7 +473,7 @@ out:
                 Assert(0,"%s-%d:unkown type %d\n",__func__, __LINE__, misalign_fault_type);
                 break;
         }
-        // printf("%s-%d:now have a %ld misalign fault trap happend\nnow pc is "FMT_WORD"\n", __func__, __LINE__, NO, cpu.pc);
+        debug_info("%s-%d:now have a %ld misalign fault trap happend\nnow pc is "FMT_WORD"\n", __func__, __LINE__, NO, cpu.pc);
         isa_raise_intr(s, NO, s->pc, error_vaddr);
         if (ref_difftest_raise_intr)
             ref_difftest_raise_intr(NO);

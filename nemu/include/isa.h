@@ -63,6 +63,12 @@ word_t get_csr(word_t csr_num, bool *csr_success);
 void set_csr(word_t csr_num, word_t mask, bool *csr_success);
 void clr_csr(word_t csr_num, word_t mask, bool *csr_success);
 void wirte_csr(word_t csr_num, word_t num, bool *csr_success);
+// #define MY_DEBUG
+#ifdef MY_DEBUG
+#define debug_info printf
+#else
+#define debug_info(fmt, ...)
+#endif
 // myself
 
 // difftest
