@@ -188,7 +188,7 @@ static int decode_exec(Decode *s) {
     int rd = 0;
     word_t gpr_temp = 0;
     bool amo_flag = false;
-    bool csr_success = true;
+    bool inst_success = true;
     word_t src1 = 0, src2 = 0, imm = 0;
     s->dnpc = s->snpc;
 
@@ -211,17 +211,19 @@ static int decode_exec(Decode *s) {
         INSTPAT_INST(s) &= 0xffff;
         uint16_t c_inst = INSTPAT_INST(s);
         if((INSTPAT_INST(s) & 0x3) == 0x0){
-            INSTPAT("000 000 000 00 000 00", Illegal_instruction,   N,  INV(s->pc));
-            INSTPAT("000 000 000 00 ??? 00", C.ADDI4SPN_res,        N,  INV(s->pc));
+            // INSTPAT("000 000 000 00 000 00", Illegal_instruction,   N,  INV(s->pc));
+            INSTPAT("000 000 000 00 000 00", Illegal_instruction,   N,  inst_success = false);
+            // INSTPAT("000 000 000 00 ??? 00", C.ADDI4SPN_res,        N,  INV(s->pc));
+            INSTPAT("000 000 000 00 ??? 00", C.ADDI4SPN_res,        N,  inst_success = false);
             INSTPAT("000 ??? ??? ?? ??? 00", C.ADDI4SPN,            CIW,R(rd) = R(2) + c_addi4spn_imm);
             INSTPAT("010 ??? ??? ?? ??? 00", c.lw,                  CL, gpr_temp = R(rd);R(rd) = SEXT(Mr(src1 + c_lsw_imm, 4), 32));
             INSTPAT("110 ??? ??? ?? ??? 00", c.sw,                  CS, Mw(src1 + c_lsw_imm, 4, src2));
 #ifdef CONFIG_RV64
-            INSTPAT("011 ??? ??? ?? ??? 00", c.ld, CL, gpr_temp = R(rd); R(rd) = Mr(src1 + c_lsd_imm, 8));
-            INSTPAT("111 ??? ??? ?? ??? 00", c.sd, CS, Mw(src1 + c_lsd_imm, 8, src2));
+            INSTPAT("011 ??? ??? ?? ??? 00", c.ld,                  CL, gpr_temp = R(rd); R(rd) = Mr(src1 + c_lsd_imm, 8));
+            INSTPAT("111 ??? ??? ?? ??? 00", c.sd,                  CS, Mw(src1 + c_lsd_imm, 8, src2));
 #endif
         }
-        if((INSTPAT_INST(s) & 0x3) == 0x1){
+        else if((INSTPAT_INST(s) & 0x3) == 0x1){
             // INSTPAT("000 000 000 00 000 01", c.nop_hint,            N);
             INSTPAT("000 ?00 000 ?? ??? 01", c.nop,                 N);
             // INSTPAT("000 0?? ??? 00 000 01", c.addi_hint,           N);
@@ -229,9 +231,11 @@ static int decode_exec(Decode *s) {
             // INSTPAT("010 ?00 000 ?? ??? 01", c.li_hint,             N);
             INSTPAT("010 ??? ??? ?? ??? 01", c.li,                  CI, R(rd) = c_addi_addiw_andi_li_imm);
             // INSTPAT("011 ?00 000 ?? ??? 01", c.lui_hint,            N);
-            INSTPAT("011 000 010 00 000 01", c.addi16sp_res,        N, INV(s->pc));
+            // INSTPAT("011 000 010 00 000 01", c.addi16sp_res,        N, INV(s->pc));
+            INSTPAT("011 000 010 00 000 01", c.addi16sp_res,        N, inst_success = false);
             INSTPAT("011 ?00 010 ?? ??? 01", c.addi16sp,            CI, R(rd) = src1 + c_addi16sp_imm);
-            INSTPAT("011 0?? ??? 00 000 01", c.lui_res,             N, INV(s->pc));
+            // INSTPAT("011 0?? ??? 00 000 01", c.lui_res,             N, INV(s->pc));
+            INSTPAT("011 0?? ??? 00 000 01", c.lui_res,             N, inst_success = false);
             INSTPAT("011 ??? ??? ?? ??? 01", c.lui,                 CI, R(rd) = c_lui_imm);
             INSTPAT("100 ?10 ??? ?? ??? 01", c.andi,                CA, R(rd) = src1 & c_addi_addiw_andi_li_imm);
             INSTPAT("100 011 ??? 00 ??? 01", c.sub,                 CA, R(rd) = src1 - src2);
@@ -242,7 +246,8 @@ static int decode_exec(Decode *s) {
             INSTPAT("110 ??? ??? ?? ??? 01", c.beqz,                CB, if (src1 == 0) s->dnpc = s->pc + c_b_imm);
             INSTPAT("111 ??? ??? ?? ??? 01", c.bnez,                CB, if (src1 != 0) s->dnpc = s->pc + c_b_imm);
 #ifdef CONFIG_RV64
-            INSTPAT("001 ?00 000 ?? ??? 01", c.addiw_res,           N, INV(s->pc));
+            // INSTPAT("001 ?00 000 ?? ??? 01", c.addiw_res,           N, INV(s->pc));
+            INSTPAT("001 ?00 000 ?? ??? 01", c.addiw_res,           N, inst_success = false);
             INSTPAT("001 ??? ??? ?? ??? 01", c.addiw,               CI, R(rd) = SEXT((src1 + c_addi_addiw_andi_li_imm), 32));
             // INSTPAT("100 000 ??? 00 000 01", c.srli_hint,           N);
             INSTPAT("100 ?00 ??? ?? ??? 01", c.srli,                CA, R(rd) = src1 >> c_srli_srai_slli_imm);
@@ -258,15 +263,17 @@ static int decode_exec(Decode *s) {
             INSTPAT("100 001 ??? ?? ??? 01", c.srai,                CA, R(rd) = (sword_t)src1 >> c_srli_srai_slli_imm);
 #endif
         }
-        if((INSTPAT_INST(s) & 0x3) == 0x2){
-            INSTPAT("010 ?00 000 ?? ??? 10", c.lwsp_res,            N, INV(s->pc));
+        else if((INSTPAT_INST(s) & 0x3) == 0x2){
+            // INSTPAT("010 ?00 000 ?? ??? 10", c.lwsp_res,            N, INV(s->pc));
+            INSTPAT("010 ?00 000 ?? ??? 10", c.lwsp_res,            N, inst_success = false);
             INSTPAT("010 ??? ??? ?? ??? 10", c.lwsp,                CI, gpr_temp = R(rd);R(rd) = SEXT(Mr(R(2) + c_lwsp_imm, 4), 32));
-            INSTPAT("100 000 000 00 000 10", c.jr_res,              N, INV(s->pc));
-            INSTPAT("100 0?? ??? 00 000 10", c.jr,                  CI, s->dnpc = src1);
+            // INSTPAT("100 000 000 00 000 10", c.jr_res,              N, INV(s->pc));
+            INSTPAT("100 000 000 00 000 10", c.jr_res,              N, inst_success = false);
+            INSTPAT("100 0?? ??? 00 000 10", c.jr,                  CI, s->dnpc = src1; s->dnpc &= ((word_t)-2));
             // INSTPAT("100 000 000 ?? ??? 10", c.mv_hint,             N);
             INSTPAT("100 0?? ??? ?? ??? 10", c.mv,                  CR, R(rd) = src2);
             INSTPAT("100 100 000 00 000 10", c.ebreak,              N, s->dnpc=s->pc;NEMUBREAK(s->pc, R(10)));
-            INSTPAT("100 1?? ??? 00 000 10", c.jalr,                CR, R(1) = s->dnpc; s->dnpc = src1);
+            INSTPAT("100 1?? ??? 00 000 10", c.jalr,                CR, R(1) = s->dnpc; s->dnpc = src1; s->dnpc &= ((word_t)-2); FTRACE_JUMP(s->dnpc));
             // INSTPAT("100 100 000 ?? ??? 10", c.add_hint,            N);
             INSTPAT("100 1?? ??? ?? ??? 10", c.add,                 CR, R(rd) = src1 + src2);
             INSTPAT("110 ??? ??? ?? ??? 10", c.swsp,                CSS, Mw(R(2) + c_swsp_imm, 4, src2));
@@ -274,7 +281,8 @@ static int decode_exec(Decode *s) {
             // INSTPAT("000 0?? ??? 00 000 10", c.slli64_hint, N);
             // INSTPAT("000 ?00 000 ?? ??? 10", c.slli_hint, N);
             INSTPAT("000 ??? ??? ?? ??? 10", c.slli,                CI, R(rd) = src1 << c_srli_srai_slli_imm);
-            INSTPAT("011 ?00 000 ?? ??? 10", c.ldsp_res,            N, INV(s->pc));
+            // INSTPAT("011 ?00 000 ?? ??? 10", c.ldsp_res,            N, INV(s->pc));
+            INSTPAT("011 ?00 000 ?? ??? 10", c.ldsp_res,            N, inst_success = false);
             INSTPAT("011 ??? ??? ?? ??? 10", c.ldsp,                CI, gpr_temp = R(rd);R(rd) = Mr(R(2) + c_ldsp_imm, 8));
             INSTPAT("111 ??? ??? ?? ??? 10", c.sdsp,                CSS, Mw(R(2) + c_sdsp_imm, 8, src2));
 #else
@@ -283,7 +291,8 @@ static int decode_exec(Decode *s) {
             INSTPAT("000 0?? ??? ?? ??? 10", c.slli,                CI, R(rd) = src1 << c_srli_srai_slli_imm);
 #endif
         }
-        INSTPAT("??? ??? ??? ?? ??? ??", Illegal_instruction,   N,  INV(s->pc));
+        // INSTPAT("??? ??? ??? ?? ??? ??", Illegal_instruction,   N,  INV(s->pc));
+        INSTPAT("??? ??? ??? ?? ??? ??", Illegal_instruction,   N,  inst_success = false);
     }
     // myself
     INSTPAT("??????? ????? ????? ??? ????? 00101 11", auipc  ,  U, R(rd) = s->pc + imm);
@@ -353,10 +362,10 @@ static int decode_exec(Decode *s) {
     INSTPAT("0100000 ????? ????? 101 ????? 01110 11", sraw,     R, src2 &= 0x1f; R(rd) = (int32_t)((int32_t)src1 >> (uint32_t)src2););
 
     INSTPAT("0000001 ????? ????? 000 ????? 01110 11", mulw,     R, R(rd) = (int32_t)((uint32_t)src1 * (uint32_t)src2););
-    INSTPAT("0000001 ????? ????? 100 ????? 01110 11", divw,     R, if ((uint32_t)src2 == 0) R(rd) = (word_t)-1; else if (((uint32_t)src1 == (uint32_t)0x80000000) & ((int32_t)src2 == -1)) R(rd) = (uint32_t)0x80000000; else R(rd) = (int32_t)src1 / (int32_t)src2;);
-    INSTPAT("0000001 ????? ????? 101 ????? 01110 11", divuw,    R, if ((uint32_t)src2 == 0) R(rd) = (uint32_t)-1; else R(rd) = (int32_t)((uint32_t)src1 / (uint32_t)src2););
-    INSTPAT("0000001 ????? ????? 110 ????? 01110 11", remw,     R, if ((uint32_t)src2 == 0) R(rd) = src1; else if (((uint32_t)src1 == (uint32_t)0x80000000) & ((int32_t)src2 == -1)) R(rd) = 0; else R(rd) = (int32_t)src1 % (int32_t)src2;);
-    INSTPAT("0000001 ????? ????? 111 ????? 01110 11", remuw,    R, if ((uint32_t)src2 == 0) R(rd) = src1; else R(rd) = (int32_t)((uint32_t)src1 % (uint32_t)src2););
+    INSTPAT("0000001 ????? ????? 100 ????? 01110 11", divw,     R, if ((uint32_t)src2 == 0) R(rd) = (word_t)-1; else if (((uint32_t)src1 == (uint32_t)0x80000000) & ((int32_t)src2 == -1)) R(rd) = (int32_t)0x80000000; else R(rd) = (int32_t)src1 / (int32_t)src2;);
+    INSTPAT("0000001 ????? ????? 101 ????? 01110 11", divuw,    R, if ((uint32_t)src2 == 0) R(rd) = (word_t)-1; else R(rd) = (int32_t)((uint32_t)src1 / (uint32_t)src2););
+    INSTPAT("0000001 ????? ????? 110 ????? 01110 11", remw,     R, if ((uint32_t)src2 == 0) R(rd) = (int32_t)src1; else if (((uint32_t)src1 == (uint32_t)0x80000000) & ((int32_t)src2 == -1)) R(rd) = 0; else R(rd) = (int32_t)src1 % (int32_t)src2;);
+    INSTPAT("0000001 ????? ????? 111 ????? 01110 11", remuw,    R, if ((uint32_t)src2 == 0) R(rd) = (int32_t)src1; else R(rd) = (int32_t)((uint32_t)src1 % (uint32_t)src2););
 
     INSTPAT("00010?? 00000 ????? 011 ????? 01011 11", lr.d,     R, amo_flag = true;gpr_temp = R(rd);R(rd) = lr_sc(src1, 8, true, 0););
     INSTPAT("00011?? ????? ????? 011 ????? 01011 11", sd.d,     R, amo_flag = true;gpr_temp = R(rd);R(rd) = lr_sc(src1, 8, false, src2););
@@ -380,12 +389,12 @@ static int decode_exec(Decode *s) {
     INSTPAT("0000001 ????? ????? 110 ????? 01100 11", rem,      R, if (src2 == 0) R(rd) = src1; else if ((src1 == MUXDEF(CONFIG_ISA64, 0x8000000000000000, 0x80000000)) & (src2 == -1)) R(rd) = 0; else R(rd) = (sword_t)src1 % (sword_t)src2;);
     INSTPAT("0000001 ????? ????? 111 ????? 01100 11", remu,     R, if (src2 == 0) R(rd) = src1; else R(rd) = src1 % src2;);
 
-    INSTPAT("??????? ????? ????? 001 ????? 11100 11", csrrw  ,  I, word_t temp = 0;if (rd != 0) temp = get_csr(imm, &csr_success); if(csr_success) wirte_csr(imm, src1, &csr_success);if(csr_success) R(rd) = temp);
-    INSTPAT("??????? ????? ????? 010 ????? 11100 11", csrrs  ,  I, word_t temp = 0;temp = get_csr(imm, &csr_success); if (((BITS(s->isa.inst.val, 19, 15)) != 0) && csr_success) set_csr(imm, src1, &csr_success);if(csr_success) R(rd) = temp);
-    INSTPAT("??????? ????? ????? 011 ????? 11100 11", csrrc  ,  I, word_t temp = 0;temp = get_csr(imm, &csr_success); if (((BITS(s->isa.inst.val, 19, 15)) != 0) && csr_success) clr_csr(imm, src1, &csr_success);if(csr_success) R(rd) = temp);
-    INSTPAT("??????? ????? ????? 101 ????? 11100 11", csrrwi ,  I, word_t temp = 0;if (rd != 0) temp = get_csr(imm, &csr_success); if(csr_success) wirte_csr(imm, BITS(s->isa.inst.val, 19, 15), &csr_success);if(csr_success) R(rd) = temp);
-    INSTPAT("??????? ????? ????? 110 ????? 11100 11", csrrsi ,  I, word_t temp = 0;temp = get_csr(imm, &csr_success); if (((BITS(s->isa.inst.val, 19, 15)) != 0) && csr_success) set_csr(imm, BITS(s->isa.inst.val, 19, 15), &csr_success);if(csr_success) R(rd) = temp);
-    INSTPAT("??????? ????? ????? 111 ????? 11100 11", csrrci ,  I, word_t temp = 0;temp = get_csr(imm, &csr_success); if (((BITS(s->isa.inst.val, 19, 15)) != 0) && csr_success) clr_csr(imm, BITS(s->isa.inst.val, 19, 15), &csr_success);if(csr_success) R(rd) = temp);
+    INSTPAT("??????? ????? ????? 001 ????? 11100 11", csrrw  ,  I, word_t temp = 0;if (rd != 0) temp = get_csr(imm, &inst_success); if(inst_success) wirte_csr(imm, src1, &inst_success);if(inst_success) R(rd) = temp);
+    INSTPAT("??????? ????? ????? 010 ????? 11100 11", csrrs  ,  I, word_t temp = 0;temp = get_csr(imm, &inst_success); if (((BITS(s->isa.inst.val, 19, 15)) != 0) && inst_success) set_csr(imm, src1, &inst_success);if(inst_success) R(rd) = temp);
+    INSTPAT("??????? ????? ????? 011 ????? 11100 11", csrrc  ,  I, word_t temp = 0;temp = get_csr(imm, &inst_success); if (((BITS(s->isa.inst.val, 19, 15)) != 0) && inst_success) clr_csr(imm, src1, &inst_success);if(inst_success) R(rd) = temp);
+    INSTPAT("??????? ????? ????? 101 ????? 11100 11", csrrwi ,  I, word_t temp = 0;if (rd != 0) temp = get_csr(imm, &inst_success); if(inst_success) wirte_csr(imm, BITS(s->isa.inst.val, 19, 15), &inst_success);if(inst_success) R(rd) = temp);
+    INSTPAT("??????? ????? ????? 110 ????? 11100 11", csrrsi ,  I, word_t temp = 0;temp = get_csr(imm, &inst_success); if (((BITS(s->isa.inst.val, 19, 15)) != 0) && inst_success) set_csr(imm, BITS(s->isa.inst.val, 19, 15), &inst_success);if(inst_success) R(rd) = temp);
+    INSTPAT("??????? ????? ????? 111 ????? 11100 11", csrrci ,  I, word_t temp = 0;temp = get_csr(imm, &inst_success); if (((BITS(s->isa.inst.val, 19, 15)) != 0) && inst_success) clr_csr(imm, BITS(s->isa.inst.val, 19, 15), &inst_success);if(inst_success) R(rd) = temp);
 
     INSTPAT("00010?? 00000 ????? 010 ????? 01011 11", lr.w,     R, amo_flag = true;gpr_temp = R(rd);R(rd) = lr_sc(src1, 4, true, 0););
     INSTPAT("00011?? ????? ????? 010 ????? 01011 11", sd.w,     R, amo_flag = true;gpr_temp = R(rd);R(rd) = lr_sc(src1, 4, false, src2););
@@ -412,7 +421,8 @@ static int decode_exec(Decode *s) {
 
     // INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak ,  N, NEMUTRAP(s->pc, R(10))); // R(10) is $a0
     INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak ,  N, s->dnpc=s->pc;NEMUBREAK(s->pc, R(10))); // R(10) is $a0
-    INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv    ,  N, INV(s->pc));
+    // INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv    ,  N, INV(s->pc));
+    INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv    ,  N, inst_success = false);
     INSTPAT_END();
 
 out:
@@ -420,16 +430,20 @@ out:
     R(0) = 0; // reset $zero to 0
 
     // printf("now PC is 0x%x\n", s->dnpc);
-    if(INSTPAT_INST(s)==0x00008067){
+    if((INSTPAT_INST(s)==0x00008067) || (BITS(INSTPAT_INST(s), 31, 0)==0x8082)){
         // printf("Hello world\n");
         FTRACE_RETU(s->pc);
     }
 
-    if(!csr_success){
+    if(!inst_success){
+        // printf("%s-%s-%d:0x%x\n", __func__, __FILE__, __LINE__, INSTPAT_INST(s));
         isa_raise_intr(s, 2, s->pc, INSTPAT_INST(s));
+        // printf("%s-%s-%d:0x%x\n", __func__, __FILE__, __LINE__, INSTPAT_INST(s));
         if (ref_difftest_raise_intr)
             ref_difftest_raise_intr(2);
+        // printf("%s-%s-%d:0x%x\n", __func__, __FILE__, __LINE__, INSTPAT_INST(s));
         difftest_skip_ref();
+        // printf("%s-%s-%d:0x%x\n", __func__, __FILE__, __LINE__, INSTPAT_INST(s));
     }
 
     if(page_fault_flag){
