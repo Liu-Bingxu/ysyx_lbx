@@ -61,8 +61,8 @@ void init_sbi_disk_img(const char *disk_img_file){
         printf("open disk img %s file error with %d\n", disk_img_file, sbi_disk.disk_img_fd);
         printf("errno=%d\n", errno);
         sbi_disk.has_disk = false;
-        // return;
-        exit(0);
+        return;
+        // exit(0);
     }
     sbi_disk.disk_img = mmap(NULL, 1 * 1024 * 1024 * 1024, PROT_READ | PROT_WRITE, MAP_SHARED, sbi_disk.disk_img_fd, 0);
     if (sbi_disk.disk_img == MAP_FAILED){
