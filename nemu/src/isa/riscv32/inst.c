@@ -277,7 +277,8 @@ static int decode_exec(Decode *s) {
             INSTPAT("100 0?? ??? 00 000 10", c.jr,                  CI, s->dnpc = src1; s->dnpc &= ((word_t)-2));
             // INSTPAT("100 000 000 ?? ??? 10", c.mv_hint,             N);
             INSTPAT("100 0?? ??? ?? ??? 10", c.mv,                  CR, R(rd) = src2);
-            INSTPAT("100 100 000 00 000 10", c.ebreak,              N, s->dnpc=s->pc;NEMUBREAK(s->pc, R(10)));
+            // INSTPAT("100 100 000 00 000 10", c.ebreak,              N, s->dnpc=s->pc;NEMUBREAK(s->pc, R(10)));
+            INSTPAT("100 100 000 00 000 10", c.ebreak,              N, isa_raise_intr(s, 3, s->pc, s->pc));
             INSTPAT("100 1?? ??? 00 000 10", c.jalr,                CR, R(1) = s->dnpc; s->dnpc = src1; s->dnpc &= ((word_t)-2); FTRACE_JUMP(s->dnpc));
             // INSTPAT("100 100 000 ?? ??? 10", c.add_hint,            N);
             INSTPAT("100 1?? ??? ?? ??? 10", c.add,                 CR, R(rd) = src1 + src2);
@@ -425,7 +426,9 @@ static int decode_exec(Decode *s) {
     // myself
 
     // INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak ,  N, NEMUTRAP(s->pc, R(10))); // R(10) is $a0
-    INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak ,  N, s->dnpc=s->pc;NEMUBREAK(s->pc, R(10))); // R(10) is $a0
+    // INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak ,  N, s->dnpc=s->pc; NEMUBREAK(s->pc, R(10))); // R(10) is $a0
+    INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak ,  N, isa_raise_intr(s, 3, s->pc, s->pc)); // R(10) is $a0
+    INSTPAT("1111110 00000 00000 000 00000 11100 11", halt   ,  N, can_not_diasssemble = true; s->dnpc=s->pc; NEMUBREAK(s->pc, R(10))); // R(10) is $a0
     // INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv    ,  N, INV(s->pc));
     INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv    ,  N, can_not_diasssemble = true; inst_success = false);
     INSTPAT_END();

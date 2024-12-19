@@ -298,7 +298,7 @@ static int cmd_b(char *args){
         assert(0);
     }
     inst = paddr_read(addr, 4);
-    paddr_write(addr, 4, 0x100073);
+    paddr_write(addr, 4, 0xfc000073);
     return 0;
 }
 static int cmd_bq(char *args){
