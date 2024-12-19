@@ -50,6 +50,7 @@ void invalid_inst(vaddr_t thispc) {
         "* Every line of untested code is always wrong!\n\n", ANSI_FG_RED), isa_logo);
 
   IFDEF(CONFIG_ITRACE, irangbuf_printf());
+  isa_reg_display();
 
   set_nemu_state(NEMU_ABORT, thispc, -1);
 }
