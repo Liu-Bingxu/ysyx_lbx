@@ -182,6 +182,10 @@ void isa_misalign_fault(int type, vaddr_t vaddr){
     misalign_fault_type = type;
     error_vaddr     = vaddr;
 }
+static bool can_not_diasssemble;
+bool isa_can_not_disassemble(){
+    return can_not_diasssemble;
+}
 // myself
 
 static int decode_exec(Decode *s) {
@@ -189,6 +193,7 @@ static int decode_exec(Decode *s) {
     word_t gpr_temp = 0;
     bool amo_flag = false;
     bool inst_success = true;
+    can_not_diasssemble = false;
     word_t src1 = 0, src2 = 0, imm = 0;
     s->dnpc = s->snpc;
 
@@ -212,9 +217,9 @@ static int decode_exec(Decode *s) {
         uint16_t c_inst = INSTPAT_INST(s);
         if((INSTPAT_INST(s) & 0x3) == 0x0){
             // INSTPAT("000 000 000 00 000 00", Illegal_instruction,   N,  INV(s->pc));
-            INSTPAT("000 000 000 00 000 00", Illegal_instruction,   N,  inst_success = false);
+            INSTPAT("000 000 000 00 000 00", Illegal_instruction,   N,  can_not_diasssemble = true; inst_success = false);
             // INSTPAT("000 000 000 00 ??? 00", C.ADDI4SPN_res,        N,  INV(s->pc));
-            INSTPAT("000 000 000 00 ??? 00", C.ADDI4SPN_res,        N,  inst_success = false);
+            INSTPAT("000 000 000 00 ??? 00", C.ADDI4SPN_res,        N,  can_not_diasssemble = true; inst_success = false);
             INSTPAT("000 ??? ??? ?? ??? 00", C.ADDI4SPN,            CIW,R(rd) = R(2) + c_addi4spn_imm);
             INSTPAT("010 ??? ??? ?? ??? 00", c.lw,                  CL, gpr_temp = R(rd);R(rd) = SEXT(Mr(src1 + c_lsw_imm, 4), 32));
             INSTPAT("110 ??? ??? ?? ??? 00", c.sw,                  CS, Mw(src1 + c_lsw_imm, 4, src2));
@@ -232,10 +237,10 @@ static int decode_exec(Decode *s) {
             INSTPAT("010 ??? ??? ?? ??? 01", c.li,                  CI, R(rd) = c_addi_addiw_andi_li_imm);
             // INSTPAT("011 ?00 000 ?? ??? 01", c.lui_hint,            N);
             // INSTPAT("011 000 010 00 000 01", c.addi16sp_res,        N, INV(s->pc));
-            INSTPAT("011 000 010 00 000 01", c.addi16sp_res,        N, inst_success = false);
+            INSTPAT("011 000 010 00 000 01", c.addi16sp_res,        N, can_not_diasssemble = true; inst_success = false);
             INSTPAT("011 ?00 010 ?? ??? 01", c.addi16sp,            CI, R(rd) = src1 + c_addi16sp_imm);
             // INSTPAT("011 0?? ??? 00 000 01", c.lui_res,             N, INV(s->pc));
-            INSTPAT("011 0?? ??? 00 000 01", c.lui_res,             N, inst_success = false);
+            INSTPAT("011 0?? ??? 00 000 01", c.lui_res,             N, can_not_diasssemble = true; inst_success = false);
             INSTPAT("011 ??? ??? ?? ??? 01", c.lui,                 CI, R(rd) = c_lui_imm);
             INSTPAT("100 ?10 ??? ?? ??? 01", c.andi,                CA, R(rd) = src1 & c_addi_addiw_andi_li_imm);
             INSTPAT("100 011 ??? 00 ??? 01", c.sub,                 CA, R(rd) = src1 - src2);
@@ -247,7 +252,7 @@ static int decode_exec(Decode *s) {
             INSTPAT("111 ??? ??? ?? ??? 01", c.bnez,                CB, if (src1 != 0) s->dnpc = s->pc + c_b_imm);
 #ifdef CONFIG_RV64
             // INSTPAT("001 ?00 000 ?? ??? 01", c.addiw_res,           N, INV(s->pc));
-            INSTPAT("001 ?00 000 ?? ??? 01", c.addiw_res,           N, inst_success = false);
+            INSTPAT("001 ?00 000 ?? ??? 01", c.addiw_res,           N, can_not_diasssemble = true; inst_success = false);
             INSTPAT("001 ??? ??? ?? ??? 01", c.addiw,               CI, R(rd) = SEXT((src1 + c_addi_addiw_andi_li_imm), 32));
             // INSTPAT("100 000 ??? 00 000 01", c.srli_hint,           N);
             INSTPAT("100 ?00 ??? ?? ??? 01", c.srli,                CA, R(rd) = src1 >> c_srli_srai_slli_imm);
@@ -265,10 +270,10 @@ static int decode_exec(Decode *s) {
         }
         else if((INSTPAT_INST(s) & 0x3) == 0x2){
             // INSTPAT("010 ?00 000 ?? ??? 10", c.lwsp_res,            N, INV(s->pc));
-            INSTPAT("010 ?00 000 ?? ??? 10", c.lwsp_res,            N, inst_success = false);
+            INSTPAT("010 ?00 000 ?? ??? 10", c.lwsp_res,            N, can_not_diasssemble = true; inst_success = false);
             INSTPAT("010 ??? ??? ?? ??? 10", c.lwsp,                CI, gpr_temp = R(rd);R(rd) = SEXT(Mr(R(2) + c_lwsp_imm, 4), 32));
             // INSTPAT("100 000 000 00 000 10", c.jr_res,              N, INV(s->pc));
-            INSTPAT("100 000 000 00 000 10", c.jr_res,              N, inst_success = false);
+            INSTPAT("100 000 000 00 000 10", c.jr_res,              N, can_not_diasssemble = true; inst_success = false);
             INSTPAT("100 0?? ??? 00 000 10", c.jr,                  CI, s->dnpc = src1; s->dnpc &= ((word_t)-2));
             // INSTPAT("100 000 000 ?? ??? 10", c.mv_hint,             N);
             INSTPAT("100 0?? ??? ?? ??? 10", c.mv,                  CR, R(rd) = src2);
@@ -282,7 +287,7 @@ static int decode_exec(Decode *s) {
             // INSTPAT("000 ?00 000 ?? ??? 10", c.slli_hint, N);
             INSTPAT("000 ??? ??? ?? ??? 10", c.slli,                CI, R(rd) = src1 << c_srli_srai_slli_imm);
             // INSTPAT("011 ?00 000 ?? ??? 10", c.ldsp_res,            N, INV(s->pc));
-            INSTPAT("011 ?00 000 ?? ??? 10", c.ldsp_res,            N, inst_success = false);
+            INSTPAT("011 ?00 000 ?? ??? 10", c.ldsp_res,            N, can_not_diasssemble = true; inst_success = false);
             INSTPAT("011 ??? ??? ?? ??? 10", c.ldsp,                CI, gpr_temp = R(rd);R(rd) = Mr(R(2) + c_ldsp_imm, 8));
             INSTPAT("111 ??? ??? ?? ??? 10", c.sdsp,                CSS, Mw(R(2) + c_sdsp_imm, 8, src2));
 #else
@@ -292,7 +297,7 @@ static int decode_exec(Decode *s) {
 #endif
         }
         // INSTPAT("??? ??? ??? ?? ??? ??", Illegal_instruction,   N,  INV(s->pc));
-        INSTPAT("??? ??? ??? ?? ??? ??", Illegal_instruction,   N,  inst_success = false);
+        INSTPAT("??? ??? ??? ?? ??? ??", Illegal_instruction,   N,  can_not_diasssemble = true; inst_success = false);
     }
     // myself
     INSTPAT("??????? ????? ????? ??? ????? 00101 11", auipc  ,  U, R(rd) = s->pc + imm);
@@ -422,7 +427,7 @@ static int decode_exec(Decode *s) {
     // INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak ,  N, NEMUTRAP(s->pc, R(10))); // R(10) is $a0
     INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak ,  N, s->dnpc=s->pc;NEMUBREAK(s->pc, R(10))); // R(10) is $a0
     // INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv    ,  N, INV(s->pc));
-    INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv    ,  N, inst_success = false);
+    INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv    ,  N, can_not_diasssemble = true; inst_success = false);
     INSTPAT_END();
 
 out:

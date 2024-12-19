@@ -36,6 +36,7 @@ word_t isa_reg_str2val(const char *name, bool *success);
 // exec
 struct Decode;
 int isa_exec_once(struct Decode *s);
+bool isa_can_not_disassemble();
 
 // memory
 enum { MMU_DIRECT, MMU_TRANSLATE, MMU_FAIL };
