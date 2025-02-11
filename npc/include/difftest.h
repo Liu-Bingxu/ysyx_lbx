@@ -50,10 +50,40 @@ static inline bool difftest_check_reg(const char *name, vaddr_t pc, word_t ref, 
   return true;
 }
 
+typedef enum
+{
+    PRV_U = 0,
+    PRV_S = 1,
+    PRV_M = 3
+} privileged;
+
 typedef struct{
     word_t gpr[32];
     word_t pc;
-    word_t mtvec, mstatus, mcause, mepc;
+    privileged privilege;
+    word_t mtvec, mstatus, mcause, mepc, mtval;
+    word_t stvec, sepc, scause, stval;
+    word_t medeleg, mideleg;
+    word_t mip, mie;
+    word_t mcycle, minstret, mhpmcounter[29], mhpmevent[29];
+    uint32_t mcountinhibit;
+    word_t mscratch;
+    word_t sscratch;
+    word_t satp;
+#ifndef CONFIG_RV64
+    word_t mcycleh, minstreth, mhpmcounterh[29], mhpmeventh[29];
+#endif
+    //? RW but RO in imp
+    word_t misa, menvcfg, mseccfg;
+    word_t senvcfg;
+    uint32_t mcounteren;
+    uint32_t scounteren;
+#ifndef CONFIG_RV64
+    word_t mstatush;
+    word_t menvcfgh, mseccfgh;
+#endif
+    //? RO reg
+    word_t mvendorid, marchid, mimpid, mhartid, mconfigptr;
 }CPU_state;
 
 enum { DIFFTEST_TO_DUT, DIFFTEST_TO_REF };

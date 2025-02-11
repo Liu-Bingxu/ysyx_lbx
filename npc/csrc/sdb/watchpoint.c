@@ -172,8 +172,8 @@ bool check_watchpoint(){
             printf("\n");
             printf("\n");
             now->Hitnum++;
-            printf("Old value = %#x\n", now->old_value);
-            printf("New value = %#x\n", now_value);
+            printf("Old value = " FMT_WORD "\n", now->old_value);
+            printf("New value = " FMT_WORD "\n", now_value);
             now->old_value = now_value;
             check_bool = false;
         }

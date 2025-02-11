@@ -125,7 +125,7 @@ static int cmd_x(char *args){
                     for (int y = 0; y < n; y++){
                         word_t val;
                         pmem_read(addr, &val);
-                        printf("0x%08x ", val);
+                        printf(FMT_WORD " ", val);
                         addr += 4;
                         if((y+1)%4==0)
                             printf("\n");

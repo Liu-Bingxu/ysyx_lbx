@@ -1,7 +1,7 @@
 #include "device.h"
 #include "difftest.h"
 
-void serial_out(word_t ch){
+void serial_out(char ch){
     // putchar(ch);
     // fflush(stdout);
     fprintf(stderr, "%c", ch);

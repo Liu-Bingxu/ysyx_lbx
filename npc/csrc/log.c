@@ -9,7 +9,7 @@ void init_log(const char *log_file){
     // printf("%s\n", "w");
     log_fp = fopen(log_file, "w");
     assert(log_fp);
-    Log("Open log file %s succces\n",log_file);
+    Log("Open log file %s succces",log_file);
 }
 
 bool log_enable(int code){
