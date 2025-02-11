@@ -18,7 +18,7 @@ CFLAGS += -DMAINARGS=\"$(mainargs)\"
 # LIBS+=am/src/riscv/npc
 
 NPCFLAGS += $(shell dirname $(IMAGE).elf)/npc-log.txt
-NPCDIR = $(addsuffix /$(NAME)-RTL_build,$(shell dirname $(IMAGE).elf))
+NPCDIR = $(addsuffix /RTL_build,$(shell dirname $(IMAGE).elf))
 
 .PHONY: $(AM_HOME)/am/src/riscv/npc/trm.c
 
@@ -28,6 +28,6 @@ image: $(IMAGE).elf
 	@$(OBJCOPY) -S --set-section-flags .bss=alloc,contents -O binary $(IMAGE).elf $(IMAGE).bin
 
 run:image
-	$(shell if [ ! -d $(NPCDIR)/build ]; then mkdir -p $(NPCDIR)/build ;fi)
-	$(MAKE) -C $(NPC_HOME) run ARGS="-w $(NPCDIR)/$(NAME)-wave.vcd -l $(NPCFLAGS) $(B) -e $(IMAGE).elf" IMG=$(IMAGE).bin ISA=$(ISA) BUILD_DIR=$(NPCDIR) name=$(NAME)-
+	$(shell if [ ! -d $(NPCDIR) ]; then mkdir -p $(NPCDIR) ;fi)
+	$(MAKE) -C $(NPC_HOME) run ARGS="-w $(NPCDIR)/$(NAME)-wave.fst -l $(NPCFLAGS) $(B) -e $(IMAGE).elf" IMG=$(IMAGE).bin ISA=$(ISA) BUILD_DIR=$(NPCDIR) name=$(NAME)- TOPNAME=core_debugger_top
 
