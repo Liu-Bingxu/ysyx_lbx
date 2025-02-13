@@ -236,7 +236,7 @@ void sim_rst(){
             Log("now rst have some wrong");
             isa_reg_display();
             IFDEF(CONFIG_ITRACE, irangbuf_printf());
-            set_npc_state(NPC_END, get_gpr(32), 0);
+            set_npc_state(NPC_END, get_gpr(32), 1);
             sim_exit();
         }
     }
@@ -360,7 +360,7 @@ static void exec_once(char *p, char *p2,paddr_t pc){
             Log("now cnt_now is too big\n");
             isa_reg_display();
             IFDEF(CONFIG_ITRACE, irangbuf_printf());
-            set_npc_state(NPC_END, get_gpr(32), 0);
+            set_npc_state(NPC_END, get_gpr(32), 1);
             sim_exit();
         }
     }
