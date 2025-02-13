@@ -52,10 +52,23 @@ __EXPORT void difftest_regcpy(void *dut, bool direction) {
             cpu.gpr[i] = dut_regs->gpr[i];
         }
         cpu.pc = dut_regs->pc;
+        cpu.privilege = dut_regs->privilege;
         cpu.mepc = dut_regs->mepc;
         cpu.mtvec = dut_regs->mtvec;
         cpu.mstatus = dut_regs->mstatus;
         cpu.mcause = dut_regs->mcause;
+        cpu.mtval = dut_regs->mtval;
+        cpu.mscratch = dut_regs->mscratch;
+        cpu.mideleg = dut_regs->mideleg;
+        cpu.medeleg = dut_regs->medeleg;
+        cpu.mip = dut_regs->mip;
+        cpu.mie = dut_regs->mie;
+        cpu.sepc = dut_regs->sepc;
+        cpu.stvec = dut_regs->stvec;
+        cpu.scause = dut_regs->scause;
+        cpu.stval = dut_regs->stval;
+        cpu.sscratch = dut_regs->sscratch;
+        cpu.satp = dut_regs->satp;
     }
     else if (direction == DIFFTEST_TO_DUT)
     {
@@ -64,10 +77,23 @@ __EXPORT void difftest_regcpy(void *dut, bool direction) {
             dut_regs->gpr[i] = cpu.gpr[i];
         }
         dut_regs->pc = cpu.pc;
+        dut_regs->privilege = cpu.privilege;
         dut_regs->mepc = cpu.mepc;
         dut_regs->mtvec = cpu.mtvec;
         dut_regs->mstatus = cpu.mstatus;
         dut_regs->mcause = cpu.mcause;
+        dut_regs->mtval = cpu.mtval;
+        dut_regs->mscratch = cpu.mscratch;
+        dut_regs->mideleg = cpu.mideleg;
+        dut_regs->medeleg = cpu.medeleg;
+        dut_regs->mip = cpu.mip;
+        dut_regs->mie = cpu.mie;
+        dut_regs->sepc = cpu.sepc;
+        dut_regs->stvec = cpu.stvec;
+        dut_regs->scause = cpu.scause;
+        dut_regs->stval = cpu.stval;
+        dut_regs->sscratch = cpu.sscratch;
+        dut_regs->satp = cpu.satp;
     }
     else{
         assert(0);

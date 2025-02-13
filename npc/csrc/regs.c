@@ -121,22 +121,31 @@ word_t isa_reg_str2val(const char *name, bool *test)
     assert(0);
 }
 
-void isa_reg_display(void)
-{
-    bool text = true;
+void isa_reg_display(void){
     printf("npc is :\n");
     for (int i = 0; i < 32; i++)
         printf("%-7s : %-20" FMT_WORD_U "(" FMT_WORD ")\n", regs[i], get_gpr(i), get_gpr(i));
     printf("pc      : %-20" FMT_WORD_U "(" FMT_WORD ")\n", get_gpr(32), get_gpr(32));
-    printf("mepc    : %-20" FMT_WORD_U "(" FMT_WORD ")\n", isa_reg_str2val("mepc", &text), isa_reg_str2val("mepc", &text));
-    printf("mtvec   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", isa_reg_str2val("mtvec", &text), isa_reg_str2val("mtvec", &text));
-    printf("mcause  : %-20" FMT_WORD_U "(" FMT_WORD ")\n", isa_reg_str2val("mcause", &text), isa_reg_str2val("mcause", &text));
-    printf("mstatus : %-20" FMT_WORD_U "(" FMT_WORD ")\n", isa_reg_str2val("mstatus", &text), isa_reg_str2val("mstatus", &text));
+    printf("mepc    : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mepc,     reg.mepc);
+    printf("mtvec   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mtvec,    reg.mtvec);
+    printf("mcause  : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mcause,   reg.mcause);
+    printf("mstatus : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mstatus,  reg.mstatus);
+    printf("mtval   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mtval,    reg.mtval);
+    printf("mscratch: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mscratch, reg.mscratch);
+    printf("mideleg : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mideleg,  reg.mideleg);
+    printf("medeleg : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.medeleg,  reg.medeleg);
+    printf("mip     : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mip,      reg.mip);
+    printf("mie     : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mie,      reg.mie);
+    printf("sepc    : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.sepc,     reg.sepc);
+    printf("stvec   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.stvec,    reg.stvec);
+    printf("scause  : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.scause,   reg.scause);
+    printf("sstatus : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.sstatus,  reg.sstatus);
+    printf("stval   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.stval,    reg.stval);
+    printf("sscratch: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.sscratch, reg.sscratch);
+    printf("satp    : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.satp,     reg.satp);
 }
 
-void isa_ref_reg_display(CPU_state *ref)
-{
-    bool text = true;
+void isa_ref_reg_display(CPU_state *ref){
     printf("ref is :\n");
     for (int i = 0; i < 32; i++)
         printf("%-7s : %-20" FMT_WORD_U "(" FMT_WORD ")\n", regs[i], ref->gpr[i], ref->gpr[i]);
@@ -145,6 +154,19 @@ void isa_ref_reg_display(CPU_state *ref)
     printf("mtvec   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->mtvec,ref->mtvec);
     printf("mcause  : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->mcause,ref->mcause);
     printf("mstatus : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->mstatus,ref->mstatus);
+    printf("mtval   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->mtval,    ref->mtval);
+    printf("mscratch: %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->mscratch, ref->mscratch);
+    printf("mideleg : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->mideleg,  ref->mideleg);
+    printf("medeleg : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->medeleg,  ref->medeleg);
+    printf("mip     : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->mip,      ref->mip);
+    printf("mie     : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->mie,      ref->mie);
+    printf("sepc    : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->sepc,     ref->sepc);
+    printf("stvec   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->stvec,    ref->stvec);
+    printf("scause  : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->scause,   ref->scause);
+    // printf("sstatus : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->sstatus,  ref->sstatus);
+    printf("stval   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->stval,    ref->stval);
+    printf("sscratch: %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->sscratch, ref->sscratch);
+    printf("satp    : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->satp,     ref->satp);
 }
 
 bool isa_difftest_checkregs(CPU_state *ref,paddr_t pc){
@@ -165,20 +187,76 @@ bool isa_difftest_checkregs(CPU_state *ref,paddr_t pc){
         printf("The pc diff\n");
         this_text=false;
     }
-    if (ref->mcause != isa_reg_str2val("mcause",&text)){
+    if (ref->privilege != reg.privilege){
+        printf("The privilege diff\n");
+        this_text=false;
+    }
+    if (ref->mcause != reg.mcause){
         printf("The mcause diff\n");
         this_text=false;
     }
-    if (ref->mepc != isa_reg_str2val("mepc",&text)){
+    if (ref->mepc != reg.mepc){
         printf("The mepc diff\n");
         this_text=false;
     }
-    if (ref->mstatus != isa_reg_str2val("mstatus",&text)){
+    if (ref->mstatus != reg.mstatus){
         printf("The mstatus diff\n");
         this_text=false;
     }
-    if (ref->mtvec != isa_reg_str2val("mtvec",&text)){
+    if (ref->mtvec != reg.mtvec){
         printf("The mtvec diff\n");
+        this_text=false;
+    }
+    if (ref->mtval != reg.mtval){
+        printf("The mtval diff\n");
+        this_text=false;
+    }
+    if (ref->scause != reg.scause){
+        printf("The scause diff\n");
+        this_text=false;
+    }
+    if (ref->sepc != reg.sepc){
+        printf("The sepc diff\n");
+        this_text=false;
+    }
+    // if (ref->sstatus != reg.sstatus){
+    //     printf("The sstatus diff\n");
+    //     this_text=false;
+    // }
+    if (ref->stvec != reg.stvec){
+        printf("The stvec diff\n");
+        this_text=false;
+    }
+    if (ref->stval != reg.stval){
+        printf("The stval diff\n");
+        this_text=false;
+    }
+    if (ref->satp != reg.satp){
+        printf("The satp diff\n");
+        this_text=false;
+    }
+    if (ref->mip != reg.mip){
+        printf("The mip diff\n");
+        this_text=false;
+    }
+    if (ref->mie != reg.mie){
+        printf("The mie diff\n");
+        this_text=false;
+    }
+    if (ref->mscratch != reg.mscratch){
+        printf("The mscratch diff\n");
+        this_text=false;
+    }
+    if (ref->sscratch != reg.sscratch){
+        printf("The sscratch diff\n");
+        this_text=false;
+    }
+    if (ref->mideleg != reg.mideleg){
+        printf("The mideleg diff\n");
+        this_text=false;
+    }
+    if (ref->medeleg != reg.medeleg){
+        printf("The medeleg diff\n");
         this_text=false;
     }
     if(this_text==false){
@@ -192,15 +270,25 @@ bool isa_difftest_checkregs(CPU_state *ref,paddr_t pc){
 }
 
 void init_ref(CPU_state *cpu){
-    bool text = true;
-    for (int i = 0; i < MUXDEF(CONFIG_RVE, 16, 32); i++)
-    {
+    for (int i = 0; i < MUXDEF(CONFIG_RVE, 16, 32); i++){
         cpu->gpr[i] = get_gpr(i);
     }
     cpu->pc = get_gpr(32);
     cpu->privilege = PRV_M;
-    cpu->mepc = isa_reg_str2val("mepc", &text);
-    cpu->mtvec=isa_reg_str2val("mtvec", &text);
-    cpu->mcause=isa_reg_str2val("mcause", &text);
-    cpu->mstatus=isa_reg_str2val("mstatus", &text);
+    cpu->mepc    = reg.mepc;
+    cpu->mtvec   = reg.mtvec;
+    cpu->mcause  = reg.mcause;
+    cpu->mstatus = reg.mstatus;
+    cpu->mtval   = reg.mtval;
+    cpu->sepc    = reg.sepc;
+    cpu->stval   = reg.stval;
+    cpu->stvec   = reg.stvec;
+    cpu->scause  = reg.scause;
+    cpu->satp    = reg.satp;
+    cpu->mip     = reg.mip;
+    cpu->mie     = reg.mie;
+    cpu->mscratch= reg.mscratch;
+    cpu->sscratch= reg.sscratch;
+    cpu->mideleg = reg.mideleg;
+    cpu->medeleg = reg.medeleg;
 }
