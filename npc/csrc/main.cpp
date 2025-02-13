@@ -9,6 +9,7 @@
 #include "debug.h"
 #include "regs.h"
 #include "sdb.h"
+#include "remote_bitbang.h"
 
 using namespace std;
 
@@ -31,11 +32,12 @@ void set_skip_ref_flag(void){
 extern void sdb_mainloop();
 
 static VTOP *top;
+static remote_bitbang_t *remote_bitbang;
 uint64_t g_nr_guest_inst = 0;
 static uint64_t g_timer = 0; // unit: us
 static bool g_print_step = false;
 
-extern void init_monitor(VTOP *top, VerilatedFstC *tfp, int argc, char *argv[]);
+extern void init_monitor(VTOP *top, VerilatedFstC *tfp, remote_bitbang_t **remote_bitbang, int argc, char *argv[]);
 extern void irangbuf_printf();
 extern void irangbuf_write(const char *buf);
 extern void ftrace_watch(paddr_t pc,paddr_t pc_jump);
@@ -105,6 +107,8 @@ void sim_exit(){
     IFDEF(CONFIG_VCD_GET, tfp->close());
     delete contextp;
     IFDEF(CONFIG_VCD_GET, delete tfp);
+    delete remote_bitbang;
+    delete top;
     statistic();
     exit(is_exit_status_bad());
 }
@@ -128,7 +132,7 @@ void sim_init(int argc, char *argv[]){
     top->clock = 0;
     top->rst_n = 0;
     // pmem_read(top->PC_out, &top->inst_in);
-    init_monitor(top, tfp, argc, argv);
+    init_monitor(top, tfp, &remote_bitbang, argc, argv);
 }
 
 typedef struct
@@ -466,6 +470,8 @@ static void execute(uint64_t n)
         paddr_t pc = get_gpr(32);
         exec_once(p, p2, pc);
         g_nr_guest_inst++;
+        if((g_nr_guest_inst % 5000) == 0)
+            remote_bitbang->tick();
         // paddr_t dnpc = top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__u_core_top__DOT__u_lsu__DOT__u_PC__DOT__data_out_reg;
         paddr_t dnpc = get_gpr(32);
         // set_pc(dnpc);

@@ -15,8 +15,10 @@ INC_file=$(sort $(dir $(shell find $(abspath ./) -name "*.h")))
 LIBS?=
 LIBS+=-lreadline
 
-override ARGS ?= --log=$(BUILD_DIR)/npc-log.txt --wave=$(BUILD_DIR)/$(name)wave.fst -b char-test.bin 
+override ARGS ?= --log=$(BUILD_DIR)/npc-log.txt --wave=$(BUILD_DIR)/$(name)wave.fst -b -p 1234 
 override ARGS += -d $(NEMU_HOME)/build/riscv64-nemu-interpreter-so
+
+IMG?=$(NPC_HOME)/loop_test.bin 
 
 CONFIG_ITRACE=true
 
@@ -75,8 +77,8 @@ $(NPC_HOME)/.stamp.verilate: $(MODULE_SRC) $(CSRC) $(HEAD_FILE)
 	@if [ -d $(NPC_HOME)/build ]; then echo "build dir have build";else mkdir -p $(NPC_HOME)/build; fi
 	@echo
 	@echo "### VERILATING ###"
-	@echo verilator --Mdir $(NPC_HOME)/build --unroll-count 1000 --trace-fst --x-assign unique --x-initial unique --timing --top-module $(TOPNAME)  -cc $(TOPMODULE) --exe $(CSRC) $(INC) $(VSRC_DIR) $(MY_CXXFLAGS) $(MY_LDFLAGS) -Wno-WIDTHTRUNC
-	@verilator --Mdir $(NPC_HOME)/build --autoflush --unroll-count 1000 --trace-fst --x-assign unique --x-initial unique --timescale "1ns/1ns" --no-timing --top-module $(TOPNAME)  -cc $(TOPMODULE) --exe $(CSRC) $(INC) $(VSRC_DIR) $(MY_CXXFLAGS) $(MY_LDFLAGS) -Wno-WIDTHTRUNC
+	@echo verilator --Mdir $(NPC_HOME)/build --unroll-count 1000 --trace-fst --x-assign unique --x-initial unique --timing --top-module $(TOPNAME)  -cc $(TOPMODULE) --exe $(CSRC) $(INC) $(VSRC_DIR) $(MY_CXXFLAGS) $(MY_LDFLAGS) -Wno-WIDTHTRUNC -Wno-WIDTHEXPAND
+	@verilator --Mdir $(NPC_HOME)/build --autoflush --unroll-count 1000 --trace-fst --x-assign unique --x-initial unique --timescale "1ns/1ns" --no-timing --top-module $(TOPNAME)  -cc $(TOPMODULE) --exe $(CSRC) $(INC) $(VSRC_DIR) $(MY_CXXFLAGS) $(MY_LDFLAGS) -Wno-WIDTHTRUNC -Wno-WIDTHEXPAND
 	@touch $(NPC_HOME)/.stamp.verilate
 
 .PHONY:lint

@@ -6,6 +6,7 @@
 #include "debug.h"
 #include "verilated.h"
 #include "verilated_fst_c.h"
+#include "remote_bitbang.h"
 #include VTOP_H
 #include "regs.h"
 
@@ -114,7 +115,7 @@ static void parse_args(int argc,char *argv[]){
   return;
 }
 
-void init_monitor(VTOP *top, VerilatedFstC *tfp, int argc, char *argv[]){
+void init_monitor(VTOP *top, VerilatedFstC *tfp, remote_bitbang_t **remote_bitbang, int argc, char *argv[]){
     IFDEF(CONFIG_ITRACE, init_itrace());
     parse_args(argc, argv);
     init_log(log_file);
@@ -129,6 +130,7 @@ void init_monitor(VTOP *top, VerilatedFstC *tfp, int argc, char *argv[]){
     sim_rst();
     Log("successful sim rst\n");
     // isa_reg_display();
+    *remote_bitbang = new remote_bitbang_t(difftest_port, top);
     init_difftest(diff_so_file, img_size, difftest_port);
     Log("successful init difftest\n");
     welcome();
