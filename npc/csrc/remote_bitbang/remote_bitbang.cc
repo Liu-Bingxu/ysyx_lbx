@@ -96,11 +96,11 @@ void remote_bitbang_t::accept(){
 }
 
 void remote_bitbang_t::tick(){
-  if (client_fd > 0) {
-    execute_commands();
-  } else {
-    this->accept();
-  }
+    if (client_fd > 0) {
+        execute_commands();
+    } else {
+        this->accept();
+    }
 }
 
 void remote_bitbang_t::reset(){
@@ -118,81 +118,83 @@ void remote_bitbang_t::set_pins(uint8_t tck, uint8_t tms, uint8_t tdi){
 }
 
 void remote_bitbang_t::execute_commands(){
-  unsigned total_processed = 0;
-  bool quit = false;
+    unsigned total_processed = 0;
+    bool quit = false;
     bool in_rti = tap->tap_state == RUN_TEST_IDLE;
-  bool entered_rti = false;
-  while (1) {
-    if (recv_start < recv_end) {
-      unsigned send_offset = 0;
-      while (recv_start < recv_end) {
-        uint8_t command = recv_buf[recv_start];
+    bool entered_rti = false;
+    while (1) {
+        if (recv_start < recv_end) {
+            unsigned send_offset = 0;
+            while (recv_start < recv_end) {
+                uint8_t command = recv_buf[recv_start];
 
-        switch (command) {
-          case 'B': /* fprintf(stderr, "*BLINK*\n"); */ break;
-          case 'b': /* fprintf(stderr, "_______\n"); */ break;
-          case 'r': reset(); break;
-          case '0': set_pins(0, 0, 0); step_and_dump_wave(); break;
-          case '1': set_pins(0, 0, 1); step_and_dump_wave(); break;
-          case '2': set_pins(0, 1, 0); step_and_dump_wave(); break;
-          case '3': set_pins(0, 1, 1); step_and_dump_wave(); break;
-          case '4': set_pins(1, 0, 0); step_and_dump_wave(); break;
-          case '5': set_pins(1, 0, 1); step_and_dump_wave(); break;
-          case '6': set_pins(1, 1, 0); step_and_dump_wave(); break;
-          case '7': set_pins(1, 1, 1); step_and_dump_wave(); break;
-          case 'R': send_buf[send_offset++] = tap->tdo ? '1' : '0'; break;
-          case 'Q': quit = true; break;
-          default:
-                    fprintf(stderr, "remote_bitbang got unsupported command '%c'\n",
-                        command);
+                switch (command) {
+                    case 'B': /* fprintf(stderr, "*BLINK*\n"); */ break;
+                    case 'b': /* fprintf(stderr, "_______\n"); */ break;
+                    case 'r': reset(); break;
+                    case '0': set_pins(0, 0, 0); step_and_dump_wave(); break;
+                    case '1': set_pins(0, 0, 1); step_and_dump_wave(); break;
+                    case '2': set_pins(0, 1, 0); step_and_dump_wave(); break;
+                    case '3': set_pins(0, 1, 1); step_and_dump_wave(); break;
+                    case '4': set_pins(1, 0, 0); step_and_dump_wave(); break;
+                    case '5': set_pins(1, 0, 1); step_and_dump_wave(); break;
+                    case '6': set_pins(1, 1, 0); step_and_dump_wave(); break;
+                    case '7': set_pins(1, 1, 1); step_and_dump_wave(); break;
+                    case 'R': send_buf[send_offset++] = tap->tdo ? '1' : '0'; break;
+                    case 'Q': quit = true; break;
+                    default:
+                                fprintf(stderr, "remote_bitbang got unsupported command '%c'\n",
+                                    command);
+                }
+                recv_start++;
+                total_processed++;
+                if (!in_rti && tap->tap_state == RUN_TEST_IDLE) {
+                    entered_rti = true;
+                    break;
+                }
+                in_rti = false;
+            }
+            unsigned sent = 0;
+            while (sent < send_offset) {
+                ssize_t bytes = write(client_fd, send_buf + sent, send_offset);
+                if (bytes == -1) {
+                    fprintf(stderr, "failed to write to socket: %s (%d)\n", strerror(errno), errno);
+                    abort();
+                }
+                sent += bytes;
+            }
         }
-        recv_start++;
-        total_processed++;
-        if (!in_rti && tap->tap_state == RUN_TEST_IDLE) {
-            entered_rti = true;
+
+        if (total_processed > buf_size || quit || entered_rti) {
+            // Don't go forever, because that could starve the main simulation.
             break;
         }
-        in_rti = false;
-      }
-      unsigned sent = 0;
-      while (sent < send_offset) {
-        ssize_t bytes = write(client_fd, send_buf + sent, send_offset);
-        if (bytes == -1) {
-          fprintf(stderr, "failed to write to socket: %s (%d)\n", strerror(errno), errno);
-          abort();
+
+        recv_start = 0;
+        recv_end = read(client_fd, recv_buf, buf_size);
+
+        if (recv_end == -1) {
+            if (errno == EAGAIN) {
+                break;
+            } else {
+                fprintf(stderr, "remote_bitbang failed to read on socket: %s (%d)\n",
+                    strerror(errno), errno);
+                abort();
+            }
         }
-        sent += bytes;
-      }
-    }
 
-    if (total_processed > buf_size || quit || entered_rti) {
-      // Don't go forever, because that could starve the main simulation.
-      break;
-    }
+        if (quit) {
+            fprintf(stderr, "Remote Bitbang received 'Q'\n");
+        }
 
-    recv_start = 0;
-    recv_end = read(client_fd, recv_buf, buf_size);
-
-    if (recv_end == -1) {
-      if (errno == EAGAIN) {
-        break;
-      } else {
-        fprintf(stderr, "remote_bitbang failed to read on socket: %s (%d)\n",
-            strerror(errno), errno);
-        abort();
-      }
+        if (recv_end == 0 || quit) {
+            // The remote disconnected.
+            fprintf(stderr, "Received nothing. Quitting.\n");
+            close(client_fd);
+            client_fd = 0;
+            set_npc_state(NPC_END, get_gpr(32), 1);
+            sim_exit();
+            break;
+        }
     }
-
-    if (quit) {
-      fprintf(stderr, "Remote Bitbang received 'Q'\n");
-    }
-
-    if (recv_end == 0 || quit) {
-      // The remote disconnected.
-      fprintf(stderr, "Received nothing. Quitting.\n");
-      close(client_fd);
-      client_fd = 0;
-      break;
-    }
-  }
 }

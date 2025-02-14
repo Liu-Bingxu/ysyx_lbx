@@ -2,6 +2,8 @@
 #define REMOTE_BITBANG_H
 
 #include <stdint.h>
+#include "utils.h"
+#include "regs.h"
 
 // #include "jtag_dtm.h"
 #include VTOP_H
@@ -9,16 +11,17 @@
 #define RUN_TEST_IDLE 1
 
 extern void step_and_dump_wave();
+extern void sim_exit();
 
 class remote_bitbang_t
 {
 public:
-  // Create a new server, listening for connections from localhost on the given
-  // port.
-  remote_bitbang_t(uint16_t port, VTOP *tap);
+    // Create a new server, listening for connections from localhost on the given
+    // port.
+    remote_bitbang_t(uint16_t port, VTOP *tap);
 
-  // Do a bit of work.
-  void tick();
+    // Do a bit of work.
+    void tick();
 
 private:
     VTOP *tap;
