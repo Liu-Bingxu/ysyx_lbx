@@ -9,4 +9,8 @@
 !*.cpp
 !.gitignore
 !README.md
+!rot13*
+!start*
+!*.cfg
+!*.lds
 build/

@@ -15,10 +15,10 @@ INC_file=$(sort $(dir $(shell find $(abspath ./) -name "*.h")))
 LIBS?=
 LIBS+=-lreadline
 
-override ARGS ?= --log=$(BUILD_DIR)/npc-log.txt --wave=$(BUILD_DIR)/$(name)wave.fst -b -p 1234 
+override ARGS ?= --log=$(BUILD_DIR)/npc-log.txt --wave=$(BUILD_DIR)/$(name)wave.fst -b -p 9825 
 override ARGS += -d $(NEMU_HOME)/build/riscv64-nemu-interpreter-so
 
-IMG?=$(NPC_HOME)/loop_test.bin 
+IMG?=$(NPC_HOME)/rot13.bin 
 
 CONFIG_ITRACE=true
 
