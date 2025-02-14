@@ -108,7 +108,6 @@ void sim_exit(){
     delete contextp;
     IFDEF(CONFIG_VCD_GET, delete tfp);
     delete remote_bitbang;
-    delete top;
     statistic();
     exit(is_exit_status_bad());
 }
@@ -236,6 +235,8 @@ void sim_rst(){
         top->clock = !top->clock;
         step_and_dump_wave();
         clock_cnt++;
+        if ((clock_cnt % 50) == 0)
+            remote_bitbang->tick();
         if(clock_cnt == 100){
             Log("now rst have some wrong");
             isa_reg_display();
@@ -359,6 +360,8 @@ static void exec_once(char *p, char *p2,paddr_t pc){
         top->clock = !top->clock;
         step_and_dump_wave();
         clock_cnt++;
+        if ((clock_cnt % 50) == 0)
+            remote_bitbang->tick();
         cnt_now++;
         if (cnt_now == 100000){
             Log("now cnt_now is too big\n");
@@ -470,8 +473,6 @@ static void execute(uint64_t n)
         paddr_t pc = get_gpr(32);
         exec_once(p, p2, pc);
         g_nr_guest_inst++;
-        if((g_nr_guest_inst % 5000) == 0)
-            remote_bitbang->tick();
         // paddr_t dnpc = top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__u_core_top__DOT__u_lsu__DOT__u_PC__DOT__data_out_reg;
         paddr_t dnpc = get_gpr(32);
         // set_pc(dnpc);
