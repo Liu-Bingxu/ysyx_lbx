@@ -26,8 +26,10 @@ image: $(IMAGE).elf
 	@$(OBJDUMP) -d $(IMAGE).elf > $(IMAGE).txt
 	@echo + OBJCOPY "->" $(IMAGE_REL).bin
 	@$(OBJCOPY) -S --set-section-flags .bss=alloc,contents -O binary $(IMAGE).elf $(IMAGE).bin
+	@$(OBJCOPY) -S --set-section-flags .bss=alloc,contents -O ihex   $(IMAGE).elf $(IMAGE).hex
+	@~/tools/hex2image.py --hex_file $(IMAGE).hex --image $(IMAGE).image --width 64
 
 run:image
 	$(shell if [ ! -d $(NPCDIR) ]; then mkdir -p $(NPCDIR) ;fi)
-	$(MAKE) -C $(NPC_HOME) run ARGS="-w $(NPCDIR)/$(NAME)-wave.fst -l $(NPCFLAGS) $(B) -e $(IMAGE).elf -p 1234" IMG=$(IMAGE).bin ISA=$(ISA) BUILD_DIR=$(NPCDIR) name=$(NAME)- TOPNAME=core_debugger_top
+	$(MAKE) -C $(NPC_HOME) run ARGS="-w $(NPCDIR)/$(NAME)-wave.fst -l $(NPCFLAGS) $(B) -e $(IMAGE).elf -p 1234" IMG=$(IMAGE).bin IMAGE=$(IMAGE).image ISA=$(ISA) BUILD_DIR=$(NPCDIR) name=$(NAME)- TOPNAME=core_debugger_top
 

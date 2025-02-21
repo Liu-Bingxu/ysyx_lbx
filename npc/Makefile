@@ -31,6 +31,7 @@ vsrc_dir_add=$(addprefix -I,$(1))
 
 BUILD_DIR?=$(NPC_HOME)/build
 name?=
+IMAGE?=$(NPC_HOME)/rot13.image
 
 include $(NPC_HOME)/csrc/utils/filelist.mk
 
@@ -65,7 +66,7 @@ $(BUILD_DIR)/$(name)wave.fst: $(NPC_HOME)/build/V$(TOPNAME) $(IMG)
 	@echo
 	@echo "### SIMULATING ###"
 	@echo "$(NPC_HOME)/build/V$(TOPNAME) $(ARGS) $(IMG) +verilator+rand+reset+2"
-	$(NPC_HOME)/build/V$(TOPNAME) $(ARGS) $(IMG) +verilator+rand+reset+2
+	$(NPC_HOME)/build/V$(TOPNAME) $(ARGS) $(IMG) +verilator+rand+reset+2 +image=$(IMAGE)
 
 $(NPC_HOME)/build/V$(TOPNAME): $(NPC_HOME)/.stamp.verilate
 	@echo
