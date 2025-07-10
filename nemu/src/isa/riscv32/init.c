@@ -37,7 +37,7 @@ static void restart() {
 
   cpu.mvendorid = (word_t)0x79737978;
   cpu.marchid =  (word_t)23060081;
-  cpu.mimpid = (word_t)0x797379786C627800;
+  cpu.mimpid = (word_t)0x797379785f6C6278;
   cpu.mhartid = 0;
   cpu.mconfigptr = 0;
   cpu.menvcfg = 0;
