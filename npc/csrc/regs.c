@@ -13,7 +13,7 @@ extern "C" void difftest_CSRState(word_t *out_io_privilegeMode, word_t *out_io_m
                                   word_t *out_io_stval, word_t *out_io_mtvec, word_t *out_io_stvec, word_t *out_io_mcause, word_t *out_io_scause, word_t *out_io_satp,
                                   word_t *out_io_mip, word_t *out_io_mie, word_t *out_io_mscratch, word_t *out_io_sscratch, word_t *out_io_mideleg, word_t *out_io_medeleg);
 
-static REGS reg;
+REGS reg;
 #define nop 0x00000013
 
 const char *regs[] = {
@@ -41,14 +41,14 @@ static const uint32_t img[] = {
 };
 
 void update_reg(void){
-    svSetScope(svGetScopeFromName("TOP.core_debugger_top.u_DifftestArchIntRegState"));
+    svSetScope(svGetScopeFromName("TOP." TOPNAME ".u_DifftestArchIntRegState"));
     difftest_ArchIntRegState(&reg.GPR[0], &reg.GPR[1], &reg.GPR[2], &reg.GPR[3], &reg.GPR[4], &reg.GPR[5], &reg.GPR[6], &reg.GPR[7], &reg.GPR[8], &reg.GPR[9],
                              &reg.GPR[10], &reg.GPR[11], &reg.GPR[12], &reg.GPR[13], &reg.GPR[14], &reg.GPR[15], &reg.GPR[16], &reg.GPR[17], &reg.GPR[18], &reg.GPR[19],
                              &reg.GPR[20], &reg.GPR[21], &reg.GPR[22], &reg.GPR[23], &reg.GPR[24], &reg.GPR[25], &reg.GPR[26], &reg.GPR[27], &reg.GPR[28], &reg.GPR[29],
                              &reg.GPR[30], &reg.GPR[31]);
     // printf("after update s5 is " FMT_WORD "\n", reg.GPR[21]);
     word_t privilegeMode;
-    svSetScope(svGetScopeFromName("TOP.core_debugger_top.u_DifftestCSRState"));
+    svSetScope(svGetScopeFromName("TOP." TOPNAME ".u_DifftestCSRState"));
     difftest_CSRState(&privilegeMode, &reg.mstatus, &reg.sstatus, &reg.mepc, &reg.sepc, &reg.mtval, &reg.stval, &reg.mtvec, &reg.stvec, &reg.mcause, &reg.scause, &reg.satp,
                       &reg.mip, &reg.mie, &reg.mscratch, &reg.sscratch, &reg.mideleg, &reg.medeleg);
     // reg.privilege = privilegeMode;
