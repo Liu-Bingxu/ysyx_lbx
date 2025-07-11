@@ -276,7 +276,7 @@ void init_ref(CPU_state *cpu){
         cpu->gpr[i] = get_gpr(i);
     }
     cpu->pc = get_gpr(32);
-    cpu->privilege = PRV_M;
+    cpu->privilege = reg.privilege;
     cpu->mepc    = reg.mepc;
     cpu->mtvec   = reg.mtvec;
     cpu->mcause  = reg.mcause;
