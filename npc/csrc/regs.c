@@ -124,49 +124,51 @@ word_t isa_reg_str2val(const char *name, bool *test)
 void isa_reg_display(void){
     printf("npc is :\n");
     for (int i = 0; i < 32; i++)
-        printf("%-7s : %-20" FMT_WORD_U "(" FMT_WORD ")\n", regs[i], get_gpr(i), get_gpr(i));
-    printf("pc      : %-20" FMT_WORD_U "(" FMT_WORD ")\n", get_gpr(32), get_gpr(32));
-    printf("mepc    : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mepc,     reg.mepc);
-    printf("mtvec   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mtvec,    reg.mtvec);
-    printf("mcause  : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mcause,   reg.mcause);
-    printf("mstatus : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mstatus,  reg.mstatus);
-    printf("mtval   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mtval,    reg.mtval);
-    printf("mscratch: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mscratch, reg.mscratch);
-    printf("mideleg : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mideleg,  reg.mideleg);
-    printf("medeleg : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.medeleg,  reg.medeleg);
-    printf("mip     : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mip,      reg.mip);
-    printf("mie     : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mie,      reg.mie);
-    printf("sepc    : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.sepc,     reg.sepc);
-    printf("stvec   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.stvec,    reg.stvec);
-    printf("scause  : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.scause,   reg.scause);
-    printf("sstatus : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.sstatus,  reg.sstatus);
-    printf("stval   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.stval,    reg.stval);
-    printf("sscratch: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.sscratch, reg.sscratch);
-    printf("satp    : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.satp,     reg.satp);
+        printf("%-7s   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", regs[i], get_gpr(i), get_gpr(i));
+    printf("pc        : %-20" FMT_WORD_U "(" FMT_WORD ")\n", get_gpr(32), get_gpr(32));
+    printf("privilege : %-20s\n", (reg.privilege == PRV_M) ? "PRV_M" : (reg.privilege == PRV_S) ? "PRV_S" : (reg.privilege == PRV_U) ? "PRV_U" : "UNKOWN PRIV");
+    printf("mepc      : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mepc,     reg.mepc);
+    printf("mtvec     : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mtvec,    reg.mtvec);
+    printf("mcause    : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mcause,   reg.mcause);
+    printf("mstatus   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mstatus,  reg.mstatus);
+    printf("mtval     : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mtval,    reg.mtval);
+    printf("mscratch  : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mscratch, reg.mscratch);
+    printf("mideleg   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mideleg,  reg.mideleg);
+    printf("medeleg   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.medeleg,  reg.medeleg);
+    printf("mip       : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mip,      reg.mip);
+    printf("mie       : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mie,      reg.mie);
+    printf("sepc      : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.sepc,     reg.sepc);
+    printf("stvec     : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.stvec,    reg.stvec);
+    printf("scause    : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.scause,   reg.scause);
+    printf("sstatus   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.sstatus,  reg.sstatus);
+    printf("stval     : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.stval,    reg.stval);
+    printf("sscratch  : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.sscratch, reg.sscratch);
+    printf("satp      : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.satp,     reg.satp);
 }
 
 void isa_ref_reg_display(CPU_state *ref){
     printf("ref is :\n");
     for (int i = 0; i < 32; i++)
-        printf("%-7s : %-20" FMT_WORD_U "(" FMT_WORD ")\n", regs[i], ref->gpr[i], ref->gpr[i]);
-    printf("pc      : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->pc,ref->pc);
-    printf("mepc    : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->mepc,ref->mepc);
-    printf("mtvec   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->mtvec,ref->mtvec);
-    printf("mcause  : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->mcause,ref->mcause);
-    printf("mstatus : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->mstatus,ref->mstatus);
-    printf("mtval   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->mtval,    ref->mtval);
-    printf("mscratch: %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->mscratch, ref->mscratch);
-    printf("mideleg : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->mideleg,  ref->mideleg);
-    printf("medeleg : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->medeleg,  ref->medeleg);
-    printf("mip     : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->mip,      ref->mip);
-    printf("mie     : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->mie,      ref->mie);
-    printf("sepc    : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->sepc,     ref->sepc);
-    printf("stvec   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->stvec,    ref->stvec);
-    printf("scause  : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->scause,   ref->scause);
-    // printf("sstatus : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->sstatus,  ref->sstatus);
-    printf("stval   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->stval,    ref->stval);
-    printf("sscratch: %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->sscratch, ref->sscratch);
-    printf("satp    : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->satp,     ref->satp);
+        printf("%-7s   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", regs[i], ref->gpr[i], ref->gpr[i]);
+    printf("pc        : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->pc,ref->pc);
+    printf("privilege : %-20s\n", (ref->privilege == PRV_M) ? "PRV_M" : (ref->privilege == PRV_S) ? "PRV_S" : (ref->privilege == PRV_U) ? "PRV_U" : "UNKOWN PRIV");
+    printf("mepc      : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->mepc,ref->mepc);
+    printf("mtvec     : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->mtvec,ref->mtvec);
+    printf("mcause    : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->mcause,ref->mcause);
+    printf("mstatus   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->mstatus,ref->mstatus);
+    printf("mtval     : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->mtval,    ref->mtval);
+    printf("mscratch  : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->mscratch, ref->mscratch);
+    printf("mideleg   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->mideleg,  ref->mideleg);
+    printf("medeleg   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->medeleg,  ref->medeleg);
+    printf("mip       : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->mip,      ref->mip);
+    printf("mie       : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->mie,      ref->mie);
+    printf("sepc      : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->sepc,     ref->sepc);
+    printf("stvec     : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->stvec,    ref->stvec);
+    printf("scause    : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->scause,   ref->scause);
+    // printf("sstatus   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->sstatus,  ref->sstatus);
+    printf("stval     : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->stval,    ref->stval);
+    printf("sscratch  : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->sscratch, ref->sscratch);
+    printf("satp      : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ref->satp,     ref->satp);
 }
 
 bool isa_difftest_checkregs(CPU_state *ref,paddr_t pc){
