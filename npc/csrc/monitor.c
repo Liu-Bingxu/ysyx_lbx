@@ -15,6 +15,7 @@ static char *diff_so_file = NULL;
 static char *img_file = NULL;
 static char *ELF_FILE = NULL;
 static char *wave_file = NULL;
+static char *disk_img_file = NULL;
 static int difftest_port = 0;
 
 extern void init_log(const char *log_file);
@@ -23,15 +24,21 @@ extern void init_itrace();
 extern void sim_rst();
 extern void init_ftrace(const char *ELF_FILE);
 extern void init_difftest(char *ref_so_file, long img_size, int port);
+extern void init_sbi_disk_img(const char *disk_img_file);
+extern void init_sbi_disk();
+extern void init_sbi_serial();
+extern void init_sbi_plic();
+extern void init_sbi_clint(VTOP *top);
 
-static void welcome() {
-  Log("Trace: %s", MUXDEF(CONFIG_TRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
-  IFDEF(CONFIG_TRACE, Log("If trace is enabled, a log file will be generated "
-        "to record the trace. This may lead to a large log file. "
-        "If it is not necessary, you can disable it in menuconfig"));
-  Log("Build time: %s, %s", __TIME__, __DATE__);
-  printf("Welcome to %s-NPC!\n", ANSI_FMT(str(__GUEST_ISA__), ANSI_FG_YELLOW ANSI_BG_RED));
-  printf("For help, type \"help\"\n");
+static void welcome()
+{
+    Log("Trace: %s", MUXDEF(CONFIG_TRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
+    IFDEF(CONFIG_TRACE, Log("If trace is enabled, a log file will be generated "
+                            "to record the trace. This may lead to a large log file. "
+                            "If it is not necessary, you can disable it in menuconfig"));
+    Log("Build time: %s, %s", __TIME__, __DATE__);
+    printf("Welcome to %s-NPC!\n", ANSI_FMT(str(__GUEST_ISA__), ANSI_FG_YELLOW ANSI_BG_RED));
+    printf("For help, type \"help\"\n");
 }
 
 static long load_img(){
@@ -71,11 +78,12 @@ static void parse_args(int argc,char *argv[]){
         {"port",    required_argument,  NULL,   'p' },
         {"wave",    required_argument,  NULL,   'w' },
         {"elf",     required_argument,  NULL,   'e' },
+        {"img",     required_argument,  NULL,   'i' },
         {"help",    no_argument,        NULL,   'h' },
         {0,         0,                  NULL,   0   },
     };
     int o;
-    while ((o = getopt_long(argc, argv, "-bhl:d:p:e:w:", table, NULL)) != -1)
+    while ((o = getopt_long(argc, argv, "-bhl:d:p:e:w:i:", table, NULL)) != -1)
     {
         switch (o)
         {
@@ -97,6 +105,9 @@ static void parse_args(int argc,char *argv[]){
             break;
         case 'w':
             wave_file = optarg;
+            break;
+        case 'i':
+            disk_img_file = optarg;
             break;
         case 1:
             img_file = optarg;
@@ -121,6 +132,11 @@ void init_monitor(VTOP *top, VerilatedFstC *tfp, remote_bitbang_t **remote_bitba
     init_log(log_file);
     IFDEF(CONFIG_FTRACE, init_ftrace(ELF_FILE));
     long img_size=load_img();
+    init_sbi_disk();
+    init_sbi_serial();
+    init_sbi_plic();
+    init_sbi_clint(top);
+    init_sbi_disk_img(disk_img_file);
     init_sdb();
     Log("successful init sdb");
     init_disasm(MUXDEF(CONFIG_RV64, "riscv64", "riscv32") "-pc-linux-gnu");
