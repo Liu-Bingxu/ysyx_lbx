@@ -6,9 +6,26 @@
 extern void assert_fail_msg();
 
 static char pmem[PMEM_SIZE];
+static char mrom[MROM_SIZE];
+
+static inline bool in_pmem(paddr_t addr){
+    return ((addr >= PMEM_START) && (addr < (PMEM_START + PMEM_SIZE)));
+}
+
+static inline bool in_mrom(paddr_t addr){
+    return ((addr >= MROM_START) && (addr < (MROM_START + MROM_SIZE)));
+}
 
 void *guest_to_host(paddr_t addr){
-    return (pmem + addr - PC_RST);
+    if(in_pmem(addr)){
+        return (pmem + addr - PC_RST);
+    }
+    else if(in_mrom(addr)){
+        return (mrom + addr - 0x20000000);
+    }
+    else{
+        Assert(0, "now try to read " FMT_PADDR, addr);
+    }
 }
 
 void pmem_read(word_t raddr,word_t *rdata){
@@ -142,10 +159,10 @@ extern "C" void sim_periph_write(uint64_t waddr, uint64_t wdata, uint8_t wmask){
 
 extern "C" void flash_read(int32_t addr, int32_t *data) { assert(0); }
 extern "C" void mrom_read(int32_t addr, int32_t *data) {
-    (*data) = 0xfc000073;
-    // *data = 0x100073;
-    // addr &= (~0x3U);
-    // assert(raddr < PMEM_SIZE);
+    // (*data) = 0xfc000073;
+    // (*data) = 0x100073;
+    assert(addr < (MROM_START + MROM_SIZE));
+    addr &= (~0x3U);
     // if ((addr - PC_RST) >= PMEM_SIZE)
     // {
     //     printf("raddr >= PMEM_SIZE, addr is " FMT_PADDR "\n", addr);
@@ -154,5 +171,5 @@ extern "C" void mrom_read(int32_t addr, int32_t *data) {
     //     npc_state.halt_ret = 0;
     //     sim_exit();
     // }
-    // (*data) = *(int32_t *)(guest_to_host(addr));
+    (*data) = *(int32_t *)(guest_to_host(addr));
 }

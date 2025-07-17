@@ -63,7 +63,12 @@ static long load_img(){
     fseek(fp, 0, SEEK_SET);
     int ret = fread(guest_to_host(PC_RST), size, 1, fp);
     assert(ret == 1);
-    Log("successful read img");
+    Log("successful read img to pmem");
+
+    fseek(fp, 0, SEEK_SET);
+    ret = fread(guest_to_host(MROM_START), (size > MROM_SIZE) ? MROM_SIZE : size, 1, fp);
+    assert(ret == 1);
+    Log("successful read img to mrom");
 
     fclose(fp);
     return size;
