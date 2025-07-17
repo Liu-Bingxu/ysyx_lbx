@@ -81,7 +81,13 @@ void step_and_dump_wave(){
     top->eval();
     // printf("Hello\n");
     contextp->timeInc(1);
-    IFDEF(CONFIG_VCD_GET, tfp->dump(contextp->time()));
+    volatile static bool dump_flag = false;
+    if (g_nr_guest_inst > 44742000){
+        dump_flag = true;
+    }
+    if (dump_flag == true){
+        IFDEF(CONFIG_VCD_GET, tfp->dump(contextp->time()));
+    }
 }
 
 static void statistic(){
@@ -198,6 +204,20 @@ extern "C" void difftest_InstrCommit(
     packet.special = io_special;
 }
 
+extern "C" void difftest_TrapEvent(
+    uint8_t io_hasTrap,
+    uint64_t io_cycleCnt,
+    uint64_t io_instrCnt,
+    uint8_t io_hasWFI,
+    uint64_t io_code,
+    uint64_t io_pc,
+    uint8_t io_coreid)
+{
+    if (ref_difftest_raise_intr)
+        ref_difftest_raise_intr(io_code);
+    IFDEF(CONFIG_ETRACE, Log("Now have a tarp happen cycle is " NUMBERIC_FMT ", inst is " NUMBERIC_FMT ",code is 0x%016lx,pc is 0x%016lx", io_cycleCnt, io_instrCnt, io_code, io_pc));
+}
+
 void sim_rst(){
     top->rst_n = 0;
     for (int i = 0; i < 10;i++){
@@ -228,24 +248,24 @@ void sim_rst(){
     //     }
     // }
     update_reg();
-    while (packet.valid == false)
-    {
-        top->clock = !top->clock;
-        step_and_dump_wave();
-        top->clock = !top->clock;
-        step_and_dump_wave();
-        clock_cnt++;
-        if ((clock_cnt % 50) == 0)
-            remote_bitbang->tick();
-        if(clock_cnt == 100){
-            Log("now rst have some wrong");
-            isa_reg_display();
-            IFDEF(CONFIG_ITRACE, irangbuf_printf());
-            set_npc_state(NPC_END, get_gpr(32), 1);
-            sim_exit();
-        }
-    }
-    set_pc(packet.pc);
+    // while (packet.valid == false)
+    // {
+    //     top->clock = !top->clock;
+    //     step_and_dump_wave();
+    //     top->clock = !top->clock;
+    //     step_and_dump_wave();
+    //     clock_cnt++;
+    //     if ((clock_cnt % 50) == 0)
+    //         remote_bitbang->tick();
+    //     if(clock_cnt == 100){
+    //         Log("now rst have some wrong");
+    //         isa_reg_display();
+    //         IFDEF(CONFIG_ITRACE, irangbuf_printf());
+    //         set_npc_state(NPC_END, get_gpr(32), 1);
+    //         sim_exit();
+    //     }
+    // }
+    set_pc(0x80000000);
     // top->sys_clk = !top->sys_clk;
     // step_and_dump_wave();
     // top->sys_clk = !top->sys_clk;
@@ -280,7 +300,7 @@ static void exec_once(char *p, char *p2,paddr_t pc){
     memset(p, ' ', space_len);
     p += space_len;
     disassemble(p, p + 128 - p,pc, (uint8_t *)&val, ilen);
-    printf("ASM1: %s\n", inst_asm);
+    // printf("ASM1: %s\n", inst_asm);
 
     char *inst_asm2 = p2;
     p2 += snprintf(p2, 128, FMT_WORD ":", (pc));
@@ -299,7 +319,7 @@ static void exec_once(char *p, char *p2,paddr_t pc){
     memset(p2, ' ', space_len2);
     p2 += space_len2;
     disassemble(p2, p2 + 128 - p2, pc, (uint8_t *)&val2, ilen2);
-    printf("ASM2: %s\n", inst_asm2);
+    // printf("ASM2: %s\n", inst_asm2);
     // if(strcmp(inst_asm,inst_asm2)!=0){
     //     npc_state.state = NPC_END;
     //     npc_state.halt_pc = get_gpr(32);
@@ -332,12 +352,6 @@ static void exec_once(char *p, char *p2,paddr_t pc){
     //     step_and_dump_wave();
     //     clock_cnt++;
     // }
-
-    //! end instr 
-    if ((packet.instr) == 0xfc000073){
-        set_npc_state(NPC_END, get_gpr(32), get_gpr(10));
-        return;
-    }
     // fflush(stdout);
 
     // top->clock = !top->clock;
@@ -345,7 +359,6 @@ static void exec_once(char *p, char *p2,paddr_t pc){
     // top->clock = !top->clock;
     // step_and_dump_wave();
     // clock_cnt++;
-    update_reg();
     packet.valid = false;
     int cnt_now = 0;
     while (packet.valid == false){
@@ -372,8 +385,25 @@ static void exec_once(char *p, char *p2,paddr_t pc){
         }
     }
     set_pc(packet.pc);
+    update_reg();
 
-    // if (g_nr_guest_inst >= 2500){
+    //! end instr 
+    if ((packet.instr) == 0xfc000073){
+        set_npc_state(NPC_END, get_gpr(32), get_gpr(10));
+        return;
+    }
+
+    //! end instr 
+    if ((packet.pc) == 0xffffffff800c0730){
+        npc_state.state = NPC_STOP;
+    }
+
+    if (g_nr_guest_inst % 2500 == 0){
+        void update_sbi_time(uint64_t us);
+        update_sbi_time(get_time());
+    }
+
+    // if (g_nr_guest_inst >= 44830000){
     //     npc_state.state = NPC_END;
     //     npc_state.halt_pc = get_gpr(32);
     //     npc_state.halt_ret = 0;
@@ -459,19 +489,19 @@ static void trace_and_difftest(const char *buf,paddr_t pc, paddr_t dnpc) {
 
 static void execute(uint64_t n)
 {
+    char *p = (char *)malloc(128);
+    char *p2 = (char *)malloc(128);
     for (; n > 0; n--)
     {
-        char *p = (char *)malloc(128);
-        char *p2 = (char *)malloc(128);
         // paddr_t pc = get_gpr(32);
         // paddr_t pc = top->rootp->top__DOT__u_ifu__DOT__PC_to_sram_reg;
+        // paddr_t pc = top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__u_core_top__DOT__u_lsu__DOT__u_PC__DOT__data_out_reg;
+        paddr_t pc = get_gpr(32);
+        exec_once(p, p2, pc);
         if(skip_ref_flag==true){
             skip_ref_flag = false;
             difftest_skip_ref();
         }
-        // paddr_t pc = top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__u_core_top__DOT__u_lsu__DOT__u_PC__DOT__data_out_reg;
-        paddr_t pc = get_gpr(32);
-        exec_once(p, p2, pc);
         g_nr_guest_inst++;
         // paddr_t dnpc = top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__u_core_top__DOT__u_lsu__DOT__u_PC__DOT__data_out_reg;
         paddr_t dnpc = get_gpr(32);
@@ -480,6 +510,10 @@ static void execute(uint64_t n)
         // if((g_nr_guest_inst%1000)==0){
         // log_write(1, "now program runing %d inst, PC is" FMT_WORD "\n", g_nr_guest_inst,get_gpr(32));
         // }
+        if (g_print_step) {
+            IFDEF(CONFIG_ITRACE, printf("ASM1: %s\n", p););
+            IFDEF(CONFIG_ITRACE, printf("ASM2: %s\n", p2););
+        }
         trace_and_difftest(p, pc, dnpc);
         if (npc_state.state != NPC_RUNNING)
             break;

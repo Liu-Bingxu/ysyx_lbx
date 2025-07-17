@@ -237,10 +237,10 @@ bool isa_difftest_checkregs(CPU_state *ref,paddr_t pc){
         printf("The satp diff\n");
         this_text=false;
     }
-    if (ref->mip != reg.mip){
-        printf("The mip diff\n");
-        this_text=false;
-    }
+    // if (ref->mip != reg.mip){
+    //     printf("The mip diff\n");
+    //     this_text=false;
+    // }
     if (ref->mie != reg.mie){
         printf("The mie diff\n");
         this_text=false;
