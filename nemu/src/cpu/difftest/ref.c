@@ -17,6 +17,7 @@
 #include <cpu/cpu.h>
 #include <difftest-def.h>
 #include <memory/paddr.h>
+#include "cpu/decode.h"
 
 __EXPORT void difftest_memcpy(paddr_t addr, void *buf, size_t n, bool direction) {
     if (direction == DIFFTEST_TO_REF){
@@ -107,13 +108,21 @@ __EXPORT void difftest_exec(uint64_t n) {
 }
 
 __EXPORT void difftest_raise_intr(word_t NO) {
-
-//   assert(0);
+    Decode s;
+    s.pc = cpu.pc;
+    s.snpc = cpu.pc;
+    s.dnpc = cpu.pc;
+    isa_raise_intr(&s, NO, s.pc, 0);
+    cpu.pc = s.dnpc;
+    //   assert(0);
 }
+__EXPORT CPU_state *_nemu_cpu = &cpu;
+__EXPORT uint8_t *_nemu_pmem;
 
 __EXPORT void difftest_init(int port) {
   void init_mem();
   init_mem();
   /* Perform ISA dependent initialization. */
   init_isa();
+  _nemu_pmem = guest_to_host(0x80000000);
 }
