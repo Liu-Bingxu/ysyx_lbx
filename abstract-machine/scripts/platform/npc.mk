@@ -20,6 +20,9 @@ CFLAGS += -DMAINARGS=\"$(mainargs)\"
 NPCFLAGS += $(shell dirname $(IMAGE).elf)/npc-log.txt
 NPCDIR = $(addsuffix /RTL_build,$(shell dirname $(IMAGE).elf))
 
+# TOPNAME?=core_debugger_top
+TOPNAME?=core_debugger_top_with_idcache
+
 .PHONY: $(AM_HOME)/am/src/riscv/npc/trm.c
 
 image: $(IMAGE).elf
@@ -31,5 +34,5 @@ image: $(IMAGE).elf
 
 run:image
 	$(shell if [ ! -d $(NPCDIR) ]; then mkdir -p $(NPCDIR) ;fi)
-	$(MAKE) -C $(NPC_HOME) run ARGS="-w $(NPCDIR)/$(NAME)-wave.fst -l $(NPCFLAGS) $(B) -e $(IMAGE).elf -p 1234" IMG=$(IMAGE).bin IMAGE=$(IMAGE).image ISA=$(ISA) BUILD_DIR=$(NPCDIR) name=$(NAME)- TOPNAME=core_debugger_top
+	$(MAKE) -C $(NPC_HOME) run ARGS="-w $(NPCDIR)/$(NAME)-wave.fst -l $(NPCFLAGS) $(B) -e $(IMAGE).elf -p 1234" IMG=$(IMAGE).bin IMAGE=$(IMAGE).image ISA=$(ISA) BUILD_DIR=$(NPCDIR) name=$(NAME)- TOPNAME=$(TOPNAME)
 
