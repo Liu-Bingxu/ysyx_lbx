@@ -8,9 +8,9 @@
 extern "C" {
 #endif
 
-#define PC_RST 0x80000000
+#define PC_RST    0x80000000
 
-#define PMEM_SIZE 0x8000000
+#define PMEM_SIZE 0x20000000
 
 void *guest_to_host(paddr_t addr);
 
