@@ -389,7 +389,7 @@ static void exec_once(char *p, char *p2,paddr_t pc){
 
     //! end instr 
     if ((packet.instr) == 0xfc000073){
-        set_npc_state(NPC_END, get_gpr(32), get_gpr(10));
+        set_npc_state(NPC_END, pc, get_gpr(10));
         return;
     }
 
