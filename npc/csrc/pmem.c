@@ -3,7 +3,7 @@
 #include "device.h"
 #include "regs.h"
 
-extern void sim_exit();
+extern void assert_fail_msg();
 
 static char pmem[PMEM_SIZE];
 
@@ -16,10 +16,11 @@ void pmem_read(word_t raddr,word_t *rdata){
     // assert(raddr < PMEM_SIZE);
     if(raddr>=PMEM_SIZE){
         printf("raddr >= PMEM_SIZE\n");
+        printf("now try to read " FMT_WORD ":%ld\n", raddr, raddr);
         npc_state.state = NPC_END;
         npc_state.halt_pc = get_gpr(32);
         npc_state.halt_ret = 0;
-        sim_exit();
+        assert_fail_msg();
     }
     (*rdata) = (*((word_t *)(pmem + raddr)));
     // printf("now read addr: " FMT_PADDR " now rdata is " FMT_WORD "\n", raddr, *rdata);
@@ -73,29 +74,85 @@ extern "C" void sim_sram_write(uint64_t waddr, uint64_t wdata, uint8_t wmask){
 }
 
 extern "C" void sim_periph_read(uint64_t raddr, uint64_t *rdata){
-    if(raddr==TIMER_ADDR){
+    if((raddr==TIMER_ADDR) || (raddr==(TIMER_ADDR + 4))){
         (*rdata) = ((uint64_t)get_timer_reg(0) | ((uint64_t)get_timer_reg(1) << 32));
+        set_skip_ref_flag();
+        return;
+    }
+    if ((raddr >= CONFIG_SBI_DISK_MMIO) && (raddr < CONFIG_SBI_DISK_MMIO + 64)){
+        sbi_disk_io_handler_r(raddr, rdata);
+        set_skip_ref_flag();
+        return;
+    }
+    if ((raddr >= CONFIG_SBI_SERIAL_MMIO) && (raddr < CONFIG_SBI_SERIAL_MMIO + 8)){
+        sbi_serial_io_handler_r(raddr, rdata);
+        set_skip_ref_flag();
+        return;
+    }
+    if ((raddr >= CONFIG_SBI_CLINT_MMIO) && (raddr < CONFIG_SBI_CLINT_MMIO + 64 * 1024)){
+        sbi_clint_io_handler_r(raddr, rdata);
+        set_skip_ref_flag();
+        return;
+    }
+    if ((raddr >= CONFIG_SBI_PLIC_MMIO) && (raddr < CONFIG_SBI_PLIC_MMIO + (2 * 1024 + 64) * 1024)){
+        sbi_plic_io_handler_r(raddr, rdata);
+        set_skip_ref_flag();
+        return;
     }
 }
 
 extern "C" void sim_periph_write(uint64_t waddr, uint64_t wdata, uint8_t wmask){
-    if(waddr==SERIAL_ADDR){serial_out((char)wdata);return;}
-    if((waddr==TIMER_ADDR)&&(wdata==0)){get_uptime();return;}
-    if((waddr==TIMER_ADDR)&&(wdata==1)){get_rtc();return;}
+    if(waddr==SERIAL_ADDR){
+        serial_out((char)wdata);
+        set_skip_ref_flag();
+        return;
+    }
+    if((waddr==TIMER_ADDR)&&(wdata==0)){
+        get_uptime();
+        set_skip_ref_flag();
+        return;
+    }
+    if((waddr==TIMER_ADDR)&&(wdata==1)){
+        get_rtc();
+        set_skip_ref_flag();
+        return;
+    }
+    if ((waddr >= CONFIG_SBI_DISK_MMIO) && (waddr < CONFIG_SBI_DISK_MMIO + 64)){
+        sbi_disk_io_handler_w(waddr, wdata, wmask);
+        set_skip_ref_flag();
+        return;
+    }
+    if ((waddr >= CONFIG_SBI_SERIAL_MMIO) && (waddr < CONFIG_SBI_SERIAL_MMIO + 8)){
+        sbi_serial_io_handler_w(waddr, wdata, wmask);
+        set_skip_ref_flag();
+        return;
+    }
+    if ((waddr >= CONFIG_SBI_CLINT_MMIO) && (waddr < CONFIG_SBI_CLINT_MMIO + 64 * 1024))
+    {
+        sbi_clint_io_handler_w(waddr, wdata, wmask);
+        set_skip_ref_flag();
+        return;
+    }
+    if ((waddr >= CONFIG_SBI_PLIC_MMIO) && (waddr < CONFIG_SBI_PLIC_MMIO + (2 * 1024 + 64) * 1024)){
+        sbi_plic_io_handler_w(waddr, wdata, wmask);
+        set_skip_ref_flag();
+        return;
+    }
 }
 
-// extern "C" void flash_read(int32_t addr, int32_t *data) { assert(0); }
-// extern "C" void mrom_read(int32_t addr, int32_t *data) {
-//     // *data = 0x100073;
-//     addr &= (~0x3U);
-//     // assert(raddr < PMEM_SIZE);
-//     if ((addr - PC_RST) >= PMEM_SIZE)
-//     {
-//         printf("raddr >= PMEM_SIZE, addr is " FMT_PADDR "\n", addr);
-//         npc_state.state = NPC_END;
-//         npc_state.halt_pc = get_gpr(32);
-//         npc_state.halt_ret = 0;
-//         sim_exit();
-//     }
-//     (*data) = *(int32_t *)(guest_to_host(addr));
-// }
+extern "C" void flash_read(int32_t addr, int32_t *data) { assert(0); }
+extern "C" void mrom_read(int32_t addr, int32_t *data) {
+    (*data) = 0xfc000073;
+    // *data = 0x100073;
+    // addr &= (~0x3U);
+    // assert(raddr < PMEM_SIZE);
+    // if ((addr - PC_RST) >= PMEM_SIZE)
+    // {
+    //     printf("raddr >= PMEM_SIZE, addr is " FMT_PADDR "\n", addr);
+    //     npc_state.state = NPC_END;
+    //     npc_state.halt_pc = get_gpr(32);
+    //     npc_state.halt_ret = 0;
+    //     sim_exit();
+    // }
+    // (*data) = *(int32_t *)(guest_to_host(addr));
+}
