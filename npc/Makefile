@@ -1,13 +1,17 @@
 # TOPNAME=core_top
-TOPNAME?=ysyxSoCFull
+TOPNAME?=ysyxsoc_sim
 # vsrc_dir=../../ysyx-for-LiuBingxu/vsrc
 # vsrc_dir+=../ysyxSoC/perip/uart16550/rtl
 # vsrc_dir+=../ysyxSoC/perip/spi/rtl
 vsrc_dir?=../../ysyx-for-LiuBingxu
 MODULE_SRC = $(shell find $(abspath $(vsrc_dir)) -name "*.v" -or -name "*.sv")
 VINC_file=$(sort $(dir $(shell find $(abspath $(vsrc_dir)) -name "*.v" -or -name "*.sv")))
-# MODULE_SRC+= $(shell find $(abspath ../ysyxSoC/perip) -name "*.v" -or -name "*.sv")
-# MODULE_SRC+=./vsrc/ysyx_23060081.v
+MODULE_SRC+= $(shell find $(abspath /home/kuuga/ysyx-workbench/ysyxSoC/perip) -name "*.v" -or -name "*.sv")
+# VINC_file+=/home/kuuga/ysyx-workbench/ysyxSoC/perip/uart16550/rtl
+# VINC_file+=/home/kuuga/ysyx-workbench/ysyxSoC/perip/spi/rtl
+VINC_file+=$(sort $(dir $(shell find /home/kuuga/ysyx-workbench/ysyxSoC/perip -name "*.v" -or -name "*.sv")))
+# MODULE_SRC+=/home/kuuga/ysyx-workbench/ysyxSoC/build/ysyxSoCFull.v
+VINC_file+=/home/kuuga/ysyx-workbench/ysyxSoC/build
 TOPMODULE = $(shell find $(abspath $(vsrc_dir)) -name "$(TOPNAME).v")
 CSRC = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cpp" -or -name "*.cc")#
 HEAD_FILE=$(shell find $(abspath ./) -name "*.h")
@@ -35,7 +39,7 @@ IMAGE?=$(NPC_HOME)/rot13.image
 
 include $(NPC_HOME)/csrc/utils/filelist.mk
 
-CXXFLAGS+=-DVTOP=V$(TOPNAME) -DVTOP_H=\\\"V$(TOPNAME).h\\\" -DVTOP_DPI_H=\\\"V$(TOPNAME)__Dpi.h\\\" -D__GUEST_ISA__=$(ISA)
+CXXFLAGS+=-DVTOP=V$(TOPNAME) -DVTOP_H=\\\"V$(TOPNAME).h\\\" -DVTOP_DPI_H=\\\"V$(TOPNAME)__Dpi.h\\\" -D__GUEST_ISA__=$(ISA) -DTOPNAME=\\\"$(TOPNAME)\\\" -g 
 
 VSRC_DIR=$(call vsrc_dir_add,$(VINC_file))
 MODULE=$(call module_add,$(MODULE_SRC))
@@ -62,43 +66,44 @@ waves: $(BUILD_DIR)/$(name)wave.fst
 	@echo "### WAVES ###"
 	@gtkwave $(BUILD_DIR)/$(name)wave.fst
 
-$(BUILD_DIR)/$(name)wave.fst: $(NPC_HOME)/build/V$(TOPNAME) $(IMG)
+$(BUILD_DIR)/$(name)wave.fst: $(NPC_HOME)/$(TOPNAME)-build/V$(TOPNAME) $(IMG)
 	@echo
 	@echo "### SIMULATING ###"
-	@echo "$(NPC_HOME)/build/V$(TOPNAME) $(ARGS) $(IMG) +verilator+rand+reset+2"
-	$(NPC_HOME)/build/V$(TOPNAME) $(ARGS) $(IMG) +verilator+rand+reset+2 +image=$(IMAGE)
+	@echo "$(NPC_HOME)/$(TOPNAME)-build/V$(TOPNAME) $(ARGS) $(IMG) +verilator+rand+reset+2"
+	$(NPC_HOME)/$(TOPNAME)-build/V$(TOPNAME) $(ARGS) $(IMG) +verilator+rand+reset+2 +image=$(IMAGE)
 
-$(NPC_HOME)/build/V$(TOPNAME): $(NPC_HOME)/.stamp.verilate
+$(NPC_HOME)/$(TOPNAME)-build/V$(TOPNAME): $(NPC_HOME)/.stamp.verilate
 	@echo
 	@echo "### BUILDING SIM ###"
-	@echo "make -C $(NPC_HOME)/build -f V$(TOPNAME).mk V$(TOPNAME) "
-	make -C $(NPC_HOME)/build -f V$(TOPNAME).mk V$(TOPNAME) 
+	@echo "make -C $(NPC_HOME)/$(TOPNAME)-build -f V$(TOPNAME).mk V$(TOPNAME) "
+	make -C $(NPC_HOME)/$(TOPNAME)-build -f V$(TOPNAME).mk V$(TOPNAME) 
 
 $(NPC_HOME)/.stamp.verilate: $(MODULE_SRC) $(CSRC) $(HEAD_FILE)
-	@if [ -d $(NPC_HOME)/build ]; then echo "build dir have build";else mkdir -p $(NPC_HOME)/build; fi
+	@if [ -d $(NPC_HOME)/$(TOPNAME)-build ]; then echo "build dir have build";else mkdir -p $(NPC_HOME)/$(TOPNAME)-build; fi
 	@echo
 	@echo "### VERILATING ###"
-	@echo verilator --Mdir $(NPC_HOME)/build --unroll-count 1000 --trace-fst --x-assign unique --x-initial unique --timing --top-module $(TOPNAME)  -cc $(TOPMODULE) --exe $(CSRC) $(INC) $(VSRC_DIR) $(MY_CXXFLAGS) $(MY_LDFLAGS) -Wno-WIDTHTRUNC -Wno-WIDTHEXPAND
-	@verilator --Mdir $(NPC_HOME)/build --autoflush --unroll-count 1000 --trace-fst --x-assign unique --x-initial unique --timescale "1ns/1ns" --no-timing --top-module $(TOPNAME)  -cc $(TOPMODULE) --exe $(CSRC) $(INC) $(VSRC_DIR) $(MY_CXXFLAGS) $(MY_LDFLAGS) -Wno-WIDTHTRUNC -Wno-WIDTHEXPAND
+	@echo verilator --Mdir $(NPC_HOME)/$(TOPNAME)-build --unroll-count 1000 --trace-fst --x-assign unique --x-initial unique --timescale "1ns/1ns" --no-timing --top-module $(TOPNAME)  -cc $(TOPMODULE) --exe $(CSRC) $(INC) $(VSRC_DIR) $(MY_CXXFLAGS) $(MY_LDFLAGS) -Wno-WIDTHTRUNC -Wno-WIDTHEXPAND
+	@verilator --Mdir $(NPC_HOME)/$(TOPNAME)-build --autoflush --unroll-count 1000 --trace-fst --x-assign unique --x-initial unique --timescale "1ns/1ns" --no-timing --top-module $(TOPNAME)  -cc $(TOPMODULE) --exe $(CSRC) $(INC) $(VSRC_DIR) $(MY_CXXFLAGS) $(MY_LDFLAGS) -Wno-WIDTHTRUNC -Wno-WIDTHEXPAND
 	@touch $(NPC_HOME)/.stamp.verilate
 
 .PHONY:lint
 lint: $(MODULE_SRC) 
 	verilator --lint-only $(MODULE_SRC) $(VSRC_DIR) --top-module $(TOPNAME) -Wall --timescale "1ns/1ns" --no-timing
 
-# WORK_PATH=$(shell echo $(PWD))
-# SDC_FILE = $(shell find $(abspath ./) -name "*.sdc")
-# .PHONY:sta
-# sta:
-# 	@rm -rf $(WORK_PATH)/result
-# 	make clean -C ~/yosys-sta -f Makefile
-# 	make sta DESIGN=core SDC_FILE=$(SDC_FILE) RTL_FILES="$(MODULE_SRC)" CLK_FREQ_MHZ=100 -C ~/yosys-sta/ -f Makefile
-# 	@cp -r ~/yosys-sta/result/ $(WORK_PATH)/
+SDC_FILE = $(shell find $(NPC_HOME) -name "*.sdc")
+CLK_FREQ_MHZ=100
+.PHONY:sta
+sta:
+	@rm -rf $(NPC_HOME)/build/result
+	@mkdir -p $(NPC_HOME)/build/result/rtl
+	@cp $(MODULE_SRC) $(NPC_HOME)/build/result/rtl
+# @make sta DESIGN=$(TOPNAME) SDC_FILE=$(SDC_FILE) RTL_FILES="$(shell find $(abspath $(NPC_HOME)/build/result/rtl) -name "*.v" -or -name "*.sv")" \
+# 		CLK_FREQ_MHZ=$(CLK_FREQ_MHZ) CLK_PORT_NAME=clk O=$(NPC_HOME)/build/result -C ~/yosys-sta/ -f Makefile
 
 .PHONY: clean
 clean:
 	rm -rf .stamp.*;
-	rm -rf ./build
+	rm -rf ./*build
 	rm -rf wave.fst
 	rm -rf *.txt
 

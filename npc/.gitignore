@@ -13,4 +13,4 @@
 !start*
 !*.cfg
 !*.lds
-build/
+*build/
