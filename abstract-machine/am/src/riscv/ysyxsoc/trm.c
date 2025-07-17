@@ -23,7 +23,8 @@ void putch(char ch) {
 }
 
 void halt(int code) {
-    asm volatile("mv a0,%0; ebreak;":: "r"(code));
+    asm volatile(".word 0xfc000073" : : "r"(code));
+    // asm volatile("mv a0,%0; ebreak;" ::"r"(code));
     while (1);
 }
 

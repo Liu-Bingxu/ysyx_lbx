@@ -18,7 +18,7 @@ CFLAGS += -DMAINARGS=\"$(mainargs)\"
 # LIBS+=am/src/riscv/ysyxsoc
 
 YSYXSOCFLAGS += $(shell dirname $(IMAGE).elf)/ysyxsoc-log.txt
-YSYXSOCDIR = $(addsuffix /$(NAME)-RTL_build,$(shell dirname $(IMAGE).elf))
+YSYXSOCDIR = $(addsuffix /RTL_build,$(shell dirname $(IMAGE).elf))
 
 .PHONY: $(AM_HOME)/am/src/riscv/ysyxsoc/trm.c
 
@@ -28,6 +28,6 @@ image: $(IMAGE).elf
 	@$(OBJCOPY) -S --set-section-flags .bss=alloc,contents -O binary $(IMAGE).elf $(IMAGE).bin
 
 run:image
-	$(shell if [ ! -d $(YSYXSOCDIR)/build ]; then mkdir -p $(YSYXSOCDIR)/build ;fi)
-	$(MAKE) -C $(NPC_HOME) run ARGS="-w $(YSYXSOCDIR)/$(NAME)-wave.vcd -l $(YSYXSOCFLAGS) $(B) -e $(IMAGE).elf" IMG=$(IMAGE).bin ISA=$(ISA) BUILD_DIR=$(YSYXSOCDIR) name=$(NAME)-
+	$(shell if [ ! -d $(YSYXSOCDIR) ]; then mkdir -p $(YSYXSOCDIR) ;fi)
+	$(MAKE) -C $(NPC_HOME) run ARGS="-w $(YSYXSOCDIR)/$(NAME)-wave.fst -l $(YSYXSOCFLAGS) $(B) -e $(IMAGE).elf -p 1234" IMG=$(IMAGE).bin ISA=$(ISA) BUILD_DIR=$(YSYXSOCDIR) name=$(NAME)- TOPNAME=ysyxsoc_sim
 
