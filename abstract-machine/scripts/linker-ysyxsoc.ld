@@ -12,28 +12,40 @@ SECTIONS {
     .text : {
         *(entry)
         *(.text*)
-    } : text
+    }> mrom AT> mrom  : text
     etext = .;
     _etext = .;
     .rodata : {
         *(.rodata*)
-    }
+        *(.srodata*)
+        . = ALIGN(0x10);
+    }> mrom AT> mrom 
+    _erodata = .;
     .data : {
-        *(.data)
-    } : data
+        . = ALIGN(0x10);
+        _data_start = .;
+        *(.data*)
+        *(.sdata*)
+        . = ALIGN(0x10);
+        _data_end = .;
+    }> sram AT> mrom : data 
     edata = .;
     _data = .;
     .bss : {
+        . = ALIGN(0x10);
         _bss_start = .;
         *(.bss*)
         *(.sbss*)
         *(.scommon)
-    }
+        _bss_end = .;
+        . = ALIGN(0x10);
+    }> sram
     end = .;
     _end = .;
-    . = 0x0f000000;
     _stack_top = ALIGN(0x200);
     . = _stack_top + 0x1000;
     _stack_pointer = .;
     _heap_start = ALIGN(0x200);
+    . = 0x0f002000;
+    _heap_end = .;
 }
