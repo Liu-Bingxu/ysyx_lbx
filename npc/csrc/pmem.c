@@ -18,10 +18,10 @@ static inline bool in_mrom(paddr_t addr){
 
 void *guest_to_host(paddr_t addr){
     if(in_pmem(addr)){
-        return (pmem + addr - PC_RST);
+        return (pmem + addr - PMEM_START);
     }
     else if(in_mrom(addr)){
-        return (mrom + addr - 0x20000000);
+        return (mrom + addr - MROM_START);
     }
     else{
         Assert(0, "now try to read " FMT_PADDR, addr);

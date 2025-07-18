@@ -40,6 +40,11 @@ IMAGE?=$(NPC_HOME)/rot13.image
 include $(NPC_HOME)/csrc/utils/filelist.mk
 
 CXXFLAGS+=-DVTOP=V$(TOPNAME) -DVTOP_H=\\\"V$(TOPNAME).h\\\" -DVTOP_DPI_H=\\\"V$(TOPNAME)__Dpi.h\\\" -D__GUEST_ISA__=$(ISA) -DTOPNAME=\\\"$(TOPNAME)\\\" -g 
+ifeq ($(findstring  ysyxsoc_sim,$(TOPNAME)), )
+	CXXFLAGS+=-DPC_RST=0x80000000
+else
+	CXXFLAGS+=-DPC_RST=0x20000000
+endif
 
 VSRC_DIR=$(call vsrc_dir_add,$(VINC_file))
 MODULE=$(call module_add,$(MODULE_SRC))
@@ -55,7 +60,7 @@ sim:$(BUILD_DIR)/$(name)wave.fst
 # @echo "Write this Makefile by your self."
 
 .PHONY:verilate
-verilate: $(NPC_HOME)/.stamp.verilate
+verilate: $(NPC_HOME)/.stamp.verilate-$(TOPNAME)
 
 .PHONY:run
 run:sim $(BUILD_DIR)/$(name)wave.fst
@@ -72,19 +77,19 @@ $(BUILD_DIR)/$(name)wave.fst: $(NPC_HOME)/$(TOPNAME)-build/V$(TOPNAME) $(IMG)
 	@echo "$(NPC_HOME)/$(TOPNAME)-build/V$(TOPNAME) $(ARGS) $(IMG) +verilator+rand+reset+2"
 	$(NPC_HOME)/$(TOPNAME)-build/V$(TOPNAME) $(ARGS) $(IMG) +verilator+rand+reset+2 +image=$(IMAGE)
 
-$(NPC_HOME)/$(TOPNAME)-build/V$(TOPNAME): $(NPC_HOME)/.stamp.verilate
+$(NPC_HOME)/$(TOPNAME)-build/V$(TOPNAME): $(NPC_HOME)/.stamp.verilate-$(TOPNAME)
 	@echo
 	@echo "### BUILDING SIM ###"
 	@echo "make -C $(NPC_HOME)/$(TOPNAME)-build -f V$(TOPNAME).mk V$(TOPNAME) "
 	make -C $(NPC_HOME)/$(TOPNAME)-build -f V$(TOPNAME).mk V$(TOPNAME) 
 
-$(NPC_HOME)/.stamp.verilate: $(MODULE_SRC) $(CSRC) $(HEAD_FILE)
+$(NPC_HOME)/.stamp.verilate-$(TOPNAME): $(MODULE_SRC) $(CSRC) $(HEAD_FILE)
 	@if [ -d $(NPC_HOME)/$(TOPNAME)-build ]; then echo "build dir have build";else mkdir -p $(NPC_HOME)/$(TOPNAME)-build; fi
 	@echo
 	@echo "### VERILATING ###"
 	@echo verilator --Mdir $(NPC_HOME)/$(TOPNAME)-build --unroll-count 1000 --trace-fst --x-assign unique --x-initial unique --timescale "1ns/1ns" --no-timing --top-module $(TOPNAME)  -cc $(TOPMODULE) --exe $(CSRC) $(INC) $(VSRC_DIR) $(MY_CXXFLAGS) $(MY_LDFLAGS) -Wno-WIDTHTRUNC -Wno-WIDTHEXPAND
 	@verilator --Mdir $(NPC_HOME)/$(TOPNAME)-build --autoflush --unroll-count 1000 --trace-fst --x-assign unique --x-initial unique --timescale "1ns/1ns" --no-timing --top-module $(TOPNAME)  -cc $(TOPMODULE) --exe $(CSRC) $(INC) $(VSRC_DIR) $(MY_CXXFLAGS) $(MY_LDFLAGS) -Wno-WIDTHTRUNC -Wno-WIDTHEXPAND
-	@touch $(NPC_HOME)/.stamp.verilate
+	@touch $(NPC_HOME)/.stamp.verilate-$(TOPNAME)
 
 .PHONY:lint
 lint: $(MODULE_SRC) 

@@ -265,7 +265,7 @@ void sim_rst(){
     //         sim_exit();
     //     }
     // }
-    set_pc(0x80000000);
+    set_pc(PC_RST);
     // top->sys_clk = !top->sys_clk;
     // step_and_dump_wave();
     // top->sys_clk = !top->sys_clk;

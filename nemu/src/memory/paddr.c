@@ -25,7 +25,29 @@ static uint8_t *pmem = NULL;
 static uint8_t pmem[CONFIG_MSIZE] PG_ALIGN = {};
 #endif
 
-uint8_t* guest_to_host(paddr_t paddr) { return pmem + paddr - CONFIG_MBASE; }
+static uint8_t mrom[MROM_SIZE] PG_ALIGN = {};
+static uint8_t sram[SRAM_SIZE] PG_ALIGN = {};
+
+// uint8_t* guest_to_host(paddr_t paddr) { return pmem + paddr - CONFIG_MBASE; }
+static inline bool in_mrom(paddr_t addr){
+    return ((addr >= MROM_START) && (addr < (MROM_START + MROM_SIZE)));
+}
+
+static inline bool in_sram(paddr_t addr){
+    return ((addr >= SRAM_START) && (addr < (SRAM_START + SRAM_SIZE)));
+}
+
+uint8_t *guest_to_host(paddr_t paddr){
+    if(in_mrom(paddr)){
+        return (mrom + paddr - MROM_START);
+    }
+    else if(in_sram(paddr)){
+        return (sram + paddr - SRAM_START);
+    }
+    else{
+        return (pmem + paddr - CONFIG_MBASE);
+    }
+}
 paddr_t host_to_guest(uint8_t *haddr) { return haddr - pmem + CONFIG_MBASE; }
 #ifndef CACHE_ENABLE
 static word_t pmem_read(paddr_t addr, int len) {
@@ -64,7 +86,7 @@ void init_mem() {
 }
 
 word_t paddr_read(paddr_t addr, int len) {
-  if (likely(in_pmem(addr))){
+  if (likely((in_pmem(addr) | (in_mrom(addr)) | in_sram(addr)))){
   #ifdef CACHE_ENABLE
       return cache_read(addr,len);
     #else
@@ -77,7 +99,7 @@ word_t paddr_read(paddr_t addr, int len) {
 }
 
 void paddr_write(paddr_t addr, int len, word_t data) {
-  if (likely(in_pmem(addr))) { 
+  if (likely((in_pmem(addr) | in_sram(addr)))) { 
     #ifdef CACHE_ENABLE
       cache_write(addr, len, data);
     #else

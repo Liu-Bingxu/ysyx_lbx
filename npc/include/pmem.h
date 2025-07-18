@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-#define PC_RST     0x80000000
+// #define PC_RST     0x80000000
 
 #define PMEM_START 0x80000000
 #define PMEM_SIZE  0x20000000

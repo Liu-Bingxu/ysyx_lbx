@@ -173,7 +173,8 @@ void isa_ref_reg_display(CPU_state *ref){
 
 bool isa_difftest_checkregs(CPU_state *ref,paddr_t pc){
     word_t val;
-    pmem_read(pc, &val);
+    // pmem_read(pc, &val);
+    val = *(uint32_t *)guest_to_host(pc & (~3U));
     bool text = true;
     bool this_text = true;
     // for (int i = 0; i < 32; i++)
