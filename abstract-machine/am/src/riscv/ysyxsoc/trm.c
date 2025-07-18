@@ -19,6 +19,9 @@ Area heap = RANGE(&_heap_start, HEAP_END);
 static const char mainargs[] = MAINARGS;
 
 void putch(char ch) {
+    while ((inb(SERIAL_LSR_ADDR) & 0x20) == 0)
+        ;
+
     outb(SERIAL_ADDR, ch);
 }
 
@@ -40,6 +43,21 @@ void _trm_init() {
     /* Zero bss.  */
     for (dst = &_bss_start; dst < &_bss_end; dst++)
         *dst = 0;
+
+    uint16_t bdiv = 2;
+
+    outb(SERIAL_LCR_ADDR, 0x80);
+
+    if (bdiv) {
+		/* Set divisor low byte */
+        outb(SERIAL_DLL_ADDR, bdiv & 0xff);
+        /* Set divisor high byte */
+        outb(SERIAL_DLM_ADDR, (bdiv >> 8) & 0xff);
+    }
+
+	/* 8 bits, no parity, one stop bit */
+    outb(SERIAL_LCR_ADDR, 0x03);
+
     int ret = main(mainargs);
     halt(ret);
 }

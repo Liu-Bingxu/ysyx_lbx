@@ -393,6 +393,11 @@ static void exec_once(char *p, char *p2,paddr_t pc){
         return;
     }
 
+    //! skip
+    if ((packet.skip) == true){
+        difftest_skip_ref();
+    }
+
     //! end instr 
     if ((packet.pc) == 0xffffffff800c0730){
         npc_state.state = NPC_STOP;
@@ -500,7 +505,7 @@ static void execute(uint64_t n)
         exec_once(p, p2, pc);
         if(skip_ref_flag==true){
             skip_ref_flag = false;
-            difftest_skip_ref();
+            // difftest_skip_ref();
         }
         g_nr_guest_inst++;
         // paddr_t dnpc = top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__u_core_top__DOT__u_lsu__DOT__u_PC__DOT__data_out_reg;
