@@ -190,7 +190,7 @@ void sbi_disk_io_handler_w(uint64_t waddr, uint64_t wdata, uint8_t wmask){
         case 0:
             memcpy(guest_to_host(paddr), sbi_disk.disk_img + offset, nbytes);
             if(ref_difftest_memcpy)
-                ref_difftest_memcpy(vaddr, guest_to_host(paddr), nbytes, DIFFTEST_TO_REF);
+                ref_difftest_memcpy(paddr, guest_to_host(paddr), nbytes, DIFFTEST_TO_REF);
             break;
         case 1:
             memcpy(sbi_disk.disk_img + offset, guest_to_host(paddr), nbytes);
