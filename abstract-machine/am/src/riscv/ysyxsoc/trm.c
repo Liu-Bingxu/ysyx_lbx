@@ -61,6 +61,34 @@ void _trm_init() {
 
     outw(SPI_DIV_ADDR, 0x0);
 
+    uintptr_t mvendorid, marchid;
+    asm volatile(
+        "csrr %0,mvendorid\n"
+        "csrr %1,marchid\n"
+        : "=r"(mvendorid), // %1
+          "=r"(marchid)    // %2
+        :
+        : );
+    char *vendorid = (char *)&mvendorid;
+    const char *str1 = "my mvendorid is ";
+    for (int i = 0; str1[i]; i++){
+        putch(str1[i]);
+    }for (int i = 0; i < 4; i++){
+        putch(vendorid[3 - i]);
+    }
+    const char *str2 = "; my marhid is ";
+    for (int i = 0; str2[i]; i++){
+        putch(str2[i]);
+    }
+    char archid[8] = {0};
+    for (int i = 0; i < 8; i++){
+        archid[7 - i] = (marchid % 10) + '0';
+        marchid /= 10;
+    }for (int i = 0; i < 8; i++){
+        putch(archid[i]);
+    }
+    putch('\n');
+
     int ret = main(mainargs);
     halt(ret);
 }
