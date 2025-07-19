@@ -204,6 +204,10 @@ extern "C" void difftest_InstrCommit(
     packet.special = io_special;
 }
 
+uint32_t get_commit_inst(void){
+    return packet.instr;
+}
+
 extern "C" void difftest_TrapEvent(
     uint8_t io_hasTrap,
     uint64_t io_cycleCnt,
@@ -281,54 +285,6 @@ extern "C" void halt(char code){
 
 static void exec_once(char *p, char *p2,paddr_t pc){
     // printf("H\n");
-#ifdef CONFIG_ITRACE
-    char *inst_asm = p;
-    p += snprintf(p, 128, FMT_WORD ":", (pc));
-    int ilen = 4;
-    int i;
-    word_t val;
-    pmem_read(pc, &val);
-    uint8_t *inst = (uint8_t *)&val;
-    for (i = ilen - 1; i >= 0; i--){
-    p += snprintf(p, 4, " %02x", inst[i]);
-    }
-    int ilen_max = MUXDEF(CONFIG_ISA_x86, 8, 4);
-    int space_len = ilen_max - ilen;
-    if (space_len < 0)
-    space_len = 0;
-    space_len = space_len * 3 + 1;
-    memset(p, ' ', space_len);
-    p += space_len;
-    disassemble(p, p + 128 - p,pc, (uint8_t *)&val, ilen);
-    // printf("ASM1: %s\n", inst_asm);
-
-    char *inst_asm2 = p2;
-    p2 += snprintf(p2, 128, FMT_WORD ":", (pc));
-    int ilen2 = 4;
-    int i2;
-    word_t val2 = packet.instr;
-    uint8_t *inst2 = (uint8_t *)&val2;
-    for (i2 = ilen2 - 1; i2 >= 0; i2--){
-        p2 += snprintf(p2, 4, " %02x", inst2[i2]);
-    }
-    int ilen_max2 = MUXDEF(CONFIG_ISA_x86, 8, 4);
-    int space_len2 = ilen_max2 - ilen2;
-    if (space_len2 < 0)
-        space_len2 = 0;
-    space_len2 = space_len2 * 3 + 1;
-    memset(p2, ' ', space_len2);
-    p2 += space_len2;
-    disassemble(p2, p2 + 128 - p2, pc, (uint8_t *)&val2, ilen2);
-    // printf("ASM2: %s\n", inst_asm2);
-    // if(strcmp(inst_asm,inst_asm2)!=0){
-    //     npc_state.state = NPC_END;
-    //     npc_state.halt_pc = get_gpr(32);
-    //     printf("%s\n", inst_asm2);
-    //     npc_state.halt_ret = 0;
-    //     Log(ANSI_FMT("inst error\n", ANSI_FG_RED));
-    //     sim_exit();
-    // }
-#endif
     // pmem_read(top->PC_out, &top->inst_in);
     // printf("%d\n", g_nr_guest_inst);
     // top->sys_clk = !top->sys_clk;
@@ -407,6 +363,55 @@ static void exec_once(char *p, char *p2,paddr_t pc){
         void update_sbi_time(uint64_t us);
         update_sbi_time(get_time());
     }
+#ifdef CONFIG_ITRACE
+    char *inst_asm = p;
+    p += snprintf(p, 128, FMT_WORD ":", (pc));
+    int ilen = 4;
+    int i;
+    word_t val;
+    // pmem_read(pc, &val);
+    val = packet.instr;
+    uint8_t *inst = (uint8_t *)&val;
+    for (i = ilen - 1; i >= 0; i--){
+    p += snprintf(p, 4, " %02x", inst[i]);
+    }
+    int ilen_max = MUXDEF(CONFIG_ISA_x86, 8, 4);
+    int space_len = ilen_max - ilen;
+    if (space_len < 0)
+    space_len = 0;
+    space_len = space_len * 3 + 1;
+    memset(p, ' ', space_len);
+    p += space_len;
+    disassemble(p, p + 128 - p,pc, (uint8_t *)&val, ilen);
+    printf("ASM1: %s\n", inst_asm);
+
+    // char *inst_asm2 = p2;
+    // p2 += snprintf(p2, 128, FMT_WORD ":", (pc));
+    // int ilen2 = 4;
+    // int i2;
+    // word_t val2 = packet.instr;
+    // uint8_t *inst2 = (uint8_t *)&val2;
+    // for (i2 = ilen2 - 1; i2 >= 0; i2--){
+    //     p2 += snprintf(p2, 4, " %02x", inst2[i2]);
+    // }
+    // int ilen_max2 = MUXDEF(CONFIG_ISA_x86, 8, 4);
+    // int space_len2 = ilen_max2 - ilen2;
+    // if (space_len2 < 0)
+    //     space_len2 = 0;
+    // space_len2 = space_len2 * 3 + 1;
+    // memset(p2, ' ', space_len2);
+    // p2 += space_len2;
+    // disassemble(p2, p2 + 128 - p2, pc, (uint8_t *)&val2, ilen2);
+    // printf("ASM2: %s\n", inst_asm2);
+    // if(strcmp(inst_asm,inst_asm2)!=0){
+    //     npc_state.state = NPC_END;
+    //     npc_state.halt_pc = get_gpr(32);
+    //     printf("%s\n", inst_asm2);
+    //     npc_state.halt_ret = 0;
+    //     Log(ANSI_FMT("inst error\n", ANSI_FG_RED));
+    //     sim_exit();
+    // }
+#endif
 
     // if (g_nr_guest_inst >= 44830000){
     //     npc_state.state = NPC_END;
