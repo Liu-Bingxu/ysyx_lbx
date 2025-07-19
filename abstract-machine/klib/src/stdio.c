@@ -177,8 +177,8 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
             n += res;
         }
         else if(fmt[i]=='p'){
-            unsigned long long OP_num = 0;
-            OP_num = va_arg(ap, unsigned int);
+            uintptr_t OP_num = 0;
+            OP_num = va_arg(ap, uintptr_t);
             (*out) = '0';
             out++;
             (*out) = 'x';
