@@ -42,8 +42,10 @@ include $(NPC_HOME)/csrc/utils/filelist.mk
 CXXFLAGS+=-DVTOP=V$(TOPNAME) -DVTOP_H=\\\"V$(TOPNAME).h\\\" -DVTOP_DPI_H=\\\"V$(TOPNAME)__Dpi.h\\\" -D__GUEST_ISA__=$(ISA) -DTOPNAME=\\\"$(TOPNAME)\\\" -g 
 ifeq ($(findstring  ysyxsoc_sim,$(TOPNAME)), )
 	CXXFLAGS+=-DPC_RST=0x80000000
+	sepc_module=
 else
 	CXXFLAGS+=-DPC_RST=0x20000000
+	sepc_module="/home/kuuga/ysyx-workbench/ysyxSoC/perip/psram/efabless/EF_PSRAM_CTRL.v"
 endif
 
 VSRC_DIR=$(call vsrc_dir_add,$(VINC_file))
@@ -87,8 +89,8 @@ $(NPC_HOME)/.stamp.verilate-$(TOPNAME): $(MODULE_SRC) $(CSRC) $(HEAD_FILE)
 	@if [ -d $(NPC_HOME)/$(TOPNAME)-build ]; then echo "build dir have build";else mkdir -p $(NPC_HOME)/$(TOPNAME)-build; fi
 	@echo
 	@echo "### VERILATING ###"
-	@echo verilator --Mdir $(NPC_HOME)/$(TOPNAME)-build --unroll-count 1000 --trace-fst --x-assign unique --x-initial unique --timescale "1ns/1ns" --no-timing --top-module $(TOPNAME)  -cc $(TOPMODULE) --exe $(CSRC) $(INC) $(VSRC_DIR) $(MY_CXXFLAGS) $(MY_LDFLAGS) -Wno-WIDTHTRUNC -Wno-WIDTHEXPAND
-	@verilator --Mdir $(NPC_HOME)/$(TOPNAME)-build --autoflush --unroll-count 1000 --trace-fst --x-assign unique --x-initial unique --timescale "1ns/1ns" --no-timing --top-module $(TOPNAME)  -cc $(TOPMODULE) --exe $(CSRC) $(INC) $(VSRC_DIR) $(MY_CXXFLAGS) $(MY_LDFLAGS) -Wno-WIDTHTRUNC -Wno-WIDTHEXPAND
+	@echo verilator --Mdir $(NPC_HOME)/$(TOPNAME)-build --unroll-count 1000 --trace-fst --x-assign unique --x-initial unique --timescale "1ns/1ns" --no-timing --top-module $(TOPNAME)  -cc $(TOPMODULE) --exe $(CSRC) $(INC) $(VSRC_DIR) $(MY_CXXFLAGS) $(MY_LDFLAGS) $(sepc_module) -Wno-WIDTHTRUNC -Wno-WIDTHEXPAND
+	@verilator --Mdir $(NPC_HOME)/$(TOPNAME)-build --autoflush --unroll-count 1000 --trace-fst --x-assign unique --x-initial unique --timescale "1ns/1ns" --no-timing --top-module $(TOPNAME)  -cc $(TOPMODULE) --exe $(CSRC) $(INC) $(VSRC_DIR) $(MY_CXXFLAGS) $(MY_LDFLAGS) $(sepc_module) -Wno-WIDTHTRUNC -Wno-WIDTHEXPAND
 	@touch $(NPC_HOME)/.stamp.verilate-$(TOPNAME)
 
 .PHONY:lint
