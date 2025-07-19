@@ -27,6 +27,7 @@ static uint8_t pmem[CONFIG_MSIZE] PG_ALIGN = {};
 
 static uint8_t mrom[MROM_SIZE] PG_ALIGN = {};
 static uint8_t sram[SRAM_SIZE] PG_ALIGN = {};
+static uint8_t flash[FLASH_SIZE] PG_ALIGN = {};
 
 // uint8_t* guest_to_host(paddr_t paddr) { return pmem + paddr - CONFIG_MBASE; }
 static inline bool in_mrom(paddr_t addr){
@@ -37,12 +38,19 @@ static inline bool in_sram(paddr_t addr){
     return ((addr >= SRAM_START) && (addr < (SRAM_START + SRAM_SIZE)));
 }
 
+static inline bool in_flash(paddr_t addr){
+    return ((addr >= FLASH_START) && (addr < (FLASH_START + FLASH_SIZE)));
+}
+
 uint8_t *guest_to_host(paddr_t paddr){
     if(in_mrom(paddr)){
         return (mrom + paddr - MROM_START);
     }
     else if(in_sram(paddr)){
         return (sram + paddr - SRAM_START);
+    }
+    else if(in_flash(paddr)){
+        return (flash + paddr - FLASH_START);
     }
     else{
         return (pmem + paddr - CONFIG_MBASE);
@@ -86,7 +94,7 @@ void init_mem() {
 }
 
 word_t paddr_read(paddr_t addr, int len) {
-  if (likely((in_pmem(addr) | (in_mrom(addr)) | in_sram(addr)))){
+  if (likely((in_pmem(addr) | (in_mrom(addr)) | in_sram(addr) | in_flash(addr)))){
   #ifdef CACHE_ENABLE
       return cache_read(addr,len);
     #else
