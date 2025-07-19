@@ -16,6 +16,9 @@ extern "C" {
 #define MROM_START 0x20000000
 #define MROM_SIZE  0x1000
 
+#define FLASH_START 0x30000000
+#define FLASH_SIZE  0x1000000
+
 void *guest_to_host(paddr_t addr);
 
 void pmem_read(word_t raddr, word_t *rdata);

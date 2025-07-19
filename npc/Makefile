@@ -44,7 +44,7 @@ ifeq ($(findstring  ysyxsoc_sim,$(TOPNAME)), )
 	CXXFLAGS+=-DPC_RST=0x80000000
 	sepc_module=
 else
-	CXXFLAGS+=-DPC_RST=0x20000000
+	CXXFLAGS+=-DPC_RST=0x30000000
 	sepc_module="/home/kuuga/ysyx-workbench/ysyxSoC/perip/psram/efabless/EF_PSRAM_CTRL.v"
 endif
 

@@ -10,7 +10,7 @@ AM_SRCS := riscv/ysyxsoc/start.S \
 
 CFLAGS    += -fdata-sections -ffunction-sections -mstrict-align -I$(AM_HOME)/am/src/riscv/ysyxsoc/include
 LDFLAGS   += -T $(AM_HOME)/scripts/linker-ysyxsoc.ld \
-						 --defsym=_pmem_start=0x20000000 --defsym=_entry_offset=0x0
+						 --defsym=_pmem_start=0x30000000 --defsym=_entry_offset=0x0
 LDFLAGS   += --gc-sections -e _start
 CFLAGS += -DMAINARGS=\"$(mainargs)\"
 # CXXFLAGS+=-mstrict-align -mno-unaligned-access

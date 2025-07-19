@@ -70,6 +70,11 @@ static long load_img(){
     assert(ret == 1);
     Log("successful read img to mrom");
 
+    fseek(fp, 0, SEEK_SET);
+    ret = fread(guest_to_host(FLASH_START), (size > FLASH_SIZE) ? FLASH_SIZE : size, 1, fp);
+    assert(ret == 1);
+    Log("successful read img to flash");
+
     fclose(fp);
     return size;
 }
