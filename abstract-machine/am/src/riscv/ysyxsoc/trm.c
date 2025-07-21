@@ -33,17 +33,17 @@ void halt(int code) {
 }
 
 void _trm_init() {
-    extern char _erodata, _data_start, _data_end, _bss_start, _bss_end;
-    volatile char *src = &_erodata;
-    volatile char *dst = &_data_start;
+    // extern char _data_start, _bss_start, _bss_end;
+    // volatile char *src = &_erodata;
+    // volatile char *dst = &_data_start;
 
     /* ROM has data at end of text; copy it.  */
-    while (dst < &_data_end)
-        *dst++ = *src++;
+    // while (dst < &_data_end)
+    //     *dst++ = *src++;
 
     /* Zero bss.  */
-    for (dst = &_bss_start; dst < &_bss_end; dst++)
-        *dst = 0;
+    // for (dst = &_bss_start; dst < &_bss_end; dst++)
+    //     *dst = 0;
 
     uint16_t bdiv = 2;
 
