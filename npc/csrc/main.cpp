@@ -224,9 +224,9 @@ extern "C" void difftest_TrapEvent(
 
 void sim_rst(){
     top->rst_n = 0;
-    for (int i = 0; i < 10;i++){
+    for (int i = 0; i < 30;i++){
         top->clock = !top->clock;
-        if(i==9)
+        if(i==29)
             top->rst_n = 1;
         step_and_dump_wave();
     }
