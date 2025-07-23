@@ -43,7 +43,7 @@ _start:
 	//[0x30000000] --> [0x0f000000:_data_end]
     .globl _init_start_flash_addr
     REG_L	a0,	_init_start_flash_addr
-    li     t3,0x80000000
+    li     t3,0xa0000000
     sub    a0,a0,t3
     li     t3,0x30000000
     add    a0,a0,t3
@@ -60,7 +60,7 @@ _start:
 	load_data a0,a1,a2
 
     li		a0,	0x30000000
-    li		a1,	0x80000000
+    li		a1,	0xa0000000
     .globl _data_end_addr
 	REG_L	a2,	_data_end_addr
 
@@ -68,6 +68,7 @@ _start:
     sub    t2,t2,a0
     add    t2,t2,a1
 
+    fence.i
     jr     t1
 
     //load app
@@ -118,4 +119,5 @@ _bss_end_addr:
 _init:
     load_data a0,a1,a2
 
+    fence.i
     jr t2

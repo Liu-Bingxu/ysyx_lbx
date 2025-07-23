@@ -6,6 +6,7 @@ MEMORY {
     flash : ORIGIN = 0x30000000, LENGTH = 16M
     sram  : ORIGIN = 0x0f000000, LENGTH = 8K
     psram : ORIGIN = 0x80000000, LENGTH = 4M
+    sdram : ORIGIN = 0xa0000000, LENGTH = 32M
 }
 
 SECTIONS {
@@ -17,7 +18,7 @@ SECTIONS {
         *(entry)
         *(.text*)
         . = ALIGN(0x10);
-    }> psram AT> flash  : text
+    }> sdram AT> flash  : text
     etext = .;
     _etext = .;
     .rodata : {
@@ -25,7 +26,7 @@ SECTIONS {
         *(.rodata*)
         *(.srodata*)
         . = ALIGN(0x10);
-    }> psram AT> flash 
+    }> sdram AT> flash 
     _erodata = .;
     .data : {
         . = ALIGN(0x10);
@@ -34,7 +35,7 @@ SECTIONS {
         *(.sdata*)
         . = ALIGN(0x10);
         _data_end = .;
-    }> psram AT> flash : data 
+    }> sdram AT> flash : data 
     edata = .;
     _data = .;
     . = ALIGN(0x10);
@@ -45,7 +46,7 @@ SECTIONS {
         *(ssbl)
         . = ALIGN(0x10);
         _init_end = .;
-    }> psram AT> flash
+    }> sdram AT> flash
     .bss : {
         . = ALIGN(0x10);
         _bss_start = .;
@@ -54,7 +55,7 @@ SECTIONS {
         *(.scommon)
         . = ALIGN(0x10);
         _bss_end = .;
-    }> psram
+    }> sdram
     end = .;
     _end = .;
     _stack_top = ALIGN(0x10);
