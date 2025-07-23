@@ -26,6 +26,18 @@ void putch(char ch) {
     outb(SERIAL_ADDR, ch);
 }
 
+void __am_uart_tx(AM_UART_TX_T *uart_tx) {
+    putch(uart_tx->data);
+}
+
+void __am_uart_rx(AM_UART_RX_T *uart_rx) {
+    if ((inb(SERIAL_LSR_ADDR) & 0x1) == 0){
+        uart_rx->data = -1;
+        return;
+    }
+    uart_rx->data = inb(SERIAL_ADDR);
+}
+
 void halt(int code) {
     asm volatile(".word 0xfc000073" : : "r"(code));
     // asm volatile("mv a0,%0; ebreak;" ::"r"(code));
@@ -45,7 +57,7 @@ void _trm_init() {
     // for (dst = &_bss_start; dst < &_bss_end; dst++)
     //     *dst = 0;
 
-    uint16_t bdiv = 2;
+    uint16_t bdiv = 1;
 
     outb(SERIAL_LCR_ADDR, 0x80);
 
@@ -88,6 +100,12 @@ void _trm_init() {
         putch(archid[i]);
     }
     putch('\n');
+
+    uint32_t seg = 0;
+    for (int i = 0; i < 8; i++){
+        seg |= ((archid[i] - '0') << (i * 4));
+    }
+    outl(GPIO_SEG_ADDR, seg);
 
     int ret = main(mainargs);
     halt(ret);

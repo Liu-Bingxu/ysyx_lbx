@@ -19,6 +19,9 @@ extern "C" {
 #define FLASH_START 0x30000000
 #define FLASH_SIZE  0x1000000
 
+#define VMEM_START  0x21000000
+#define VMEM_SIZE   480 * 640
+
 void *guest_to_host(paddr_t addr);
 
 void pmem_read(word_t raddr, word_t *rdata);

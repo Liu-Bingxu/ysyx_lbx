@@ -44,8 +44,11 @@ ifeq ($(findstring  ysyxsoc_sim,$(TOPNAME)), )
 	CXXFLAGS+=-DPC_RST=0x80000000
 	sepc_module=
 else
-	CXXFLAGS+=-DPC_RST=0x30000000
+	CXXFLAGS+=-DPC_RST=0x30000000 -DUSE_NVBOARD
 	sepc_module="/home/kuuga/ysyx-workbench/ysyxSoC/perip/psram/efabless/EF_PSRAM_CTRL.v"
+	include $(NVBOARD_HOME)/scripts/nvboard.mk
+	INC_file+=$(NVBOARD_HOME)/usr/include
+	LIBS += $(shell sdl2-config --libs) -lSDL2_image -lSDL2_ttf
 endif
 
 VSRC_DIR=$(call vsrc_dir_add,$(VINC_file))
@@ -85,12 +88,12 @@ $(NPC_HOME)/$(TOPNAME)-build/V$(TOPNAME): $(NPC_HOME)/.stamp.verilate-$(TOPNAME)
 	@echo "make -C $(NPC_HOME)/$(TOPNAME)-build -f V$(TOPNAME).mk V$(TOPNAME) "
 	make -C $(NPC_HOME)/$(TOPNAME)-build -f V$(TOPNAME).mk V$(TOPNAME) 
 
-$(NPC_HOME)/.stamp.verilate-$(TOPNAME): $(MODULE_SRC) $(CSRC) $(HEAD_FILE)
+$(NPC_HOME)/.stamp.verilate-$(TOPNAME): $(MODULE_SRC) $(CSRC) $(HEAD_FILE) $(NVBOARD_ARCHIVE)
 	@if [ -d $(NPC_HOME)/$(TOPNAME)-build ]; then echo "build dir have build";else mkdir -p $(NPC_HOME)/$(TOPNAME)-build; fi
 	@echo
 	@echo "### VERILATING ###"
-	@echo verilator --Mdir $(NPC_HOME)/$(TOPNAME)-build --unroll-count 1000 --trace-fst --x-assign unique --x-initial unique --timescale "1ns/1ns" --no-timing --top-module $(TOPNAME)  -cc $(TOPMODULE) --exe $(CSRC) $(INC) $(VSRC_DIR) $(MY_CXXFLAGS) $(MY_LDFLAGS) $(sepc_module) -Wno-WIDTHTRUNC -Wno-WIDTHEXPAND
-	@verilator --Mdir $(NPC_HOME)/$(TOPNAME)-build --autoflush --unroll-count 1000 --trace-fst --x-assign unique --x-initial unique --timescale "1ns/1ns" --no-timing --top-module $(TOPNAME)  -cc $(TOPMODULE) --exe $(CSRC) $(INC) $(VSRC_DIR) $(MY_CXXFLAGS) $(MY_LDFLAGS) $(sepc_module) -Wno-WIDTHTRUNC -Wno-WIDTHEXPAND
+	@echo verilator --Mdir $(NPC_HOME)/$(TOPNAME)-build --unroll-count 1000 --trace-fst --x-assign unique --x-initial unique --timescale "1ns/1ns" --no-timing --top-module $(TOPNAME)  -cc $(TOPMODULE) --exe $(CSRC) $(NVBOARD_ARCHIVE) $(INC) $(VSRC_DIR) $(MY_CXXFLAGS) $(MY_LDFLAGS) $(sepc_module) -Wno-WIDTHTRUNC -Wno-WIDTHEXPAND
+	@verilator --Mdir $(NPC_HOME)/$(TOPNAME)-build --autoflush --unroll-count 1000 --trace-fst --x-assign unique --x-initial unique --timescale "1ns/1ns" --no-timing --top-module $(TOPNAME)  -cc $(TOPMODULE) --exe $(CSRC) $(NVBOARD_ARCHIVE) $(INC) $(VSRC_DIR) $(MY_CXXFLAGS) $(MY_LDFLAGS) $(sepc_module) -Wno-WIDTHTRUNC -Wno-WIDTHEXPAND
 	@touch $(NPC_HOME)/.stamp.verilate-$(TOPNAME)
 
 .PHONY:lint

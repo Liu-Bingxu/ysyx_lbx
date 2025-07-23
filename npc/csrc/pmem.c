@@ -8,6 +8,7 @@ extern void assert_fail_msg();
 static char pmem[PMEM_SIZE];
 static char mrom[MROM_SIZE];
 static char flash[FLASH_SIZE];
+static uint32_t vmem[VMEM_SIZE] = {0};
 
 static inline bool in_pmem(paddr_t addr){
     return ((addr >= PMEM_START) && (addr < (PMEM_START + PMEM_SIZE)));
@@ -84,6 +85,29 @@ void pmem_write(uint64_t waddr, uint64_t wdata,uint8_t wmask){
     else assert(0);
     // else sdb_mainloop();
     return;
+}
+
+extern "C" void sim_vmem_read(uint32_t haddr, uint32_t vaddr, uint32_t *rdata){
+    uint32_t addr = vaddr * 640 + haddr;
+    if(unlikely((vaddr > 480) || (haddr > 640))){
+        assert(0);
+    }
+    *(rdata) = vmem[addr];
+}
+
+extern "C" void sim_vmem_write(uint32_t waddr, uint32_t wdata, uint8_t wmask){
+    uint32_t addr = ((waddr - VMEM_START) / 4);
+    if(unlikely(addr > VMEM_SIZE)){
+        assert(0);
+    }
+         if(wmask==0x0f)(*((uint32_t *)((uint8_t *)(vmem + addr) + 0))) = (uint32_t)(wdata >> 0 );
+    else if(wmask==0x03)(*((uint16_t *)((uint8_t *)(vmem + addr) + 0))) = (uint16_t)(wdata >> 0 );
+    else if(wmask==0x0c)(*((uint16_t *)((uint8_t *)(vmem + addr) + 2))) = (uint16_t)(wdata >> 16);
+    else if(wmask==0x01)(*((uint8_t  *)((uint8_t *)(vmem + addr) + 0))) = (uint8_t )(wdata >> 0 );
+    else if(wmask==0x02)(*((uint8_t  *)((uint8_t *)(vmem + addr) + 1))) = (uint8_t )(wdata >> 8 );
+    else if(wmask==0x04)(*((uint8_t  *)((uint8_t *)(vmem + addr) + 2))) = (uint8_t )(wdata >> 16);
+    else if(wmask==0x08)(*((uint8_t  *)((uint8_t *)(vmem + addr) + 3))) = (uint8_t )(wdata >> 24);
+    else assert(0);
 }
 
 extern "C" void sim_sram_read(uint64_t raddr, uint64_t *rdata){
