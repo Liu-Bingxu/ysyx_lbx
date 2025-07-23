@@ -13,6 +13,7 @@
 #ifdef USE_NVBOARD
 #include "nvboard.h"
 #endif
+#include "stdlib.h"
 
 using namespace std;
 
@@ -117,14 +118,12 @@ void sim_exit(){
     delete contextp;
     IFDEF(CONFIG_VCD_GET, delete tfp);
     delete remote_bitbang;
-    statistic();
     IFDEF(USE_NVBOARD, nvboard_quit());
     exit(is_exit_status_bad());
 }
 
 void assert_fail_msg(){
     isa_reg_display();
-    statistic();
     IFDEF(CONFIG_ITRACE, irangbuf_printf());
     set_npc_state(NPC_ABORT, get_gpr(32), -1);
     sim_exit();
@@ -157,6 +156,7 @@ void nvboard_bind_all_pins(VTOP* top) {
 #endif
 
 void sim_init(int argc, char *argv[]){
+    atexit(statistic);
     contextp = new VerilatedContext;
     IFDEF(CONFIG_VCD_GET, tfp = new VerilatedFstC);
     top = new VTOP;
