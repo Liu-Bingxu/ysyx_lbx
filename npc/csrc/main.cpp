@@ -14,6 +14,7 @@
 #include "nvboard.h"
 #endif
 #include "stdlib.h"
+#include "signal.h"
 
 using namespace std;
 
@@ -39,6 +40,7 @@ static VTOP *top;
 static remote_bitbang_t *remote_bitbang;
 uint64_t g_nr_guest_inst = 0;
 static uint64_t g_timer = 0; // unit: us
+static uint64_t g_timer_rtl = 0; // unit: us
 static bool g_print_step = false;
 
 extern void init_monitor(VTOP *top, VerilatedFstC *tfp, remote_bitbang_t **remote_bitbang, int argc, char *argv[]);
@@ -82,11 +84,16 @@ void step_and_dump_wave(){
     //     cnt = 0;
     //     clock_cnt++;
     // }
+    IFDEF(CONFIG_GET_TIMER, uint64_t timer_start = get_time());
+
     top->eval();
+
+    IFDEF(CONFIG_GET_TIMER, uint64_t timer_end = get_time());
+    IFDEF(CONFIG_GET_TIMER, g_timer_rtl += timer_end - timer_start);
     // printf("Hello\n");
     contextp->timeInc(1);
     volatile static bool dump_flag = false;
-    if (g_nr_guest_inst > 44742000){
+    if (g_nr_guest_inst > 341129000){
         dump_flag = true;
     }
     if (dump_flag == true){
@@ -98,6 +105,7 @@ static void statistic(){
     // IFDEF(CONFIG_ITRACE, irangbuf_printf());
 #define NUMBERIC_FMT MUXDEF(CONFIG_TARGET_AM, "%", "%'") PRIu64
     Log("host time spent = " NUMBERIC_FMT " us", g_timer);
+    Log("host time spent rtl = " NUMBERIC_FMT " us", g_timer_rtl);
     Log("total guest instructions = " NUMBERIC_FMT, g_nr_guest_inst);
     if (g_timer > 0)
         Log("simulation frequency = " NUMBERIC_FMT " inst/s", g_nr_guest_inst * 1000000 / g_timer);
@@ -155,6 +163,10 @@ void nvboard_bind_all_pins(VTOP* top) {
 }
 #endif
 
+void my_handler(int param){
+    set_npc_state(NPC_END, get_gpr(32), get_gpr(10));
+}
+
 void sim_init(int argc, char *argv[]){
     atexit(statistic);
     contextp = new VerilatedContext;
@@ -165,6 +177,7 @@ void sim_init(int argc, char *argv[]){
     contextp->traceEverOn(true);
     contextp->commandArgs(argc, argv);
     IFDEF(CONFIG_VCD_GET, top->trace(tfp, 0));
+    signal(SIGINT, my_handler);
     init_gpr(top);
     top->clock = 0;
     top->rst_n = 0;
@@ -388,9 +401,9 @@ static void exec_once(char *p, char *p2,paddr_t pc){
     }
 
     //! end instr 
-    if ((packet.pc) == 0xffffffff800c0730){
-        npc_state.state = NPC_STOP;
-    }
+    // if ((packet.pc) == 0xffffffff800c0730){
+    //     npc_state.state = NPC_STOP;
+    // }
 
     if (g_nr_guest_inst % 2500 == 0){
         void update_sbi_time(uint64_t us);
@@ -568,6 +581,8 @@ static void execute(uint64_t n)
         // }
         IFDEF(CONFIG_DEVICE, device_update());
     }
+    free(p);
+    free(p2);
 }
 
 void cpu_exec(uint64_t n)
