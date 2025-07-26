@@ -9,7 +9,7 @@ static VTOP *_top = NULL;
 
 void update_sbi_time(uint64_t us){
     uint64_t *mtime_p = (uint64_t *)&sbi_clint_base[0xbff8];
-    (*mtime_p) = us;
+    (*mtime_p) = us / 10;
     //! one hart
     uint64_t *mtimecmp_p = (uint64_t *)&sbi_clint_base[0x4000];
     if ((*mtime_p) >= (*mtimecmp_p)){
