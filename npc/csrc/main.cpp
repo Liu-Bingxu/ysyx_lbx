@@ -15,6 +15,7 @@
 #endif
 #include "stdlib.h"
 #include "signal.h"
+#include "lightsss.h"
 
 using namespace std;
 
@@ -27,8 +28,10 @@ using namespace std;
 
 VerilatedContext* contextp = NULL;
 VerilatedFstC* tfp = NULL;
+static LightSSS *lightsss = NULL;
+static bool enable_fork = true;
 
-bool skip_ref_flag=false;
+bool skip_ref_flag = false;
 
 void set_skip_ref_flag(void){
     skip_ref_flag = true;
@@ -43,7 +46,8 @@ static uint64_t g_timer = 0; // unit: us
 static uint64_t g_timer_rtl = 0; // unit: us
 static bool g_print_step = false;
 
-extern void init_monitor(VTOP *top, VerilatedFstC *tfp, remote_bitbang_t **remote_bitbang, int argc, char *argv[]);
+extern void init_monitor(VTOP *top, remote_bitbang_t **remote_bitbang, int argc, char *argv[]);
+extern char *get_wave_name();
 extern void irangbuf_printf();
 extern void irangbuf_write(const char *buf);
 extern void ftrace_watch(paddr_t pc,paddr_t pc_jump);
@@ -92,11 +96,7 @@ void step_and_dump_wave(){
     IFDEF(CONFIG_GET_TIMER, g_timer_rtl += timer_end - timer_start);
     // printf("Hello\n");
     contextp->timeInc(1);
-    volatile static bool dump_flag = false;
-    if (g_nr_guest_inst > 341129000){
-        dump_flag = true;
-    }
-    if (dump_flag == true){
+    if (enable_fork && lightsss->is_child()){
         IFDEF(CONFIG_VCD_GET, tfp->dump(contextp->time()));
     }
 }
@@ -122,11 +122,21 @@ static void statistic(){
 void sim_exit(){
     step_and_dump_wave();
     top->final();
-    IFDEF(CONFIG_VCD_GET, tfp->close());
     delete contextp;
-    IFDEF(CONFIG_VCD_GET, delete tfp);
     delete remote_bitbang;
     IFDEF(USE_NVBOARD, nvboard_quit());
+    if (enable_fork && lightsss->is_child()) {
+        IFDEF(CONFIG_VCD_GET, tfp->close());
+        IFDEF(CONFIG_VCD_GET, delete tfp);
+    }
+    if (enable_fork && !(lightsss->is_child())) {
+        if (is_exit_status_bad()) {
+            lightsss->wakeup_child(clock_cnt);
+        } else {
+            lightsss->do_clear();
+        }
+        delete lightsss;
+    }
     exit(is_exit_status_bad());
 }
 
@@ -169,20 +179,20 @@ void my_handler(int param){
 
 void sim_init(int argc, char *argv[]){
     atexit(statistic);
+    if (enable_fork) {
+        lightsss = new LightSSS;
+    }
     contextp = new VerilatedContext;
-    IFDEF(CONFIG_VCD_GET, tfp = new VerilatedFstC);
     top = new VTOP;
     IFDEF(USE_NVBOARD, nvboard_bind_all_pins(top));
     IFDEF(USE_NVBOARD, nvboard_init());
-    contextp->traceEverOn(true);
     contextp->commandArgs(argc, argv);
-    IFDEF(CONFIG_VCD_GET, top->trace(tfp, 0));
     signal(SIGINT, my_handler);
     init_gpr(top);
     top->clock = 0;
     top->rst_n = 0;
     // pmem_read(top->PC_out, &top->inst_in);
-    init_monitor(top, tfp, &remote_bitbang, argc, argv);
+    init_monitor(top, &remote_bitbang, argc, argv);
 }
 
 typedef struct
@@ -382,7 +392,7 @@ static void exec_once(char *p, char *p2,paddr_t pc){
             Log("now cnt_now is too big\n");
             isa_reg_display();
             IFDEF(CONFIG_ITRACE, irangbuf_printf());
-            set_npc_state(NPC_END, get_gpr(32), 1);
+            set_npc_state(NPC_ABORT, get_gpr(32), 1);
             sim_exit();
         }
     }
@@ -408,6 +418,22 @@ static void exec_once(char *p, char *p2,paddr_t pc){
     if (g_nr_guest_inst % 2500 == 0){
         void update_sbi_time(uint64_t us);
         update_sbi_time(get_time());
+    }
+    if (enable_fork && (g_nr_guest_inst % 100 == 0) && !(lightsss->is_child())){
+        switch (lightsss->do_fork()) {
+            case FORK_ERROR: set_npc_state(NPC_ABORT, get_gpr(32), 1); break;
+            case FORK_CHILD:
+                top->atClone(); // dump wave
+                Verilated::traceEverOn(true);
+#ifdef ENABLE_VCD
+                tfp = new VerilatedVcdC;
+#else
+                tfp = new VerilatedFstC;
+#endif
+                top->trace(tfp, 99);
+                tfp->open(get_wave_name());
+            default: break;
+        }
     }
 #ifdef CONFIG_ITRACE
     char *inst_asm = p;

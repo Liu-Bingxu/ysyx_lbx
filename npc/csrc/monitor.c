@@ -136,7 +136,11 @@ static void parse_args(int argc,char *argv[]){
   return;
 }
 
-void init_monitor(VTOP *top, VerilatedFstC *tfp, remote_bitbang_t **remote_bitbang, int argc, char *argv[]){
+char *get_wave_name(){
+    return wave_file;
+}
+
+void init_monitor(VTOP *top, remote_bitbang_t **remote_bitbang, int argc, char *argv[]){
     IFDEF(CONFIG_ITRACE, init_itrace());
     parse_args(argc, argv);
     init_log(log_file);
@@ -151,7 +155,7 @@ void init_monitor(VTOP *top, VerilatedFstC *tfp, remote_bitbang_t **remote_bitba
     Log("successful init sdb");
     init_disasm(MUXDEF(CONFIG_RV64, "riscv64", "riscv32") "-pc-linux-gnu");
     Log("successful init disasm");
-    IFDEF(CONFIG_VCD_GET, tfp->open(wave_file));
+    // IFDEF(CONFIG_VCD_GET, tfp->open(wave_file));
     // Log(ANSI_FMT("Hello\n", ANSI_FG_GREEN));
     sim_rst();
     Log("successful sim rst\n");
