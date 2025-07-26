@@ -96,6 +96,13 @@ $(NPC_HOME)/.stamp.verilate-$(TOPNAME): $(MODULE_SRC) $(CSRC) $(HEAD_FILE) $(NVB
 	@verilator --Mdir $(NPC_HOME)/$(TOPNAME)-build --autoflush --unroll-count 1000 --trace-fst --x-assign unique --x-initial unique --timescale "1ns/1ns" --no-timing --top-module $(TOPNAME)  -cc $(TOPMODULE) --exe $(CSRC) $(NVBOARD_ARCHIVE) $(INC) $(VSRC_DIR) $(MY_CXXFLAGS) $(MY_LDFLAGS) $(sepc_module) -Wno-WIDTHTRUNC -Wno-WIDTHEXPAND
 	@touch $(NPC_HOME)/.stamp.verilate-$(TOPNAME)
 
+gdb: $(NPC_HOME)/$(TOPNAME)-build/V$(TOPNAME) $(IMG)
+	$(call git_commit, "gdb NPC")
+	@echo
+	@echo "### SIMULATING ###"
+	@echo "gdb -s $(NPC_HOME)/$(TOPNAME)-build/V$(TOPNAME) --args $(NPC_HOME)/$(TOPNAME)-build/V$(TOPNAME) $(ARGS) $(IMG) +verilator+rand+reset+2 +image=$(IMAGE)"
+	gdb -s $(NPC_HOME)/$(TOPNAME)-build/V$(TOPNAME) --args $(NPC_HOME)/$(TOPNAME)-build/V$(TOPNAME) $(ARGS) $(IMG) +verilator+rand+reset+2 +image=$(IMAGE)
+
 .PHONY:lint
 lint: $(MODULE_SRC) 
 	verilator --lint-only $(MODULE_SRC) $(VSRC_DIR) --top-module $(TOPNAME) -Wall --timescale "1ns/1ns" --no-timing

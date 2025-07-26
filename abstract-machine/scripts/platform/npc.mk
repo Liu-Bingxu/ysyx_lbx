@@ -36,3 +36,7 @@ run:image
 	$(shell if [ ! -d $(NPCDIR) ]; then mkdir -p $(NPCDIR) ;fi)
 	$(MAKE) -C $(NPC_HOME) run ARGS="-w $(NPCDIR)/$(NAME)-wave.fst -l $(NPCFLAGS) $(B) -e $(IMAGE).elf -p 1234" IMG=$(IMAGE).bin IMAGE=$(IMAGE).image ISA=$(ISA) BUILD_DIR=$(NPCDIR) name=$(NAME)- TOPNAME=$(TOPNAME)
 
+gdb: image
+	$(shell if [ ! -d $(NPCDIR) ]; then mkdir -p $(NPCDIR) ;fi)
+	$(MAKE) -C $(NPC_HOME) gdb ARGS="-w $(NPCDIR)/$(NAME)-wave.fst -l $(NPCFLAGS) $(B) -e $(IMAGE).elf -p 1234" IMG=$(IMAGE).bin IMAGE=$(IMAGE).image ISA=$(ISA) BUILD_DIR=$(NPCDIR) name=$(NAME)- TOPNAME=$(TOPNAME)
+
