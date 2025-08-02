@@ -78,7 +78,7 @@ public:
         fflush(stdout);                                        \
     } while (0);
 
-#define WAIT_INTERVAL 10
-#define SLOT_SIZE     5
+#define WAIT_INTERVAL 30
+#define SLOT_SIZE     2
 
 #endif
