@@ -60,14 +60,14 @@ paddr_t host_to_guest(uint8_t *haddr) { return haddr - pmem + CONFIG_MBASE; }
 #ifndef CACHE_ENABLE
 static word_t pmem_read(paddr_t addr, int len) {
   word_t ret = host_read(guest_to_host(addr), len);
-  IFDEF(CONFIG_MTRACE, _Log_mem(addr,"Read  Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, ret));
+  IFDEF(CONFIG_MTRACE, _Log_mem(addr, "PC is " FMT_WORD ", Read  Addr: " FMT_PADDR " Data: " FMT_WORD "\n", cpu.pc, addr, ret));
   return ret;
 }
 #endif
 #ifndef CACHE_ENABLE
 static void pmem_write(paddr_t addr, int len, word_t data) {
   host_write(guest_to_host(addr), len, data);
-  IFDEF(CONFIG_MTRACE, _Log_mem(addr,"Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, data));
+  IFDEF(CONFIG_MTRACE, _Log_mem(addr, "PC is " FMT_WORD ", Write Addr: " FMT_PADDR " Data: " FMT_WORD " len is %d\n", cpu.pc, addr, data, len));
 }
 #endif
 static void out_of_bound(paddr_t addr) {

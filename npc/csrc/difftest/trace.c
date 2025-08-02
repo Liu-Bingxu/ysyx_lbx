@@ -252,28 +252,39 @@ void init_ftrace(const char *ELF_FILE){
 
 #ifdef CONFIG_MTRACE
 
-void Log_mem_read(paddr_t addr){
+extern "C" void Log_mem_read(paddr_t addr){
+    if ((addr < CONFIG_MRACE_START) || (addr >= CONFIG_MRACE_END))
+        return;
     word_t val;
     pmem_read(addr,&val);
-    Log_mem("Read  Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, val);
+    Log_mem("PC is " FMT_WORD ", Read  Addr: " FMT_PADDR " Data: " FMT_WORD "\n", get_gpr(32), addr, val);
 }
 
-void Log_mem_wirte(paddr_t addr,word_t data,char wmask){
-    if(wmask==0x1)Log_mem("Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, (data&0xff));
-    else if(wmask==0x2)Log_mem("Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr+1, (data&0xff));
-    else if(wmask==0x4)Log_mem("Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr+2, (data&0xff));
-    else if(wmask==0x8)Log_mem("Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr+3, (data&0xff));
-    else if(wmask==0x3)Log_mem("Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, (data&0xffff));
-    else if(wmask==0x6)Log_mem("Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr+1, (data&0xffff));
-    else if(wmask==0xc)Log_mem("Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr+2, (data&0xffff));
-    else if(wmask==0xf)Log_mem("Write Addr: " FMT_PADDR " Data: " FMT_WORD "\n", addr, data);
-    else panic("error size");
+extern "C" void Log_mem_wirte(paddr_t addr,word_t data,uint8_t wmask){
+    if ((addr < CONFIG_MRACE_START) || (addr >= CONFIG_MRACE_END))
+        return;
+    if(wmask==0xff)     Log_mem("PC is " FMT_WORD ", Write Addr: " FMT_PADDR " Data: " FMT_WORD " wmask is 0x%02x\n", get_gpr(32), addr    , (uint64_t)data                  , wmask);
+    else if(wmask==0x0f)Log_mem("PC is " FMT_WORD ", Write Addr: " FMT_PADDR " Data: " FMT_WORD " wmask is 0x%02x\n", get_gpr(32), addr + 0, (uint64_t)(uint32_t)(data >> 0 ), wmask);
+    else if(wmask==0xf0)Log_mem("PC is " FMT_WORD ", Write Addr: " FMT_PADDR " Data: " FMT_WORD " wmask is 0x%02x\n", get_gpr(32), addr + 4, (uint64_t)(uint32_t)(data >> 32), wmask);
+    else if(wmask==0x03)Log_mem("PC is " FMT_WORD ", Write Addr: " FMT_PADDR " Data: " FMT_WORD " wmask is 0x%02x\n", get_gpr(32), addr + 0, (uint64_t)(uint16_t)(data >> 0 ), wmask);
+    else if(wmask==0x0c)Log_mem("PC is " FMT_WORD ", Write Addr: " FMT_PADDR " Data: " FMT_WORD " wmask is 0x%02x\n", get_gpr(32), addr + 2, (uint64_t)(uint16_t)(data >> 16), wmask);
+    else if(wmask==0x30)Log_mem("PC is " FMT_WORD ", Write Addr: " FMT_PADDR " Data: " FMT_WORD " wmask is 0x%02x\n", get_gpr(32), addr + 4, (uint64_t)(uint16_t)(data >> 32), wmask);
+    else if(wmask==0xc0)Log_mem("PC is " FMT_WORD ", Write Addr: " FMT_PADDR " Data: " FMT_WORD " wmask is 0x%02x\n", get_gpr(32), addr + 6, (uint64_t)(uint16_t)(data >> 48), wmask);
+    else if(wmask==0x01)Log_mem("PC is " FMT_WORD ", Write Addr: " FMT_PADDR " Data: " FMT_WORD " wmask is 0x%02x\n", get_gpr(32), addr + 0, (uint64_t)(uint8_t )(data >> 0 ), wmask);
+    else if(wmask==0x02)Log_mem("PC is " FMT_WORD ", Write Addr: " FMT_PADDR " Data: " FMT_WORD " wmask is 0x%02x\n", get_gpr(32), addr + 1, (uint64_t)(uint8_t )(data >> 8 ), wmask);
+    else if(wmask==0x04)Log_mem("PC is " FMT_WORD ", Write Addr: " FMT_PADDR " Data: " FMT_WORD " wmask is 0x%02x\n", get_gpr(32), addr + 2, (uint64_t)(uint8_t )(data >> 16), wmask);
+    else if(wmask==0x08)Log_mem("PC is " FMT_WORD ", Write Addr: " FMT_PADDR " Data: " FMT_WORD " wmask is 0x%02x\n", get_gpr(32), addr + 3, (uint64_t)(uint8_t )(data >> 24), wmask);
+    else if(wmask==0x10)Log_mem("PC is " FMT_WORD ", Write Addr: " FMT_PADDR " Data: " FMT_WORD " wmask is 0x%02x\n", get_gpr(32), addr + 4, (uint64_t)(uint8_t )(data >> 32), wmask);
+    else if(wmask==0x20)Log_mem("PC is " FMT_WORD ", Write Addr: " FMT_PADDR " Data: " FMT_WORD " wmask is 0x%02x\n", get_gpr(32), addr + 5, (uint64_t)(uint8_t )(data >> 40), wmask);
+    else if(wmask==0x40)Log_mem("PC is " FMT_WORD ", Write Addr: " FMT_PADDR " Data: " FMT_WORD " wmask is 0x%02x\n", get_gpr(32), addr + 6, (uint64_t)(uint8_t )(data >> 48), wmask);
+    else if(wmask==0x80)Log_mem("PC is " FMT_WORD ", Write Addr: " FMT_PADDR " Data: " FMT_WORD " wmask is 0x%02x\n", get_gpr(32), addr + 7, (uint64_t)(uint8_t )(data >> 56), wmask);
+    else panic("error size: PC is " FMT_WORD ", Write Addr: " FMT_PADDR " Data: " FMT_WORD " wmask is 0x%02x\n", get_gpr(32), addr, data, wmask);
 }
 
 #else
 
-void Log_mem_read(paddr_t addr) {}
-void Log_mem_wirte(paddr_t addr, word_t data, char wmask) {}
+extern "C" void Log_mem_read(paddr_t addr) {}
+extern "C" void Log_mem_wirte(paddr_t addr, word_t data, char wmask) {}
 
 #endif
 
