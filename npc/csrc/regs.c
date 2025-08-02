@@ -9,6 +9,14 @@ extern "C" void difftest_ArchIntRegState(word_t *out_io_value_0, word_t *out_io_
                                          word_t *out_io_value_25, word_t *out_io_value_26, word_t *out_io_value_27, word_t *out_io_value_28, word_t *out_io_value_29,
                                          word_t *out_io_value_30, word_t *out_io_value_31);
 
+extern "C" void difftest_ArchPerformRegState(word_t *out_io_value_0, word_t *out_io_value_1, word_t *out_io_value_3, word_t *out_io_value_4,
+                                             word_t *out_io_value_5, word_t *out_io_value_6, word_t *out_io_value_7, word_t *out_io_value_8, word_t *out_io_value_9,
+                                             word_t *out_io_value_10, word_t *out_io_value_11, word_t *out_io_value_12, word_t *out_io_value_13, word_t *out_io_value_14,
+                                             word_t *out_io_value_15, word_t *out_io_value_16, word_t *out_io_value_17, word_t *out_io_value_18, word_t *out_io_value_19,
+                                             word_t *out_io_value_20, word_t *out_io_value_21, word_t *out_io_value_22, word_t *out_io_value_23, word_t *out_io_value_24,
+                                             word_t *out_io_value_25, word_t *out_io_value_26, word_t *out_io_value_27, word_t *out_io_value_28, word_t *out_io_value_29,
+                                             word_t *out_io_value_30, word_t *out_io_value_31);
+
 extern "C" void difftest_CSRState(word_t *out_io_privilegeMode, word_t *out_io_mstatus, word_t *out_io_sstatus, word_t *out_io_mepc, word_t *out_io_sepc, word_t *out_io_mtval,
                                   word_t *out_io_stval, word_t *out_io_mtvec, word_t *out_io_stvec, word_t *out_io_mcause, word_t *out_io_scause, word_t *out_io_satp,
                                   word_t *out_io_mip, word_t *out_io_mie, word_t *out_io_mscratch, word_t *out_io_sscratch, word_t *out_io_mideleg, word_t *out_io_medeleg);
@@ -39,6 +47,14 @@ static const uint32_t img[] = {
     0x00100073, // ebreak (used as nemu_trap)
     0xdeadbeef, // some data
 };
+
+void update_Perform_reg(void){
+    svSetScope(svGetScopeFromName("TOP." TOPNAME ".u_DifftestPerformRegState"));
+    difftest_ArchPerformRegState(&reg.mcycle, &reg.minstret, & reg.mhpmcounter[0], &reg.mhpmcounter[1], &reg.mhpmcounter[2], &reg.mhpmcounter[3], &reg.mhpmcounter[4], &reg.mhpmcounter[5], &reg.mhpmcounter[6], &reg.mhpmcounter[7], &reg.mhpmcounter[8], 
+                                &reg.mhpmcounter[9],&reg.mhpmcounter[10], &reg.mhpmcounter[11], &reg.mhpmcounter[12], &reg.mhpmcounter[13], &reg.mhpmcounter[14], &reg.mhpmcounter[15], &reg.mhpmcounter[16], &reg.mhpmcounter[17], &reg.mhpmcounter[18], 
+                                &reg.mhpmcounter[19],&reg.mhpmcounter[20], &reg.mhpmcounter[21], &reg.mhpmcounter[22], &reg.mhpmcounter[23], &reg.mhpmcounter[24], &reg.mhpmcounter[25], &reg.mhpmcounter[26], &reg.mhpmcounter[27], &reg.mhpmcounter[28]);
+}
+
 
 void update_reg(void){
     svSetScope(svGetScopeFromName("TOP." TOPNAME ".u_DifftestArchIntRegState"));
@@ -119,6 +135,43 @@ word_t isa_reg_str2val(const char *name, bool *test)
         return reg.mtvec;
     printf("the register name is error\n");
     assert(0);
+}
+
+void isa_perform_reg_display(void){
+    update_Perform_reg();
+    printf("-------------------------------------------------------------------------------------\n");
+    printf("mcycle          : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mcycle,          reg.mcycle         );
+    printf("minstret        : %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.minstret,        reg.minstret       );
+    printf("MPerformance[3 ]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[0 ], reg.mhpmcounter[0 ]);
+    printf("MPerformance[4 ]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[1 ], reg.mhpmcounter[1 ]);
+    printf("MPerformance[5 ]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[2 ], reg.mhpmcounter[2 ]);
+    printf("MPerformance[6 ]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[3 ], reg.mhpmcounter[3 ]);
+    printf("MPerformance[7 ]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[4 ], reg.mhpmcounter[4 ]);
+    printf("MPerformance[8 ]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[5 ], reg.mhpmcounter[5 ]);
+    printf("MPerformance[9 ]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[6 ], reg.mhpmcounter[6 ]);
+    printf("MPerformance[10]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[7 ], reg.mhpmcounter[7 ]);
+    printf("MPerformance[11]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[8 ], reg.mhpmcounter[8 ]);
+    printf("MPerformance[12]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[9 ], reg.mhpmcounter[9 ]);
+    printf("MPerformance[13]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[10], reg.mhpmcounter[10]);
+    printf("MPerformance[14]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[11], reg.mhpmcounter[11]);
+    printf("MPerformance[15]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[12], reg.mhpmcounter[12]);
+    printf("MPerformance[16]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[13], reg.mhpmcounter[13]);
+    printf("MPerformance[17]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[14], reg.mhpmcounter[14]);
+    printf("MPerformance[18]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[15], reg.mhpmcounter[15]);
+    printf("MPerformance[19]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[16], reg.mhpmcounter[16]);
+    printf("MPerformance[20]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[17], reg.mhpmcounter[17]);
+    printf("MPerformance[21]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[18], reg.mhpmcounter[18]);
+    printf("MPerformance[22]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[19], reg.mhpmcounter[19]);
+    printf("MPerformance[23]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[20], reg.mhpmcounter[20]);
+    printf("MPerformance[24]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[21], reg.mhpmcounter[21]);
+    printf("MPerformance[25]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[22], reg.mhpmcounter[22]);
+    printf("MPerformance[26]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[23], reg.mhpmcounter[23]);
+    printf("MPerformance[27]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[24], reg.mhpmcounter[24]);
+    printf("MPerformance[28]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[25], reg.mhpmcounter[25]);
+    printf("MPerformance[29]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[26], reg.mhpmcounter[26]);
+    printf("MPerformance[30]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[27], reg.mhpmcounter[27]);
+    printf("MPerformance[31]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[28], reg.mhpmcounter[28]);
+    printf("-------------------------------------------------------------------------------------\n");
 }
 
 void isa_reg_display(void){
@@ -290,7 +343,7 @@ void init_ref(CPU_state *cpu){
     cpu->stvec   = reg.stvec;
     cpu->scause  = reg.scause;
     cpu->satp    = reg.satp;
-    cpu->mip     = reg.mip;
+    cpu->mip     = 0;
     cpu->mie     = reg.mie;
     cpu->mscratch= reg.mscratch;
     cpu->sscratch= reg.sscratch;

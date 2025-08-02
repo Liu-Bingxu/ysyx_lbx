@@ -122,6 +122,8 @@ static void statistic(){
 void sim_exit(){
     step_and_dump_wave();
     top->final();
+    void isa_perform_reg_display(void);
+    isa_perform_reg_display();
     delete contextp;
     delete remote_bitbang;
     IFDEF(USE_NVBOARD, nvboard_quit());
@@ -388,7 +390,7 @@ static void exec_once(char *p, char *p2,paddr_t pc){
         if ((clock_cnt % 50) == 0)
             remote_bitbang->tick();
         cnt_now++;
-        if (cnt_now == 4096 * 4 * 100){
+        if (cnt_now == 4096 * 4){
             Log("now cnt_now is too big\n");
             isa_reg_display();
             IFDEF(CONFIG_ITRACE, irangbuf_printf());
@@ -419,7 +421,7 @@ static void exec_once(char *p, char *p2,paddr_t pc){
         void update_sbi_time(uint64_t us);
         update_sbi_time(get_time());
     }
-    if (enable_fork && (g_nr_guest_inst % 100 == 0) && !(lightsss->is_child())){
+    if (enable_fork && (g_nr_guest_inst % 2000 == 0) && !(lightsss->is_child())){
         switch (lightsss->do_fork()) {
             case FORK_ERROR: set_npc_state(NPC_ABORT, get_gpr(32), 1); break;
             case FORK_CHILD:
