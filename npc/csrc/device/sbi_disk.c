@@ -175,24 +175,26 @@ void sbi_disk_io_handler_w(uint64_t waddr, uint64_t wdata, uint8_t wmask){
     }
     if ((waddr - CONFIG_SBI_DISK_MMIO) == 24){
         // printf("use disk\n");
-        paddr_t paddr = (paddr_t)sbi_disk.sbi_disk_base[2];
+        paddr_t paddr = (paddr_t)sbi_disk.sbi_disk_base[4];
         vaddr_t vaddr = (vaddr_t)sbi_disk.sbi_disk_base[2];
         uint64_t offset = sbi_disk.sbi_disk_base[0] * 512;
         uint64_t nbytes = sbi_disk.sbi_disk_base[1] * 512;
         // printf("now use the sbi disk\n");
-        printf("disk offset = %lx, nbytes = %lx\n", offset, nbytes);
-        if (mmu_riscv_translate(&paddr, vaddr, 4, MEM_TYPE_READ) == MEM_RET_FAIL)
-        {
-            Assert(0, "mmu error\n");
-        }
+        // printf("disk offset = %lx, nbytes = %lx\n", offset, nbytes);
+        // if (mmu_riscv_translate(&paddr, vaddr, 4, MEM_TYPE_READ) == MEM_RET_FAIL)
+        // {
+        //     Assert(0, "mmu error\n");
+        // }
         switch (sbi_disk.sbi_disk_base[3])
         {
         case 0:
+            // Log("try to write " FMT_WORD ", from " FMT_WORD "\n", paddr, vaddr);
             memcpy(guest_to_host(paddr), sbi_disk.disk_img + offset, nbytes);
             if(ref_difftest_memcpy)
                 ref_difftest_memcpy(paddr, guest_to_host(paddr), nbytes, DIFFTEST_TO_REF);
             break;
         case 1:
+            // Log("try to read " FMT_WORD ", from " FMT_WORD "\n", paddr, vaddr);
             memcpy(sbi_disk.disk_img + offset, guest_to_host(paddr), nbytes);
             break;
         default:
