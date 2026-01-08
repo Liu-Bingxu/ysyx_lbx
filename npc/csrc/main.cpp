@@ -45,6 +45,7 @@ uint64_t g_nr_guest_inst = 0;
 static uint64_t g_timer = 0; // unit: us
 static uint64_t g_timer_rtl = 0; // unit: us
 static bool g_print_step = false;
+static bool int_in_commit = false;
 
 extern void init_monitor(VTOP *top, remote_bitbang_t **remote_bitbang, int argc, char *argv[]);
 extern char *get_wave_name();
@@ -277,6 +278,7 @@ extern "C" void difftest_TrapEvent(
     if (ref_difftest_raise_intr)
         ref_difftest_raise_intr(io_code);
     IFDEF(CONFIG_ETRACE, Log("Now have a tarp happen cycle is " NUMBERIC_FMT ", inst is " NUMBERIC_FMT ",code is 0x%016lx,pc is 0x%016lx", io_cycleCnt, io_instrCnt, io_code, io_pc));
+    int_in_commit = true;
 }
 
 void sim_rst(){
@@ -373,6 +375,7 @@ static void exec_once(char *p, char *p2,paddr_t pc){
     // step_and_dump_wave();
     // clock_cnt++;
     packet.valid = false;
+    int_in_commit = false;
     int cnt_now = 0;
     while (packet.valid == false){
         // if (get_time() >= 800000){
@@ -408,7 +411,7 @@ static void exec_once(char *p, char *p2,paddr_t pc){
     }
 
     //! skip
-    if ((packet.skip) == true){
+    if (((packet.skip) == true) || (int_in_commit == true)){
         difftest_skip_ref();
     }
 
