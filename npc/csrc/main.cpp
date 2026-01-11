@@ -29,8 +29,11 @@ using namespace std;
 VerilatedContext* contextp = NULL;
 VerilatedFstC* tfp = NULL;
 static LightSSS *lightsss = NULL;
+#ifdef CONFIG_VCD_GET
 static bool enable_fork = true;
-
+#else
+static bool enable_fork = false;
+#endif
 bool skip_ref_flag = false;
 
 void set_skip_ref_flag(void){
