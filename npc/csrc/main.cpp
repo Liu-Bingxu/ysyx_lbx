@@ -199,6 +199,24 @@ void sim_init(int argc, char *argv[]){
     top->rst_n = 0;
     // pmem_read(top->PC_out, &top->inst_in);
     init_monitor(top, &remote_bitbang, argc, argv);
+    if (enable_fork && !(lightsss->is_child())){
+        switch (lightsss->do_fork()) {
+            case FORK_ERROR: set_npc_state(NPC_ABORT, get_gpr(32), 1); break;
+            case FORK_CHILD:
+                top->atClone(); // dump wave
+                Verilated::traceEverOn(true);
+#ifdef ENABLE_VCD
+                tfp = new VerilatedVcdC;
+#else
+                tfp = new VerilatedFstC;
+#endif
+                top->trace(tfp, 99);
+                tfp->open(get_wave_name());
+            default: break;
+        }
+    }
+    void sim_rst();
+    sim_rst();
 }
 
 typedef struct
@@ -427,6 +445,7 @@ static void exec_once(char *p, char *p2,paddr_t pc){
         void update_sbi_time(uint64_t us);
         update_sbi_time(get_time());
     }
+    g_nr_guest_inst++;
     if (enable_fork && (g_nr_guest_inst % 2000 == 0) && !(lightsss->is_child())){
         switch (lightsss->do_fork()) {
             case FORK_ERROR: set_npc_state(NPC_ABORT, get_gpr(32), 1); break;
@@ -592,7 +611,6 @@ static void execute(uint64_t n)
             skip_ref_flag = false;
             // difftest_skip_ref();
         }
-        g_nr_guest_inst++;
         // paddr_t dnpc = top->rootp->ysyxSoCFull__DOT__asic__DOT__cpu__DOT__cpu__DOT__u_core_top__DOT__u_lsu__DOT__u_PC__DOT__data_out_reg;
         paddr_t dnpc = get_gpr(32);
         // set_pc(dnpc);
