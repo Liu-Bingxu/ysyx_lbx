@@ -21,7 +21,8 @@ NPCFLAGS += $(shell dirname $(IMAGE).elf)/npc-log.txt
 NPCDIR = $(addsuffix /RTL_build,$(shell dirname $(IMAGE).elf))
 
 # TOPNAME?=core_debugger_top
-TOPNAME?=core_debugger_top_with_idcache
+# TOPNAME?=core_debugger_top_with_idcache
+TOPNAME?=core_debugger_top_with_bpu
 
 .PHONY: $(AM_HOME)/am/src/riscv/npc/trm.c
 
