@@ -38,9 +38,6 @@ static char *rl_gets(){
 }
 
 static int cmd_c(char *args){
-    // while (npc_state.state==NPC_STOP){
-    //     cpu_exec(-1);
-    // }
     cpu_exec(-1);
     return 0;
 }
@@ -83,7 +80,6 @@ static int isnum(char argc){
 long my_atoi(const char *args){
   long res = 0;
   for (int i = 0; i < 18;i++){
-    // printf("%-3d: %x\n", i, args[i]);
     if (isnum(args[i]))
     {
       res *= 10;
@@ -109,18 +105,13 @@ static int cmd_x(char *args){
         }
         else{
             long n = my_atoi(N);
-            // uint32_t addr = my_atoi(ADDR);
             bool text = true;
             word_t addr = expr(ADDR, &text,false,0,NULL);
 
             if (n < 0 || addr < 0||text==false){
-            // printf("%ld\n", n);
-            // printf("%ld\n", addr);
                 return 0;
             }
             else{
-                // printf("Now n is %ld\n", n);
-                // printf("Now addr is %ld\n", addr);
                 if((*mode)=='x'){
                     for (int y = 0; y < n; y++){
                         word_t val;

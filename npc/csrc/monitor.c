@@ -44,12 +44,10 @@ static void welcome()
 static long load_img(){
     if (img_file == NULL){
         Log("No image is given. Use the default build-in image.");
-        // exit(1);
         return 4096; // built-in image size
     }
 
     FILE *fp = fopen(img_file, "rb");
-    // Assert(fp, "Can not open '%s'", img_file);
     if(fp==NULL){
         Log("No image is given. Use the default build-in image.");
         return 4096; // built-in image size
@@ -155,11 +153,8 @@ void init_monitor(VTOP *top, remote_bitbang_t **remote_bitbang, int argc, char *
     Log("successful init sdb");
     init_disasm(MUXDEF(CONFIG_RV64, "riscv64", "riscv32") "-pc-linux-gnu");
     Log("successful init disasm");
-    // IFDEF(CONFIG_VCD_GET, tfp->open(wave_file));
-    // Log(ANSI_FMT("Hello\n", ANSI_FG_GREEN));
     sim_rst();
     Log("successful sim rst\n");
-    // isa_reg_display();
     *remote_bitbang = new remote_bitbang_t(difftest_port, top);
     init_difftest(diff_so_file, img_size, difftest_port);
     Log("successful init difftest\n");

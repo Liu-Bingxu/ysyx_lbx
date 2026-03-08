@@ -103,12 +103,6 @@ static void strcp(char *target,const char *source,int num){
 		return;
 	}
 	for (int i = 0; i < num; i++){
-		// if(source[i]=='\0'){
-		// 	assert(0);
-		// }
-		// else{
-		// 	target[i] = source[i];
-		// }
 		target[i] = source[i];
 	}
 	target[num] = '\0';
@@ -119,8 +113,6 @@ static bool make_token(char *e) {
   int position = 0;
   int i;
   regmatch_t pmatch;
-
-//   nr_token = 0;
 
   while (e[position] != '\0') {
     /* Try all rules one by one. */
@@ -145,10 +137,6 @@ static bool make_token(char *e) {
 		nr_token++;
 
 		position += substr_len;
-
-        // switch (rules[i].token_type) {
-        //   default: TODO();
-        // }
 
         break;
       }
@@ -224,16 +212,13 @@ static int check_is_OP(int i){
 }
 
 static long eval(int p,int q){
-	// printf("p: %d,q: %d\n", p, q);
 	int count = 0;
 	int flag = 0;
 	int op = -1;
 	if (p > q){
-		// printf("%s and %s, %d %d", tokens[p].str, tokens[q].str,p,q);
 		assert(0);
 	}
 	else if(p==q){
-		// printf("%s\n", tokens[p].str);
 		if (tokens[p].type == TK_NUM){
 			return my_atoi(tokens[p].str);
 		}
@@ -263,7 +248,6 @@ static long eval(int p,int q){
                 return return_val;
             }
             else if(tokens[p+1].type==TK_HEXNUM){
-				// printf("%ld\n",my_atoi_hex(tokens[p+1].str));
                 word_t return_val;
                 pmem_read(my_atoi_hex(tokens[p + 1].str), &return_val);
                 return return_val;
@@ -284,7 +268,6 @@ static long eval(int p,int q){
 			}
 		}
 		else{
-            // printf("%d\n", tokens[p].type);
             assert(0);
         }
 	}
@@ -302,10 +285,8 @@ static long eval(int p,int q){
 		}
 	}
 	else if(check_parentheses(p,q) == check_expr_true){
-		// printf("()is true\n");
 		return eval(p + 1, q - 1);
 	}
-	// else if()
 	else{
 		for (int i = p; i <= q;i++){
 			if(tokens[i].type==TK_LP){
@@ -318,7 +299,6 @@ static long eval(int p,int q){
 					flag = 0;
 			}
 			else if((check_is_OP(i)==1)&&(flag==0)){
-				// printf("YES\n");
 				if (op >= 0){
 					if((tokens[i].type-tokens[op].type)>=(-1)){
 						op = i;
@@ -328,9 +308,6 @@ static long eval(int p,int q){
 					op = i;
 				}
 			}
-			// printf("now i is %d, op is %d, count is %d, flag is %d\n", i, op, count,flag);
-			// if(op>0)
-			// 	printf("the op is %d\n", tokens[op].type);
 			assert(count >= 0);
 		}
 		long val1 = eval(p, op - 1);
@@ -421,15 +398,7 @@ word_t expr(char *e, bool *success,bool mode,int *nr_tekones,Token *tekenes) {
 		}
 	}
 
-//   for (int i = 0; i < nr_token;i++){
-//     printf("%3d: %-20s\n", tokens[i].type, tokens[i].str);
-//   }
-
   word_t val = eval(0, (nr_token - 1));
-
-  //   printf("now is %ld\n", eval(0, (nr_token - 1)));
-  /* TODO: Insert codes to evaluate the expression. */
-//   TODO();
 
   nr_token = 0;
 

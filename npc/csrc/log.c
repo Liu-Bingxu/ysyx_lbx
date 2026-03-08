@@ -6,7 +6,6 @@ FILE *log_fp = NULL;
 
 void init_log(const char *log_file){
     assert(log_file);
-    // printf("%s\n", "w");
     log_fp = fopen(log_file, "w");
     assert(log_fp);
     Log("Open log file %s succces",log_file);

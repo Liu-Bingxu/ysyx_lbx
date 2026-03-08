@@ -36,7 +36,6 @@ void *guest_to_host(paddr_t addr){
 
 void pmem_read(word_t raddr,word_t *rdata){
     raddr &= (~0x80000000U);
-    // assert(raddr < PMEM_SIZE);
     if(raddr>=PMEM_SIZE){
         printf("raddr >= PMEM_SIZE\n");
         printf("now try to read " FMT_WORD ":%ld\n", raddr, raddr);
@@ -46,27 +45,12 @@ void pmem_read(word_t raddr,word_t *rdata){
         assert_fail_msg();
     }
     (*rdata) = (*((word_t *)(pmem + raddr)));
-    // printf("now read addr: " FMT_PADDR " now rdata is " FMT_WORD "\n", raddr, *rdata);
     return;
 }
 
 void pmem_write(uint64_t waddr, uint64_t wdata,uint8_t wmask){
     waddr &= (~0x80000007U);
     Assert(waddr < PMEM_SIZE,"PC is " FMT_PADDR ", try to access " FMT_PADDR ,get_gpr(32),waddr);
-    // switch (wmask){
-    // case 0x1:
-    //     pmem[waddr] = (wdata & 0xffU);
-    //     break;
-    // case 0x3:
-    //     (*((uint16_t *)(pmem + waddr))) = (wdata & 0xffffU);
-    //     break;
-    // case 0xf:
-    //     (*((uint32_t *)(pmem + waddr))) = wdata;
-    // default:
-    //     // assert(0);
-    //     printf("send wwth %d\n", wmask);
-    //     break;
-    // }
     if(wmask==0xff)(*((uint64_t *)(pmem + waddr)))          = wdata;
     else if(wmask==0x0f)(*((uint32_t *)(pmem + waddr + 0))) = (uint32_t)(wdata >> 0 );
     else if(wmask==0xf0)(*((uint32_t *)(pmem + waddr + 4))) = (uint32_t)(wdata >> 32);
@@ -83,7 +67,6 @@ void pmem_write(uint64_t waddr, uint64_t wdata,uint8_t wmask){
     else if(wmask==0x40)(*((uint8_t  *)(pmem + waddr + 6))) = (uint8_t )(wdata >> 48);
     else if(wmask==0x80)(*((uint8_t  *)(pmem + waddr + 7))) = (uint8_t )(wdata >> 56);
     else assert(0);
-    // else sdb_mainloop();
     return;
 }
 
@@ -187,23 +170,12 @@ extern "C" void sim_periph_write(uint64_t waddr, uint64_t wdata, uint8_t wmask){
 }
 
 extern "C" void flash_read(int32_t addr, int32_t *data) { 
-    // assert(0);
     assert(addr < FLASH_SIZE);
     addr &= (~0x3U);
     (*data) = *(int32_t *)(guest_to_host(addr + FLASH_START));
 }
 extern "C" void mrom_read(int32_t addr, int32_t *data) {
-    // (*data) = 0xfc000073;
-    // (*data) = 0x100073;
     assert(addr < (MROM_START + MROM_SIZE));
     addr &= (~0x3U);
-    // if ((addr - PC_RST) >= PMEM_SIZE)
-    // {
-    //     printf("raddr >= PMEM_SIZE, addr is " FMT_PADDR "\n", addr);
-    //     npc_state.state = NPC_END;
-    //     npc_state.halt_pc = get_gpr(32);
-    //     npc_state.halt_ret = 0;
-    //     sim_exit();
-    // }
     (*data) = *(int32_t *)(guest_to_host(addr));
 }

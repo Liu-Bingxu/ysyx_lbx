@@ -65,7 +65,6 @@ static bool can_func_trace = false;
 char *symbol_find_name(paddr_t pc,paddr_t *first_addr){
     symbol_node *now = symbol_tab_list.head;
     for (int i = 0; i < symbol_tab_list.node_num; i++){
-        // printf("Hello,%d\n",symbol_tab_list.node_num);
         if ((pc >= now->first_addr) && (pc <= now->end_addr)){
             break;
         }
@@ -87,7 +86,6 @@ void ftrce_text_jump(paddr_t pc){
     char *name = NULL;
     paddr_t first_addr = 0;
     name = symbol_find_name(pc,&first_addr);
-    // printf("PC is %x\n", get_gpr(32));
     Assert(name != NULL,"jump to a unkown space, PC is : "FMT_PADDR,pc);
     Assert(first_addr != 0, "jump to a unkown space, PC is : " FMT_PADDR, pc);
     if(pc!=first_addr){
@@ -118,7 +116,6 @@ void ftrce_text_retu(paddr_t pc){
     name = symbol_find_name(pc,&first_addr);
     Assert(name != NULL,"jump to a unkown space, PC is : " FMT_PADDR, pc);
     Assert(first_addr != 0, "jump to a unkown space, PC is : " FMT_PADDR, pc);
-    // printf("Hello World\n");
     Log_func(ANSI_FMT("%s",ANSI_FG_YELLOW), name);
     Log_func("]\n");
     func--;
@@ -138,7 +135,6 @@ void ftrace_watch(paddr_t pc, paddr_t pc_jump){
 }
 
 void symbol_list_push(symbol_list *list,char *name,word_t first_addr,word_t func_size){
-    // printf("name is %s\n", name);
     symbol_node *_new = (symbol_node *)malloc(sizeof(symbol_node));
     int len=strlen(name);
     _new->name=(char *)malloc(len+1);

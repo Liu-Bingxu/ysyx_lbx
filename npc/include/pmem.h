@@ -2,13 +2,10 @@
 #define __PMEM_H__
 
 #include "common.h"
-// #include VTOP_DPI_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-// #define PC_RST     0x80000000
 
 #define PMEM_START 0x80000000
 #define PMEM_SIZE  0x28000000
