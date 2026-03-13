@@ -229,7 +229,11 @@ typedef struct
     uint8_t special;
 } DifftestInstrCommit;
 
-static DifftestInstrCommit packet = {
+static DifftestInstrCommit packet0 = {
+    .valid = false
+};
+
+static DifftestInstrCommit packet1 = {
     .valid = false
 };
 
@@ -253,27 +257,49 @@ extern "C" void difftest_InstrCommit(
     uint8_t io_coreid,
     uint8_t io_index)
 {
-    packet.valid = true;
-    packet.skip = io_skip;
-    packet.isRVC = io_isRVC;
-    packet.rfwen = io_rfwen;
-    packet.fpwen = io_fpwen;
-    packet.vecwen = io_vecwen;
-    packet.wpdest = io_wpdest;
-    packet.wdest = io_wdest;
-    packet.pc = io_pc;
-    packet.instr = io_instr;
-    packet.robIdx = io_robIdx;
-    packet.lqIdx = io_lqIdx;
-    packet.sqIdx = io_sqIdx;
-    packet.isLoad = io_isLoad;
-    packet.isStore = io_isStore;
-    packet.nFused = io_nFused;
-    packet.special = io_special;
+    if(io_index == 0){
+        packet0.valid = true;
+        packet0.skip = io_skip;
+        packet0.isRVC = io_isRVC;
+        packet0.rfwen = io_rfwen;
+        packet0.fpwen = io_fpwen;
+        packet0.vecwen = io_vecwen;
+        packet0.wpdest = io_wpdest;
+        packet0.wdest = io_wdest;
+        packet0.pc = io_pc;
+        packet0.instr = io_instr;
+        packet0.robIdx = io_robIdx;
+        packet0.lqIdx = io_lqIdx;
+        packet0.sqIdx = io_sqIdx;
+        packet0.isLoad = io_isLoad;
+        packet0.isStore = io_isStore;
+        packet0.nFused = io_nFused;
+        packet0.special = io_special;
+    }else if(io_index == 1){
+        packet1.valid = true;
+        packet1.skip = io_skip;
+        packet1.isRVC = io_isRVC;
+        packet1.rfwen = io_rfwen;
+        packet1.fpwen = io_fpwen;
+        packet1.vecwen = io_vecwen;
+        packet1.wpdest = io_wpdest;
+        packet1.wdest = io_wdest;
+        packet1.pc = io_pc;
+        packet1.instr = io_instr;
+        packet1.robIdx = io_robIdx;
+        packet1.lqIdx = io_lqIdx;
+        packet1.sqIdx = io_sqIdx;
+        packet1.isLoad = io_isLoad;
+        packet1.isStore = io_isStore;
+        packet1.nFused = io_nFused;
+        packet1.special = io_special;
+    }else{
+        Assert(0, "unkown index");
+    }
 }
 
 uint32_t get_commit_inst(void){
-    return packet.instr;
+    return packet1.valid ? packet1.instr : packet0.instr;
 }
 
 extern "C" void difftest_TrapEvent(
@@ -308,10 +334,11 @@ extern "C" void halt(char code){
 }
 
 static void exec_once(char *p, char *p2,paddr_t pc){
-    packet.valid = false;
+    packet0.valid = false;
+    packet1.valid = false;
     int_in_commit = false;
     int cnt_now = 0;
-    while (packet.valid == false){
+    while ((packet0.valid == false) && (packet1.valid == false)){
         top->clock = !top->clock;
         step_and_dump_wave();
         top->clock = !top->clock;
@@ -329,19 +356,19 @@ static void exec_once(char *p, char *p2,paddr_t pc){
             sim_exit();
         }
     }
-    set_pc(packet.pc);
+    set_pc(packet1.valid ? packet1.pc : packet0.pc);
     update_reg();
 
     //! end instr 
-    if ((packet.instr) == 0xfc000073){
+    if (get_commit_inst() == 0xfc000073){
         set_npc_state(NPC_END, pc, get_gpr(10));
         return;
     }
 
     //! skip
-    if (((packet.skip) == true) || (int_in_commit == true)){
-        difftest_skip_ref();
-    }
+    // if (((packet.skip) == true) || (int_in_commit == true)){
+    //     difftest_skip_ref();
+    // }
 
     if (g_nr_guest_inst % 2500 == 0){
         void update_sbi_time(uint64_t us);
@@ -401,6 +428,9 @@ static void trace_and_difftest(const char *buf, paddr_t pc, paddr_t dnpc) {
 #endif
     if (g_print_step) { IFDEF(CONFIG_ITRACE, printf("%s\n", buf));}
     IFDEF(CONFIG_ITRACE, irangbuf_write(buf));
+    IFDEF(CONFIG_DIFFTEST, if((ref_difftest_exec) && packet1.valid & ( packet0.skip)){difftest_skip_ref(); difftest_step((pc), dnpc);});
+    IFDEF(CONFIG_DIFFTEST, if((ref_difftest_exec) && packet1.valid & (!packet0.skip))ref_difftest_exec(1););
+    IFDEF(CONFIG_DIFFTEST, if(packet1.valid ? packet1.skip : packet0.skip)difftest_skip_ref(););
     IFDEF(CONFIG_DIFFTEST, difftest_step((pc), dnpc));
     IFDEF(CONFIG_WATCHPOINT, cpu_check_watchpoint());
     IFDEF(CONFIG_FTRACE, ftrace_watch(pc, dnpc));
