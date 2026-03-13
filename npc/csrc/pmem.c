@@ -37,13 +37,15 @@ void *guest_to_host(paddr_t addr){
 void pmem_read(word_t raddr,word_t *rdata){
     raddr &= (~0x80000000U);
     if(raddr>=PMEM_SIZE){
-        printf("raddr >= PMEM_SIZE\n");
-        printf("now try to read " FMT_WORD ":%ld\n", raddr, raddr);
-        npc_state.state = NPC_END;
-        npc_state.halt_pc = get_gpr(32);
-        npc_state.halt_ret = 0;
-        assert_fail_msg();
+        // printf("raddr >= PMEM_SIZE\n");
+        // printf("now try to read " FMT_WORD ":%ld\n", raddr, raddr);
+        // npc_state.state = NPC_END;
+        // npc_state.halt_pc = get_gpr(32);
+        // npc_state.halt_ret = 0;
+        // assert_fail_msg();
+        return;
     }
+    // Assert(raddr < PMEM_SIZE,"PC is " FMT_PADDR ", try to access " FMT_PADDR ,get_gpr(32),raddr);
     (*rdata) = (*((word_t *)(pmem + raddr)));
     return;
 }
