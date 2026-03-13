@@ -22,7 +22,9 @@ NPCDIR = $(addsuffix /RTL_build,$(shell dirname $(IMAGE).elf))
 
 # TOPNAME?=core_debugger_top
 # TOPNAME?=core_debugger_top_with_idcache
-TOPNAME?=core_debugger_top_with_bpu
+# TOPNAME?=core_debugger_top_with_bpu
+# TOPNAME?=core_debugger_top_ooo
+TOPNAME?=core_debugger_top_ooo_lite
 
 .PHONY: $(AM_HOME)/am/src/riscv/npc/trm.c
 
