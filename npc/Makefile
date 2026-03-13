@@ -14,15 +14,12 @@ MODULE_SRC+= $(shell find $(abspath /home/kuuga/ysyx-workbench/ysyxSoC/perip) -n
 VINC_file+=$(sort $(dir $(shell find /home/kuuga/ysyx-workbench/ysyxSoC/perip -name "*.v" -or -name "*.sv")))
 # MODULE_SRC+=/home/kuuga/ysyx-workbench/ysyxSoC/build/ysyxSoCFull.v
 VINC_file+=/home/kuuga/ysyx-workbench/ysyxSoC/build
-TOPMODULE = $(shell find $(abspath $(vsrc_dir)) -name "$(TOPNAME).v")
+TOPMODULE = $(shell find $(abspath $(vsrc_dir)/sim-vsrc) -name "$(TOPNAME).sv")
 CSRC = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cpp" -or -name "*.cc")#
 HEAD_FILE=$(shell find $(abspath ./) -name "*.h")
 INC_file=$(sort $(dir $(shell find $(abspath ./) -name "*.h")))
 LIBS?=
 LIBS+=-lreadline
-
-override ARGS ?= --log=$(BUILD_DIR)/npc-log.txt --wave=$(BUILD_DIR)/$(name)wave.fst -b -p 9825 
-override ARGS += -d $(NEMU_HOME)/build/riscv64-nemu-interpreter-so
 
 IMG?=$(NPC_HOME)/rot13.bin 
 
@@ -35,11 +32,14 @@ LD_add=$(addprefix -LDFLAGS ,$(1))
 module_add=$(addprefix -v ,$(1))
 vsrc_dir_add=$(addprefix -I,$(1))
 
-BUILD_DIR?=$(NPC_HOME)/build
+BUILD_DIR?=$(NPC_HOME)/$(TOPNAME)-build
 name?=
 IMAGE?=$(NPC_HOME)/rot13.image
 
 include $(NPC_HOME)/csrc/utils/filelist.mk
+
+override ARGS ?= --log=$(BUILD_DIR)/npc-log.txt --wave=$(BUILD_DIR)/$(name)wave.fst -b -p 9825 
+override ARGS += -d $(NEMU_HOME)/build/riscv64-nemu-interpreter-so
 
 CXXFLAGS+=-DVTOP=V$(TOPNAME) -DVTOP_H=\\\"V$(TOPNAME).h\\\" -DVTOP_DPI_H=\\\"V$(TOPNAME)__Dpi.h\\\" -D__GUEST_ISA__=$(ISA) -DTOPNAME=\\\"$(TOPNAME)\\\" -g 
 ifeq ($(findstring  ysyxsoc_sim,$(TOPNAME)), )
@@ -88,7 +88,7 @@ $(NPC_HOME)/$(TOPNAME)-build/V$(TOPNAME): $(NPC_HOME)/.stamp.verilate-$(TOPNAME)
 	@echo
 	@echo "### BUILDING SIM ###"
 	@echo "make -C $(NPC_HOME)/$(TOPNAME)-build -f V$(TOPNAME).mk V$(TOPNAME) "
-	make -C $(NPC_HOME)/$(TOPNAME)-build -f V$(TOPNAME).mk V$(TOPNAME) 
+	make -C $(NPC_HOME)/$(TOPNAME)-build -f V$(TOPNAME).mk V$(TOPNAME) -j4
 
 $(NPC_HOME)/.stamp.verilate-$(TOPNAME): $(MODULE_SRC) $(CSRC) $(HEAD_FILE) $(NVBOARD_ARCHIVE)
 	@if [ -d $(NPC_HOME)/$(TOPNAME)-build ]; then echo "build dir have build";else mkdir -p $(NPC_HOME)/$(TOPNAME)-build; fi
