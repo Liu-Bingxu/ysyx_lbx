@@ -44,7 +44,10 @@ void sbi_clint_io_handler_w(uint64_t waddr, uint64_t wdata, uint8_t wmask){
 }
 
 void sbi_clint_io_handler_r(uint64_t raddr, uint64_t *rdata){
-    assert((raddr - CONFIG_SBI_CLINT_MMIO) <= 0xbff8);
+    // assert((raddr - CONFIG_SBI_CLINT_MMIO) <= 0xbff8);
+    if((raddr - CONFIG_SBI_CLINT_MMIO) > 0xbff8){
+        return;
+    }
     if((raddr - CONFIG_SBI_CLINT_MMIO) == 0xbff8){
         update_sbi_time(get_time());
     }

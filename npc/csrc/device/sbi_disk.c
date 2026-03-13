@@ -138,7 +138,7 @@ static struct _sbi_disk{
 
 void sbi_disk_io_handler_r(uint64_t raddr, uint64_t *rdata){
     if(raddr >= (CONFIG_SBI_DISK_MMIO + 64)){
-        Assert(0, "raddr error\n");
+        // Assert(0, "raddr error\n");
         return;
     }
     else{

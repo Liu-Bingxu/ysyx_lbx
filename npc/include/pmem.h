@@ -27,7 +27,7 @@ void pmem_write(uint64_t waddr, uint64_t wdata, uint8_t wmask);
 
 void init_mem(const char *img_file);
 
-void sim_sram_read(uint64_t raddr, uint64_t *rdata);
+uint64_t sim_sram_read(uint64_t raddr);
 void sim_sram_write(uint64_t waddr, uint64_t wdata, uint8_t wmask);
 
 // extern "C" void flash_read(int32_t addr, int32_t *data);

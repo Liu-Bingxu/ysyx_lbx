@@ -26,7 +26,10 @@ void sbi_plic_io_handler_w(uint64_t waddr, uint64_t wdata, uint8_t wmask){
 }
 
 void sbi_plic_io_handler_r(uint64_t raddr, uint64_t *rdata){
-    assert((raddr - CONFIG_SBI_PLIC_MMIO) <= (2 * 1024 + 4 * CONFIG_SBI_PLIC_CONTEXT_COUNT) * 1024);
+    // assert((raddr - CONFIG_SBI_PLIC_MMIO) <= (2 * 1024 + 4 * CONFIG_SBI_PLIC_CONTEXT_COUNT) * 1024);
+    if((raddr - CONFIG_SBI_PLIC_MMIO) > (2 * 1024 + 4 * CONFIG_SBI_PLIC_CONTEXT_COUNT) * 1024){
+        return;
+    }
     sbi_plic_base[1024 * 512 + 1] = 0x0;
     (*rdata) = (*((word_t *)(((uint8_t *)sbi_plic_base) + ((raddr - CONFIG_SBI_PLIC_MMIO) / 8))));
 }

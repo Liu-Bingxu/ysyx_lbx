@@ -29,11 +29,6 @@ static bool enable_fork = true;
 #else
 static bool enable_fork = false;
 #endif
-bool skip_ref_flag = false;
-
-void set_skip_ref_flag(void){
-    skip_ref_flag = true;
-}
 
 extern void sdb_mainloop();
 
@@ -443,9 +438,6 @@ static void execute(uint64_t n)
     for (; n > 0; n--){
         paddr_t pc = get_gpr(32);
         exec_once(p, p2, pc);
-        if(skip_ref_flag==true){
-            skip_ref_flag = false;
-        }
         paddr_t dnpc = get_gpr(32);
         if (g_print_step) {
             IFDEF(CONFIG_ITRACE, printf("ASM1: %s\n", p););

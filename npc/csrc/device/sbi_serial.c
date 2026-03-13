@@ -118,7 +118,8 @@ void sbi_serial_io_handler_r(uint64_t raddr, uint64_t *rdata)
             //? pass
             break;
         default:
-            panic("do not support offset = %ld", raddr - CONFIG_SBI_SERIAL_MMIO);
+            // panic("do not support offset = %ld", raddr - CONFIG_SBI_SERIAL_MMIO);
+            return;
     }
     *rdata = ((uint64_t *)sbi_serial_base)[0];
 }

@@ -28,6 +28,4 @@ void sbi_clint_io_handler_w(uint64_t waddr, uint64_t wdata, uint8_t wmask);
 void sbi_plic_io_handler_w(uint64_t waddr, uint64_t wdata, uint8_t wmask);
 void sbi_plic_io_handler_r(uint64_t raddr, uint64_t *rdata);
 
-extern void set_skip_ref_flag(void);
-
 #endif
