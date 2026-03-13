@@ -21,6 +21,19 @@ void putch(char ch) {
     outb(SERIAL_ADDR, ch);
 }
 
+void __am_uart_tx(AM_UART_TX_T *uart_tx) {
+    putch(uart_tx->data);
+}
+
+void __am_uart_rx(AM_UART_RX_T *uart_rx) {
+    // if ((inb(SERIAL_LSR_ADDR) & 0x1) == 0){
+    //     uart_rx->data = -1;
+    //     return;
+    // }
+    // uart_rx->data = inb(SERIAL_ADDR);
+    uart_rx->data = -1;
+}
+
 void halt(int code) {
     asm volatile(".word 0xfc000073" : : "r"(code));
     // asm volatile("mv a0,%0; ebreak;" ::"r"(code));
