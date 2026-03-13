@@ -51,22 +51,11 @@ void pmem_read(word_t raddr,word_t *rdata){
 void pmem_write(uint64_t waddr, uint64_t wdata,uint8_t wmask){
     waddr &= (~0x80000007U);
     Assert(waddr < PMEM_SIZE,"PC is " FMT_PADDR ", try to access " FMT_PADDR ,get_gpr(32),waddr);
-    if(wmask==0xff)(*((uint64_t *)(pmem + waddr)))          = wdata;
-    else if(wmask==0x0f)(*((uint32_t *)(pmem + waddr + 0))) = (uint32_t)(wdata >> 0 );
-    else if(wmask==0xf0)(*((uint32_t *)(pmem + waddr + 4))) = (uint32_t)(wdata >> 32);
-    else if(wmask==0x03)(*((uint16_t *)(pmem + waddr + 0))) = (uint16_t)(wdata >> 0 );
-    else if(wmask==0x0c)(*((uint16_t *)(pmem + waddr + 2))) = (uint16_t)(wdata >> 16);
-    else if(wmask==0x30)(*((uint16_t *)(pmem + waddr + 4))) = (uint16_t)(wdata >> 32);
-    else if(wmask==0xc0)(*((uint16_t *)(pmem + waddr + 6))) = (uint16_t)(wdata >> 48);
-    else if(wmask==0x01)(*((uint8_t  *)(pmem + waddr + 0))) = (uint8_t )(wdata >> 0 );
-    else if(wmask==0x02)(*((uint8_t  *)(pmem + waddr + 1))) = (uint8_t )(wdata >> 8 );
-    else if(wmask==0x04)(*((uint8_t  *)(pmem + waddr + 2))) = (uint8_t )(wdata >> 16);
-    else if(wmask==0x08)(*((uint8_t  *)(pmem + waddr + 3))) = (uint8_t )(wdata >> 24);
-    else if(wmask==0x10)(*((uint8_t  *)(pmem + waddr + 4))) = (uint8_t )(wdata >> 32);
-    else if(wmask==0x20)(*((uint8_t  *)(pmem + waddr + 5))) = (uint8_t )(wdata >> 40);
-    else if(wmask==0x40)(*((uint8_t  *)(pmem + waddr + 6))) = (uint8_t )(wdata >> 48);
-    else if(wmask==0x80)(*((uint8_t  *)(pmem + waddr + 7))) = (uint8_t )(wdata >> 56);
-    else assert(0);
+    for(uint32_t i = 0; i < 8; i++){
+        if((wmask >> i) & 0x1){
+            (*((uint8_t  *)(pmem + waddr + i))) = (uint8_t )(wdata >> (8 * i));
+        }
+    }
     return;
 }
 
