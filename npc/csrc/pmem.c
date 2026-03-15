@@ -99,55 +99,44 @@ extern "C" uint64_t sim_periph_read(uint64_t raddr){
     uint64_t rdata;
     if((raddr==TIMER_ADDR) || (raddr==(TIMER_ADDR + 4))){
         rdata = ((uint64_t)get_timer_reg(0) | ((uint64_t)get_timer_reg(1) << 32));
-        return rdata;
     }
-    if ((raddr >= CONFIG_SBI_DISK_MMIO) && (raddr < CONFIG_SBI_DISK_MMIO + 64)){
+    else if ((raddr >= CONFIG_SBI_DISK_MMIO) && (raddr < CONFIG_SBI_DISK_MMIO + 64)){
         sbi_disk_io_handler_r(raddr, &rdata);
-        return rdata;
     }
-    if ((raddr >= CONFIG_SBI_SERIAL_MMIO) && (raddr < CONFIG_SBI_SERIAL_MMIO + 8)){
+    else if ((raddr >= CONFIG_SBI_SERIAL_MMIO) && (raddr < CONFIG_SBI_SERIAL_MMIO + 8)){
         sbi_serial_io_handler_r(raddr, &rdata);
-        return rdata;
     }
-    if ((raddr >= CONFIG_SBI_CLINT_MMIO) && (raddr < CONFIG_SBI_CLINT_MMIO + 64 * 1024)){
+    else if ((raddr >= CONFIG_SBI_CLINT_MMIO) && (raddr < CONFIG_SBI_CLINT_MMIO + 64 * 1024)){
         sbi_clint_io_handler_r(raddr, &rdata);
-        return rdata;
     }
-    if ((raddr >= CONFIG_SBI_PLIC_MMIO) && (raddr < CONFIG_SBI_PLIC_MMIO + (2 * 1024 + 64) * 1024)){
+    else if ((raddr >= CONFIG_SBI_PLIC_MMIO) && (raddr < CONFIG_SBI_PLIC_MMIO + (2 * 1024 + 64) * 1024)){
         sbi_plic_io_handler_r(raddr, &rdata);
-        return rdata;
     }
+    return rdata;
 }
 
 extern "C" void sim_periph_write(uint64_t waddr, uint64_t wdata, uint8_t wmask){
     if(waddr==SERIAL_ADDR){
         serial_out((char)wdata);
-        return;
     }
-    if((waddr==TIMER_ADDR)&&(wdata==0)){
+    else if((waddr==TIMER_ADDR)&&(wdata==0)){
         get_uptime();
-        return;
     }
-    if((waddr==TIMER_ADDR)&&(wdata==1)){
+    else if((waddr==TIMER_ADDR)&&(wdata==1)){
         get_rtc();
-        return;
     }
-    if ((waddr >= CONFIG_SBI_DISK_MMIO) && (waddr < CONFIG_SBI_DISK_MMIO + 64)){
+    else if ((waddr >= CONFIG_SBI_DISK_MMIO) && (waddr < CONFIG_SBI_DISK_MMIO + 64)){
         sbi_disk_io_handler_w(waddr, wdata, wmask);
-        return;
     }
-    if ((waddr >= CONFIG_SBI_SERIAL_MMIO) && (waddr < CONFIG_SBI_SERIAL_MMIO + 8)){
+    else if ((waddr >= CONFIG_SBI_SERIAL_MMIO) && (waddr < CONFIG_SBI_SERIAL_MMIO + 8)){
         sbi_serial_io_handler_w(waddr, wdata, wmask);
-        return;
     }
-    if ((waddr >= CONFIG_SBI_CLINT_MMIO) && (waddr < CONFIG_SBI_CLINT_MMIO + 64 * 1024))
+    else if ((waddr >= CONFIG_SBI_CLINT_MMIO) && (waddr < CONFIG_SBI_CLINT_MMIO + 64 * 1024))
     {
         sbi_clint_io_handler_w(waddr, wdata, wmask);
-        return;
     }
-    if ((waddr >= CONFIG_SBI_PLIC_MMIO) && (waddr < CONFIG_SBI_PLIC_MMIO + (2 * 1024 + 64) * 1024)){
+    else if ((waddr >= CONFIG_SBI_PLIC_MMIO) && (waddr < CONFIG_SBI_PLIC_MMIO + (2 * 1024 + 64) * 1024)){
         sbi_plic_io_handler_w(waddr, wdata, wmask);
-        return;
     }
 }
 
