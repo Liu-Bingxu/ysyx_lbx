@@ -423,9 +423,9 @@ static void trace_and_difftest(const char *buf, paddr_t pc, paddr_t dnpc) {
 #endif
     if (g_print_step) { IFDEF(CONFIG_ITRACE, printf("%s\n", buf));}
     IFDEF(CONFIG_ITRACE, irangbuf_write(buf));
-    IFDEF(CONFIG_DIFFTEST, if((ref_difftest_exec) && packet1.valid & ( packet0.skip)){difftest_skip_ref(); difftest_step((pc), dnpc);});
+    // IFDEF(CONFIG_DIFFTEST, if((ref_difftest_exec) && packet1.valid & ( packet0.skip)){difftest_skip_ref(); difftest_step((pc), dnpc);});
     IFDEF(CONFIG_DIFFTEST, if((ref_difftest_exec) && packet1.valid & (!packet0.skip))ref_difftest_exec(1););
-    IFDEF(CONFIG_DIFFTEST, if(packet1.valid ? packet1.skip : packet0.skip)difftest_skip_ref(););
+    IFDEF(CONFIG_DIFFTEST, if(((packet1.valid && packet1.skip) || (packet0.valid && packet0.skip)))difftest_skip_ref(););
     IFDEF(CONFIG_DIFFTEST, difftest_step((pc), dnpc));
     IFDEF(CONFIG_WATCHPOINT, cpu_check_watchpoint());
     IFDEF(CONFIG_FTRACE, ftrace_watch(pc, dnpc));
