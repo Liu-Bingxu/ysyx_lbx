@@ -21,6 +21,8 @@ INC_file=$(sort $(dir $(shell find $(abspath ./) -name "*.h")))
 LIBS?=
 LIBS+=-lreadline
 
+PKG_FILES = $(shell find $(abspath $(vsrc_dir)/rtl) -name "*_pkg*")
+
 IMG?=$(NPC_HOME)/rot13.bin 
 
 CONFIG_ITRACE=true
@@ -51,6 +53,14 @@ else
 	include $(NVBOARD_HOME)/scripts/nvboard.mk
 	INC_file+=$(NVBOARD_HOME)/usr/include
 	LIBS += $(shell sdl2-config --libs) -lSDL2_image -lSDL2_ttf
+endif
+
+# 默认不开启
+TRACE := 
+
+# 检查 config.h 中是否有有效的宏定义
+ifneq ($(shell grep -E '^\s*#define\s+CONFIG_VCD_GET\s+1\b' include/config.h),)
+    TRACE := --trace-fst
 endif
 
 VSRC_DIR=$(call vsrc_dir_add,$(VINC_file))
@@ -88,14 +98,14 @@ $(NPC_HOME)/$(TOPNAME)-build/V$(TOPNAME): $(NPC_HOME)/.stamp.verilate-$(TOPNAME)
 	@echo
 	@echo "### BUILDING SIM ###"
 	@echo "make -C $(NPC_HOME)/$(TOPNAME)-build -f V$(TOPNAME).mk V$(TOPNAME) "
-	make -C $(NPC_HOME)/$(TOPNAME)-build -f V$(TOPNAME).mk V$(TOPNAME) -j4
+	make -C $(NPC_HOME)/$(TOPNAME)-build -f V$(TOPNAME).mk V$(TOPNAME) -j2
 
 $(NPC_HOME)/.stamp.verilate-$(TOPNAME): $(MODULE_SRC) $(CSRC) $(HEAD_FILE) $(NVBOARD_ARCHIVE)
 	@if [ -d $(NPC_HOME)/$(TOPNAME)-build ]; then echo "build dir have build";else mkdir -p $(NPC_HOME)/$(TOPNAME)-build; fi
 	@echo
 	@echo "### VERILATING ###"
-	@echo verilator --Mdir $(NPC_HOME)/$(TOPNAME)-build --unroll-count 1000 --trace-fst --x-assign unique --x-initial unique --timescale "1ns/1ns" --no-timing --top-module $(TOPNAME)  -cc $(TOPMODULE) --exe $(CSRC) $(NVBOARD_ARCHIVE) $(INC) $(VSRC_DIR) $(MY_CXXFLAGS) $(MY_LDFLAGS) $(sepc_module) -Wno-WIDTHTRUNC -Wno-WIDTHEXPAND
-	@verilator --Mdir $(NPC_HOME)/$(TOPNAME)-build --autoflush --unroll-count 1000 --trace-fst --x-assign unique --x-initial unique --timescale "1ns/1ns" --no-timing --top-module $(TOPNAME)  -cc $(TOPMODULE) --exe $(CSRC) $(NVBOARD_ARCHIVE) $(INC) $(VSRC_DIR) $(MY_CXXFLAGS) $(MY_LDFLAGS) $(sepc_module) -Wno-WIDTHTRUNC -Wno-WIDTHEXPAND
+	@echo verilator --Mdir $(NPC_HOME)/$(TOPNAME)-build --unroll-count 1000 $(TRACE) -O3 --x-assign unique --x-initial unique --timescale "1ns/1ns" --no-timing $(PKG_FILES) --top-module $(TOPNAME)  -cc $(TOPMODULE) --exe $(CSRC) $(NVBOARD_ARCHIVE) $(INC) $(VSRC_DIR) $(MY_CXXFLAGS) $(MY_LDFLAGS) $(sepc_module) -Wno-WIDTHTRUNC -Wno-WIDTHEXPAND
+	@verilator --Mdir $(NPC_HOME)/$(TOPNAME)-build --autoflush --unroll-count 1000 $(TRACE) -O3 --x-assign unique --x-initial unique --timescale "1ns/1ns" --no-timing $(PKG_FILES) --top-module $(TOPNAME)  -cc $(TOPMODULE) --exe $(CSRC) $(NVBOARD_ARCHIVE) $(INC) $(VSRC_DIR) $(MY_CXXFLAGS) $(MY_LDFLAGS) $(sepc_module) -Wno-WIDTHTRUNC -Wno-WIDTHEXPAND
 	@touch $(NPC_HOME)/.stamp.verilate-$(TOPNAME)
 
 gdb: $(NPC_HOME)/$(TOPNAME)-build/V$(TOPNAME) $(IMG)

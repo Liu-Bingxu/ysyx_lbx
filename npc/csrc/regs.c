@@ -153,6 +153,8 @@ void isa_perform_reg_display(void){
     printf("MPerformance[29]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[26], reg.mhpmcounter[26]);
     printf("MPerformance[30]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[27], reg.mhpmcounter[27]);
     printf("MPerformance[31]: %-20" FMT_WORD_U "(" FMT_WORD ")\n", reg.mhpmcounter[28], reg.mhpmcounter[28]);
+    void self_perform_print();
+    self_perform_print();
     printf("-------------------------------------------------------------------------------------\n");
 }
 

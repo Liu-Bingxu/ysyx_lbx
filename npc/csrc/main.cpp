@@ -24,11 +24,6 @@ using namespace std;
 VerilatedContext* contextp = NULL;
 VerilatedFstC* tfp = NULL;
 static LightSSS *lightsss = NULL;
-#ifdef CONFIG_VCD_GET
-static bool enable_fork = true;
-#else
-static bool enable_fork = false;
-#endif
 
 extern void sdb_mainloop();
 
@@ -74,6 +69,99 @@ void mmio_access(void){
 }
 // dcache hit rate
 
+// perform cnt
+#include "Vcore_debugger_top_ooo_lite___024root.h"
+static word_t rename_preg_fail = 0;
+static word_t rename_rob_fail = 0;
+static word_t rename_lq_fail = 0;
+static word_t rename_sq_fail = 0;
+static word_t rediret_cnt = 0;
+static word_t decode_null_cnt = 0;
+static word_t rob_full_cnt = 0;
+static word_t ftq_full_cnt = 0;
+static word_t if_resume_cnt = 0;
+static word_t if_resume_max = 0;
+static word_t if_resume_min = 100;
+static word_t if_unpipeline = 0;
+typedef enum{
+    if_resume_idle  = 0,
+    if_resume_count = 1,
+    if_normal_count = 2
+}if_resume_fsm_t;
+if_resume_fsm_t if_resume_fsm;
+void perform_cnt(){
+    // if(top->rootp->core_debugger_top_ooo_lite__DOT__u_core_ooo_top__DOT__redirect){
+    //     rename_preg_fail++;
+    // }
+    // if(top->rootp->core_debugger_top_ooo_lite__DOT__u_core_ooo_top__DOT__redirect){
+    //     rename_rob_fail++;
+    // }
+    // if(top->rootp->core_debugger_top_ooo_lite__DOT__u_core_ooo_top__DOT__redirect){
+    //     rename_lq_fail++;
+    // }
+    // if(top->rootp->core_debugger_top_ooo_lite__DOT__u_core_ooo_top__DOT__redirect){
+    //     rename_sq_fail++;
+    // }
+    if(top->rootp->core_debugger_top_ooo_lite__DOT__u_core_ooo_top__DOT__redirect){
+        rediret_cnt++;
+    }
+    if(top->rootp->core_debugger_top_ooo_lite__DOT__u_core_ooo_top__DOT__u_backend_top__DOT__decode_out_valid == 0){
+        decode_null_cnt++;
+        if((top->rootp->core_debugger_top_ooo_lite__DOT__u_core_ooo_top__DOT__u_frontend_top__DOT__commit_restore == 0) & 
+            (top->rootp->core_debugger_top_ooo_lite__DOT__u_core_ooo_top__DOT__u_frontend_top__DOT__precheck_restore == 0) & 
+            (top->rootp->core_debugger_top_ooo_lite__DOT__u_core_ooo_top__DOT__u_frontend_top__DOT__predict == 0)){
+            ftq_full_cnt++;
+        }
+    }
+    static word_t this_cnt;
+    switch (if_resume_fsm){
+        case if_resume_idle:
+            if(top->rootp->core_debugger_top_ooo_lite__DOT__u_core_ooo_top__DOT__redirect){
+                if_resume_fsm = if_resume_count;
+                this_cnt = 0;
+            }
+            break;
+        case if_resume_count:
+            if(top->rootp->core_debugger_top_ooo_lite__DOT__u_core_ooo_top__DOT__u_backend_top__DOT__decode_out_valid == 0){
+                if_resume_cnt++;
+                this_cnt++;
+            }
+            else{
+                if_resume_fsm = if_normal_count;
+                if(this_cnt > if_resume_max)
+                    if_resume_max = this_cnt;
+                if(this_cnt < if_resume_min)
+                    if_resume_min = this_cnt;
+            }
+            break;
+        case if_normal_count:
+            if(top->rootp->core_debugger_top_ooo_lite__DOT__u_core_ooo_top__DOT__redirect){
+                if_resume_fsm = if_resume_count;
+                this_cnt = 0;
+            }
+            else if(top->rootp->core_debugger_top_ooo_lite__DOT__u_core_ooo_top__DOT__u_backend_top__DOT__decode_out_valid == 0){
+                if_unpipeline++;
+            }
+            break;
+        default:
+            break;
+    }
+}
+void self_perform_print(){
+    printf("rename_preg_fail: %-20" FMT_WORD_U "(" FMT_WORD ")\n", rename_preg_fail, rename_preg_fail);
+    printf("rename_rob_fail : %-20" FMT_WORD_U "(" FMT_WORD ")\n", rename_rob_fail, rename_rob_fail);
+    printf("rename_lq_fail  : %-20" FMT_WORD_U "(" FMT_WORD ")\n", rename_lq_fail, rename_lq_fail);
+    printf("rename_sq_fail  : %-20" FMT_WORD_U "(" FMT_WORD ")\n", rename_sq_fail, rename_sq_fail);
+    printf("rediret_cnt     : %-20" FMT_WORD_U "(" FMT_WORD ")\n", rediret_cnt, rediret_cnt);
+    printf("decode_null_cnt : %-20" FMT_WORD_U "(" FMT_WORD ")\n", decode_null_cnt, decode_null_cnt);
+    printf("ftq_full_cnt    : %-20" FMT_WORD_U "(" FMT_WORD ")\n", ftq_full_cnt, ftq_full_cnt);
+    printf("if_resume_cnt   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", if_resume_cnt, if_resume_cnt);
+    printf("if_resume_max   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", if_resume_max, if_resume_max);
+    printf("if_resume_min   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", if_resume_min, if_resume_min);
+    printf("if_unpipeline   : %-20" FMT_WORD_U "(" FMT_WORD ")\n", if_unpipeline, if_unpipeline);
+}
+// perform cnt
+
 uint64_t clock_cnt = 0;
 void step_and_dump_wave(){
     IFDEF(CONFIG_GET_TIMER, uint64_t timer_start = get_time());
@@ -84,7 +172,7 @@ void step_and_dump_wave(){
     IFDEF(CONFIG_GET_TIMER, g_timer_rtl += timer_end - timer_start);
     // printf("Hello\n");
     contextp->timeInc(1);
-    if (enable_fork && lightsss->is_child()){
+    if (lightsss->is_child()){
         IFDEF(CONFIG_VCD_GET, tfp->dump(contextp->time()));
     }
 }
@@ -115,11 +203,12 @@ void sim_exit(){
     delete contextp;
     delete remote_bitbang;
     IFDEF(USE_NVBOARD, nvboard_quit());
-    if (enable_fork && lightsss->is_child()) {
+    if (lightsss->is_child()) {
         IFDEF(CONFIG_VCD_GET, tfp->close());
         IFDEF(CONFIG_VCD_GET, delete tfp);
     }
-    if (enable_fork && !(lightsss->is_child())) {
+#ifdef CONFIG_VCD_GET
+    if (!(lightsss->is_child())) {
         if (is_exit_status_bad()) {
             lightsss->wakeup_child(clock_cnt);
         } else {
@@ -127,6 +216,7 @@ void sim_exit(){
         }
         delete lightsss;
     }
+#endif
     exit(is_exit_status_bad());
 }
 
@@ -169,9 +259,7 @@ void my_handler(int param){
 
 void sim_init(int argc, char *argv[]){
     atexit(statistic);
-    if (enable_fork) {
-        lightsss = new LightSSS;
-    }
+    lightsss = new LightSSS;
     contextp = new VerilatedContext;
     top = new VTOP;
     IFDEF(USE_NVBOARD, nvboard_bind_all_pins(top));
@@ -183,7 +271,8 @@ void sim_init(int argc, char *argv[]){
     top->rst_n = 0;
     // pmem_read(top->PC_out, &top->inst_in);
     init_monitor(top, &remote_bitbang, argc, argv);
-    if (enable_fork && !(lightsss->is_child())){
+#ifdef CONFIG_VCD_GET
+    if (!(lightsss->is_child())){
         switch (lightsss->do_fork()) {
             case FORK_ERROR: set_npc_state(NPC_ABORT, get_gpr(32), 1); break;
             case FORK_CHILD:
@@ -199,6 +288,7 @@ void sim_init(int argc, char *argv[]){
             default: break;
         }
     }
+#endif
     void sim_rst();
     sim_rst();
 }
@@ -339,6 +429,7 @@ static void exec_once(char *p, char *p2,paddr_t pc){
         top->clock = !top->clock;
         step_and_dump_wave();
         IFDEF(USE_NVBOARD, nvboard_update());
+        perform_cnt();
         clock_cnt++;
         if ((clock_cnt % 50) == 0)
             remote_bitbang->tick();
@@ -370,7 +461,8 @@ static void exec_once(char *p, char *p2,paddr_t pc){
         update_sbi_time(get_time());
     }
     g_nr_guest_inst++;
-    if (enable_fork && (g_nr_guest_inst % 2000 == 0) && !(lightsss->is_child())){
+#ifdef CONFIG_VCD_GET
+    if ((g_nr_guest_inst % 2000 == 0) && !(lightsss->is_child())){
         switch (lightsss->do_fork()) {
             case FORK_ERROR: set_npc_state(NPC_ABORT, get_gpr(32), 1); break;
             case FORK_CHILD:
@@ -386,6 +478,7 @@ static void exec_once(char *p, char *p2,paddr_t pc){
             default: break;
         }
     }
+#endif
 #ifdef CONFIG_ITRACE
     char *inst_asm = p;
     p += snprintf(p, 128, FMT_WORD ":", (pc));
