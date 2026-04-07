@@ -18,6 +18,7 @@
 #include "cpu/difftest.h"
 #include "debug.h"
 #include "utils.h"
+#include <device/riscv_debug_module/debug_rom_defines.h>
 
 #define SSTATUS_MASK MUXDEF(CONFIG_RV64, 0x80000003000DE762, 0x800DE762)
 #define MSTATUS_SET_BIT MUXDEF(CONFIG_RV64, 0xa00000000, 0x0)
@@ -27,13 +28,36 @@
 #define MIE_MASK     0xAAA
 #define MIP_MASK     0x222
 #define INT_MASK    MUXDEF(CONFIG_RV64, (0x1UL << 63), (0x1UL << 31))
+#define DCSR_SET_BIT 0x40000810
+#define DCSR_CLR_BIT MUXDEF(CONFIG_RV64, 0xffffffffBfff4628, 0xBfff4628)
 
 // static char *interrupt_desc[] = {
 //     "Machine_mode external", "Machine_mode software", "Machine_mode time",
 //     "Supervisor_mode external", "Supervisor_mode software", "Supervisor_mode time"
 // };
 
+void riscv_cpu_halt(){
+    cpu.dpc = cpu.pc;
+    cpu.dcsr &= (~((0x7 << 6) | 0x3));
+    cpu.dcsr |= (cpu.privilege & 0x3);
+    cpu.dcsr |= (0x3 << 6);
+    cpu.pc = DEBUG_ROM_ENTRY;
+    cpu.privilege = PRV_M;
+    cpu.debug_mode = true;
+}
+
 int try_isa_raise_intr(struct Decode *s){
+    if(cpu.setp_check == true){
+        cpu.dpc = cpu.pc;
+        cpu.dcsr &= (~((0x7 << 6) | 0x3));
+        cpu.dcsr |= (cpu.privilege & 0x3);
+        cpu.dcsr |= (0x4 << 6);
+        cpu.pc = DEBUG_ROM_ENTRY;
+        cpu.privilege = PRV_M;
+        cpu.debug_mode = true;
+        cpu.setp_check = false;
+        return 0;
+    }
     word_t NO = 0;
     word_t pending_interrupts = cpu.mip & cpu.mie;
     if(!pending_interrupts){
@@ -72,6 +96,34 @@ int try_isa_raise_intr(struct Decode *s){
     Assert(0, "unkown interrupt num\nmip is " FMT_WORD "\nmie is " FMT_WORD, cpu.mip, cpu.mie);
 }
 
+static void isa_raise_intr_debug_mode(struct Decode *s, word_t NO, vaddr_t epc, word_t tval){
+    if(NO == 3){
+        s->dnpc         = DEBUG_ROM_ENTRY;
+        cpu.pc          = DEBUG_ROM_ENTRY;
+    }else{
+        s->dnpc         = DEBUG_ROM_TVEC;
+        cpu.pc          = DEBUG_ROM_TVEC;
+    }
+}
+
+static bool try_entry_debug_mode(){
+    bool ebreakm = ((cpu.privilege == PRV_M) && ((cpu.dcsr >> 15) & 0x1));
+    bool ebreaks = ((cpu.privilege == PRV_S) && ((cpu.dcsr >> 13) & 0x1));
+    bool ebreaku = ((cpu.privilege == PRV_U) && ((cpu.dcsr >> 12) & 0x1));
+
+    if(ebreakm || ebreaks || ebreaku){
+        cpu.dpc = cpu.pc;
+        cpu.dcsr &= (~((0x7 << 6) | 0x3));
+        cpu.dcsr |= (cpu.privilege & 0x3);
+        cpu.dcsr |= (0x1 << 6);
+        cpu.pc = DEBUG_ROM_ENTRY;
+        cpu.privilege = PRV_M;
+        cpu.debug_mode = true;
+        return true;
+    }
+    return false;
+}
+
 void isa_raise_intr(struct Decode *s, word_t NO, vaddr_t epc, word_t tval){
     /* TODO: Trigger an interrupt/exception with ``NO''.
      * Then return the address of the interrupt/exception vector.
@@ -86,6 +138,14 @@ void isa_raise_intr(struct Decode *s, word_t NO, vaddr_t epc, word_t tval){
         sdeleg = cpu.mideleg;
     }else{
         sdeleg = cpu.medeleg;
+    }
+
+    if(cpu.debug_mode){
+        isa_raise_intr_debug_mode(s, NO, epc, tval);
+        return;
+    }
+    if((NO == 3) && try_entry_debug_mode()){
+        return;
     }
 
     bool success_flag = false;
@@ -155,6 +215,19 @@ void sret(struct Decode *s){
     // printf("%s:%d:now is " FMT_WORD " \n", __func__, __LINE__, cpu.mstatus);
 }
 
+void dret(struct Decode *s){
+    if(cpu.debug_mode == false){
+        isa_raise_intr(s, 2, s->pc, s->isa.inst.val);
+        return;
+    }
+    cpu.pc = cpu.dpc;
+    s->dnpc = cpu.dpc;
+    cpu.debug_mode = false;
+    cpu.privilege = (cpu.dcsr & 0x3);
+    if(cpu.privilege != PRV_M)
+        cpu.mstatus &= (~(0x1 << 17));
+}
+
 word_t isa_query_intr() {
   return INTR_EMPTY;
 }
@@ -200,6 +273,9 @@ static bool check_csr_addr(word_t csr_num){
         }
     }
 #endif
+    if((csr_num >= 0x7B0) && (csr_num <= 0x7BF) && (cpu.debug_mode == false)){
+        return false;
+    }
     return true;
 } 
 
@@ -219,7 +295,7 @@ word_t get_csr(word_t csr_num, bool *csr_success){
     }
     switch (csr_num){
         #define RO_CSR_READ(f) f(mvendorid) f(marchid) f(mimpid) f(mhartid) f(mconfigptr)
-        #define RW_CSR_READ(f) f(mstatus) f(mtvec) f(mepc) f(mcause) f(medeleg) f(mideleg) f(mie) f(mip) f(mscratch) f(stvec) f(sepc) f(scause) f(sscratch) f(satp)
+        #define RW_CSR_READ(f) f(mstatus) f(mtvec) f(mepc) f(mcause) f(medeleg) f(mideleg) f(mie) f(mip) f(mscratch) f(stvec) f(sepc) f(scause) f(sscratch) f(satp) f(dcsr) f(dpc) f(dscratch0) f(dscratch1)
         #define RW_BUT_RO_CSR_READ(f) f(misa) f(mcounteren) f(scounteren) f(menvcfg) f(mseccfg) f(senvcfg)
         #define PM_CSR_READ(f) f(cycle, cycle, ) f(instret, instret, ) PM_NUM_MAP(f,hpmcounter)
         #define PM_EVENT_CSR_READ(f) PM_NUM_MAP(f,mhpmevent)
@@ -266,7 +342,7 @@ void set_csr(word_t csr_num,word_t mask, bool *csr_success){
         return;
     }
     switch (csr_num){
-        #define RW_CSR_SET(f) f(mtvec) f(mepc) f(mcause) f(mscratch) f(stvec) f(sepc) f(scause) f(sscratch) f(mtval) f(stval)
+        #define RW_CSR_SET(f) f(mtvec) f(mepc) f(mcause) f(mscratch) f(stvec) f(sepc) f(scause) f(sscratch) f(mtval) f(stval) f(dpc) f(dscratch0) f(dscratch1)
         #define RW_BUT_RO_CSR_SET(f) f(misa) f(mcounteren) f(scounteren) f(menvcfg) f(mseccfg) f(senvcfg)
         #define PM_CSR_SET(f) f(mcycle, mcycle, ) f(minstret, minstret, ) PM_NUM_MAP(f,mhpmcounter) PM_NUM_MAP(f,mhpmevent)
 
@@ -315,6 +391,9 @@ void set_csr(word_t csr_num,word_t mask, bool *csr_success){
         case 0x310:
             return;
 #endif
+        case CSR_dcsr:
+            cpu.dcsr |= (mask & (~DCSR_CLR_BIT));
+            return;
         default:
             // panic("unkown CSR number: " FMT_WORD, csr_num);
             *csr_success = false;
@@ -330,7 +409,7 @@ void clr_csr(word_t csr_num, word_t mask, bool *csr_success){
     }
     mask = ~mask;
     switch (csr_num){
-        #define RW_CSR_CLR(f) f(mtvec) f(mepc) f(mcause) f(mscratch) f(stvec) f(sepc) f(scause) f(sscratch) f(mtval) f(stval)
+        #define RW_CSR_CLR(f) f(mtvec) f(mepc) f(mcause) f(mscratch) f(stvec) f(sepc) f(scause) f(sscratch) f(mtval) f(stval) f(dpc) f(dscratch0) f(dscratch1)
         #define RW_BUT_RO_CSR_CLR(f) f(misa) f(mcounteren) f(scounteren) f(menvcfg) f(mseccfg) f(senvcfg)
         #define PM_CSR_CLR(f) f(mcycle, mcycle, ) f(minstret, minstret, ) PM_NUM_MAP(f,mhpmcounter) PM_NUM_MAP(f,mhpmevent)
 
@@ -379,6 +458,9 @@ void clr_csr(word_t csr_num, word_t mask, bool *csr_success){
         case 0x310:
             return;
 #endif
+        case CSR_dcsr:
+            cpu.dcsr &= (mask | DCSR_SET_BIT);
+            return;
         default:
             // panic("unkown CSR number: " FMT_WORD, csr_num);
             *csr_success = false;
@@ -394,7 +476,7 @@ void wirte_csr(word_t csr_num,word_t num, bool *csr_success){
         return;
     }
     switch (csr_num){
-        #define RW_CSR_WIRTE(f) f(mtvec) f(mepc) f(mcause) f(mscratch) f(stvec) f(sepc) f(scause) f(sscratch) f(mtval) f(stval)
+        #define RW_CSR_WIRTE(f) f(mtvec) f(mepc) f(mcause) f(mscratch) f(stvec) f(sepc) f(scause) f(sscratch) f(mtval) f(stval) f(dpc) f(dscratch0) f(dscratch1)
         #define RW_BUT_RO_CSR_WIRTE(f) f(misa) f(mcounteren) f(scounteren) f(menvcfg) f(mseccfg) f(senvcfg)
         #define PM_CSR_WIRTE(f) f(mcycle, mcycle, ) f(minstret, minstret, ) PM_NUM_MAP(f,mhpmcounter) PM_NUM_MAP(f,mhpmevent)
 
@@ -448,6 +530,11 @@ void wirte_csr(word_t csr_num,word_t num, bool *csr_success){
         case 0x310:
             return;
 #endif
+        case CSR_dcsr:
+            cpu.dcsr = mask;
+            cpu.dcsr &= (~DCSR_CLR_BIT);
+            cpu.dcsr |= DCSR_SET_BIT;
+            return;
         default:
             // panic("unkown CSR number: " FMT_WORD, csr_num);
             *csr_success = false;

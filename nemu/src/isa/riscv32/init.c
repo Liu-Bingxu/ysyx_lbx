@@ -16,6 +16,8 @@
 #include <isa.h>
 #include <memory/paddr.h>
 
+void riscv_debug_module_proc_reset(unsigned id);
+
 // this is not consistent with uint8_t
 // but it is ok since we do not access the array directly
 static const uint32_t img [] = {
@@ -29,6 +31,8 @@ static const uint32_t img [] = {
 static void restart() {
   /* Set the initial program counter. */
   cpu.pc = RESET_VECTOR;
+  cpu.mtvec = RESET_VECTOR;
+  cpu.stvec = RESET_VECTOR;
 
   /* The zero register is always 0. */
   cpu.gpr[0] = 0;
@@ -54,6 +58,18 @@ static void restart() {
 #endif
 
   cpu.privilege = PRV_M;
+    cpu.debug_mode = false;
+    cpu.setp_check = false;
+    cpu.dcsr = 0x40000813;
+    cpu.dpc = 0;
+    cpu.dscratch0 = 0;
+    cpu.dscratch1 = 0;
+    IFDEF(CONFIG_HAS_RISCV_DM, riscv_debug_module_proc_reset(0));
+}
+
+void riscv_cpu_restart() {
+    /* Initialize this virtual computer system. */
+    restart();
 }
 
 void init_isa() {

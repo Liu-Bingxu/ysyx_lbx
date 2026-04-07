@@ -54,6 +54,9 @@ typedef struct
 #endif
     //? RO reg
     word_t mvendorid, marchid, mimpid, mhartid, mconfigptr;
+    //? debug mode
+    bool debug_mode, setp_check;
+    word_t dcsr, dpc, dscratch0, dscratch1;
 } MUXDEF(CONFIG_RV64, riscv64_CPU_state, riscv32_CPU_state);
 
 // decode

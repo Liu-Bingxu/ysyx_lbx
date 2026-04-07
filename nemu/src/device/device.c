@@ -35,9 +35,12 @@ void init_sbi_serial();
 void init_sbi_clint();
 void init_sbi_plic();
 void init_sbi_disk();
+void init_riscv_debug_module();
 void update_sbi_time(uint64_t us);
 
 void send_key(uint8_t, bool);
+void riscv_dm_update();
+void riscv_dm_step_check();
 void vga_update_screen();
 
 static inline void send_key_to_device(uint8_t scancode, bool is_keydown){
@@ -54,10 +57,13 @@ void device_update() {
   static uint64_t last = 0;
   uint64_t now = get_time();
   IFDEF(CONFIG_HAS_SBI_CLINT, update_sbi_time(now));
+    IFDEF(CONFIG_HAS_RISCV_DM, riscv_dm_step_check());
+    IFDEF(CONFIG_HAS_RISCV_DM, riscv_dm_update());
   if (now - last < 1000000 / TIMER_HZ) {
     return;
   }
   last = now;
+
 
   IFDEF(CONFIG_HAS_VGA, vga_update_screen());
 
@@ -91,7 +97,7 @@ void sdl_clear_event_queue() {
 #endif
 }
 
-void init_device() {
+void init_device(uint16_t port) {
   IFDEF(CONFIG_TARGET_AM, ioe_init());
   init_map();
 
@@ -108,6 +114,7 @@ void init_device() {
   IFDEF(CONFIG_HAS_SBI_CLINT, init_sbi_clint());
   IFDEF(CONFIG_HAS_SBI_PLIC, init_sbi_plic());
   IFDEF(CONFIG_HAS_SBI_DISK, init_sbi_disk());
+  IFDEF(CONFIG_HAS_RISCV_DM, init_riscv_debug_module(port));
   // myself
 
   IFNDEF(CONFIG_TARGET_AM, init_alarm());

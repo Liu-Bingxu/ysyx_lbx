@@ -20,7 +20,7 @@ void init_rand();
 void init_log(const char *log_file);
 void init_mem();
 void init_difftest(char *ref_so_file, long img_size, int port);
-void init_device();
+void init_device(uint16_t port);
 void init_sdb();
 void init_disasm(const char *triple);
 
@@ -45,7 +45,7 @@ void sdb_set_batch_mode();
 static char *log_file = NULL;
 static char *diff_so_file = NULL;
 static char *img_file = NULL;
-static int difftest_port = 1234;
+static int difftest_port = 9825;
 
 //myftrace
 static char *ELF_FILE = NULL;
@@ -129,7 +129,7 @@ void init_monitor(int argc, char *argv[]) {
   init_mem();
 
   /* Initialize devices. */
-  IFDEF(CONFIG_DEVICE, init_device());
+  IFDEF(CONFIG_DEVICE, init_device(difftest_port));
 
   /* Perform ISA dependent initialization. */
   init_isa();

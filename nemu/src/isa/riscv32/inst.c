@@ -416,6 +416,7 @@ static int decode_exec(Decode *s) {
 
     INSTPAT("0011000 00010 00000 000 00000 11100 11", mret,     N, mret(s));
     INSTPAT("0001000 00010 00000 000 00000 11100 11", sret,     N, sret(s));
+    INSTPAT("0111101 10010 00000 000 00000 11100 11", dret,     N, dret(s));
     INSTPAT("0001000 00101 00000 000 00000 11100 11", wfi,      N, difftest_skip_ref(););
     INSTPAT("0001001 ????? ????? 000 00000 11100 11", sfence.vma,N);
 

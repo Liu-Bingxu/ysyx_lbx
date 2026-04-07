@@ -28,6 +28,12 @@ SRCS-$(CONFIG_HAS_SBI_CLINT) += src/device/sbi_clint.c
 SRCS-$(CONFIG_HAS_SBI_PLIC) += src/device/sbi_plic.c
 SRCS-$(CONFIG_HAS_SBI_DISK) += src/device/sbi_disk.c
 
+ifeq ($(CONFIG_HAS_RISCV_DM), y)
+CXXSRC += src/device/riscv_debug_module/debug_module.cc
+CXXSRC += src/device/riscv_debug_module/jtag_dtm.cc
+CXXSRC += src/device/riscv_debug_module/remote_bitbang.cc
+endif
+
 SRCS-BLACKLIST-$(CONFIG_TARGET_AM) += src/device/alarm.c
 
 ifdef CONFIG_DEVICE

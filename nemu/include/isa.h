@@ -60,6 +60,7 @@ void isa_misalign_fault(int type, vaddr_t vaddr);
 // myself
 void mret(struct Decode *s);
 void sret(struct Decode *s);
+void dret(struct Decode *s);
 word_t get_csr(word_t csr_num, bool *csr_success);
 void set_csr(word_t csr_num, word_t mask, bool *csr_success);
 void clr_csr(word_t csr_num, word_t mask, bool *csr_success);
